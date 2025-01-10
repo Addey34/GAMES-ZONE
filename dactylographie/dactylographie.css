@@ -5,8 +5,6 @@
 @import url('../css/components/buttons.css');
 @import url('../css/components/forms.css');
 
-/* Supprimer les imports redondants car déjà dans le HTML */
-/* Garder uniquement les styles spécifiques au jeu de dactylographie */
 #wordContainer {
   background: white;
   border-radius: 20px;
@@ -88,22 +86,22 @@
 }
 
 .word.hidden {
-  display: none; /* Masque le mot */
+  display: none;
 }
 
 .zone {
-  margin: 2rem auto; /* Changed: ajout de auto pour centrer horizontalement */
+  margin: 2rem auto;
   display: flex;
   gap: 2rem;
   align-items: center;
-  justify-content: center; /* Added: pour centrer les éléments */
+  justify-content: center;
   width: 90%;
   max-width: 800px;
-  padding: 0; /* Changed: suppression du padding-left */
+  padding: 0;
 }
 
 #wordInput {
-  flex: 0 1 auto; /* Added: pour que l'input ne s'étende pas trop */
+  flex: 0 1 auto;
   padding: 15px 25px;
   font-size: 18px;
   border: 2px solid rgba(67, 97, 238, 0.2);
@@ -213,7 +211,7 @@
   .word {
     font-size: 14px;
     padding: 6px 12px;
-    height: 18px; /* Hauteur réduite pour mobile */
+    height: 18px;
     line-height: 18px;
   }
 

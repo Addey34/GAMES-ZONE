@@ -74,41 +74,40 @@ document.addEventListener('DOMContentLoaded', async function () {
       wordExample.style.visibility = 'hidden';
       wordExample.textContent = 'exemple';
       document.body.appendChild(wordExample);
-      
+
       const wordWidth = wordExample.offsetWidth + 12;
       document.body.removeChild(wordExample);
-  
+
       return Math.floor(containerWidth / wordWidth);
     },
-  
+
     updateWords() {
       const wordsPerLine = this.calculateWordsPerLine();
       elements.wordContainer.innerHTML = '';
-      
+
       // Créer deux lignes
       const line1 = document.createElement('div');
       const line2 = document.createElement('div');
       line1.className = 'word-line';
       line2.className = 'word-line';
-      
+
       const start = gameState.currentWordIndex;
-      const totalWords = wordsPerLine * 2; // Nombre total de mots pour 2 lignes
+      const totalWords = wordsPerLine * 2;
       const end = Math.min(gameState.words.length, start + totalWords);
-  
+
       for (let j = start; j < end; j++) {
         const span = document.createElement('span');
         span.className = 'word';
         span.textContent = gameState.words[j];
         if (j === gameState.currentWordIndex) span.classList.add('current');
-        
-        // Ajouter à la première ou deuxième ligne selon l'index
+
         if (j < start + wordsPerLine) {
           line1.appendChild(span);
         } else {
           line2.appendChild(span);
         }
       }
-  
+
       elements.wordContainer.appendChild(line1);
       elements.wordContainer.appendChild(line2);
     },
@@ -245,7 +244,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     },
 
     saveScore(username) {
-      let scores = JSON.parse(localStorage.getItem('dactylographie-scores') || '[]'); // Changé de 'highScores' à 'dactylographie-scores'
+      let scores = JSON.parse(
+        localStorage.getItem('dactylographie-scores') || '[]'
+      ); // Changé de 'highScores' à 'dactylographie-scores'
       scores.push({
         username,
         score: gameState.score,
@@ -260,7 +261,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     },
 
     loadHighScores() {
-      const scores = JSON.parse(localStorage.getItem('dactylographie-scores') || '[]'); // Et ici
+      const scores = JSON.parse(
+        localStorage.getItem('dactylographie-scores') || '[]'
+      ); // Et ici
       this.updateScoreTable(scores);
     },
 

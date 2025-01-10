@@ -80,7 +80,7 @@ class SnakeGame {
     this.setupEventListeners();
     this.reset();
     this.lastMoveTime = Date.now();
-    this.moveDelay = 50; // Délai minimum entre deux mouvements en millisecondes
+    this.moveDelay = 50;
   }
 
   initializeElements() {
@@ -93,7 +93,7 @@ class SnakeGame {
 
   reset() {
     this.snake = new Snake();
-    this.food = new Food(this.snake); // Passer le serpent à la nourriture
+    this.food = new Food(this.snake);
     this.score = 0;
     this.gameOver = false;
     this.highScore = parseInt(localStorage.getItem('high-score')) || 0;
@@ -117,7 +117,7 @@ class SnakeGame {
   handleKeyPress(e) {
     const currentTime = Date.now();
     if (currentTime - this.lastMoveTime < this.moveDelay) {
-      return; // Ignorer les entrées trop rapides
+      return;
     }
 
     const movements = {
