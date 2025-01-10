@@ -1,0 +1,36 @@
+.input-field {
+  padding: 15px 25px;
+  font-size: 1.125rem;
+  border: 2px solid rgba(67, 97, 238, 0.2);
+  border-radius: var(--border-radius-xl);
+  width: 100%;
+  transition: all var(--transition-speed) ease;
+  box-shadow: var(--shadow);
+  background: white;
+}
+
+.input-field--game {
+  width: 300px;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+  transform: translateY(-1px);
+}
+
+.input-field:disabled {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .input-field--game {
+    width: calc(100% - 40px);
+    font-size: 16px;
+    padding: 10px 15px;
+  }
+}

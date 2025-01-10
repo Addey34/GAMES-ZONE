@@ -1,0 +1,279 @@
+@import url('../css/global.css');
+@import url('../css/components/footer.css');
+@import url('../css/components/modal.css');
+@import url('../css/components/table.css');
+@import url('../css/components/buttons.css');
+@import url('../css/components/forms.css');
+
+/* Supprimer les imports redondants car déjà dans le HTML */
+/* Garder uniquement les styles spécifiques au jeu de dactylographie */
+#wordContainer {
+  background: white;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin: 1rem;
+  width: 100%;
+  max-width: 800px;
+  height: 100px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  border: 2px solid rgba(67, 97, 238, 0.1);
+  transition: border-color 0.3s ease;
+  overflow: hidden;
+}
+
+#wordContainer:hover {
+  border-color: rgba(67, 97, 238, 0.3);
+}
+
+#wordContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+#wordContainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+#wordContainer::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.word-line {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0 10px;
+}
+
+.word {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 2px solid #e9ecef;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.word.current {
+  background-color: rgba(67, 97, 238, 0.1);
+  border-color: var(--primary-color);
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
+}
+
+.word.correct {
+  background-color: rgba(56, 176, 0, 0.1);
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+  animation: successPulse 0.5s ease-out;
+}
+
+.word.incorrect {
+  background-color: rgba(239, 35, 60, 0.1);
+  border-color: var(--error-color);
+  color: var(--error-color);
+  animation: errorShake 0.5s ease-in-out;
+}
+
+.word.hidden {
+  display: none; /* Masque le mot */
+}
+
+.zone {
+  margin: 2rem auto; /* Changed: ajout de auto pour centrer horizontalement */
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center; /* Added: pour centrer les éléments */
+  width: 90%;
+  max-width: 800px;
+  padding: 0; /* Changed: suppression du padding-left */
+}
+
+#wordInput {
+  flex: 0 1 auto; /* Added: pour que l'input ne s'étende pas trop */
+  padding: 15px 25px;
+  font-size: 18px;
+  border: 2px solid rgba(67, 97, 238, 0.2);
+  border-radius: 30px;
+  width: 300px;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow);
+  background: white;
+}
+
+#wordInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+  transform: translateY(-1px);
+}
+
+#wordInput:disabled {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: #ccc;
+  color: #666;
+  box-shadow: none;
+  transform: none;
+}
+
+#wordInput:disabled:hover {
+  cursor: not-allowed;
+  transform: none;
+  border-color: #ccc;
+  box-shadow: none;
+}
+
+#chrono {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  background: white;
+  padding: 20px 30px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+.game-score {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  background: white;
+  padding: 15px 25px;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  display: inline-block;
+  margin: 1rem 0;
+}
+
+/* Garder les animations spécifiques au jeu */
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes errorShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Media queries spécifiques au jeu */
+@media (max-width: 600px) {
+  body {
+    padding: 0.5rem;
+    padding-bottom: calc(0.5rem + var(--footer-height));
+  }
+
+  #wordContainer {
+    height: 90px;
+    padding: 1rem;
+  }
+
+  .word {
+    font-size: 14px;
+    padding: 6px 12px;
+    height: 18px; /* Hauteur réduite pour mobile */
+    line-height: 18px;
+  }
+
+  .zone {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 95%;
+  }
+
+  #wordInput {
+    width: calc(100% - 40px);
+    font-size: 16px;
+    padding: 10px 15px;
+  }
+
+  #chrono {
+    font-size: 2rem;
+    padding: 10px 20px;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    margin: 1rem 0;
+  }
+
+  #scoreTable {
+    font-size: 14px;
+    width: 95%;
+  }
+
+  #scoreTable th,
+  #scoreTable td {
+    padding: 8px;
+  }
+
+  #score {
+    font-size: 2rem;
+    padding: 10px 20px;
+  }
+
+  .game-score {
+    font-size: 2rem;
+    padding: 10px 20px;
+  }
+}
+
+/* Pour les très petits écrans */
+@media (max-width: 320px) {
+  .word {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+}

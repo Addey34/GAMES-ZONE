@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dactylographie Game</title>
+    <!-- Ajout des imports CSS manquants -->
+    <link rel="stylesheet" href="../css/base/variables.css" />
+    <link rel="stylesheet" href="../css/base/typography.css" />
+    <link rel="stylesheet" href="../css/layouts/game-layout.css" />
+    <link rel="stylesheet" href="../css/components/buttons.css" />
+    <link rel="stylesheet" href="../css/components/forms.css" />
+    <link rel="stylesheet" href="../css/components/modal.css" />
+    <link rel="stylesheet" href="../css/components/table.css" />
+    <link rel="stylesheet" href="../css/components/footer.css" />
+    <link rel="stylesheet" href="dactylographie.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script src="dactylographie.js"></script>
+  </head>
+  <body class="app-body">
+    <div class="game-container">
+      <h1 class="app-title">Jeu de Dactylographie</h1>
+      <div id="wordContainer"></div>
+      <div class="game-content">
+        <div class="game-input">
+          <input
+            type="text"
+            id="wordInput"
+            class="input-field input-field--game"
+            placeholder="Tapez le mot ici..."
+          />
+          <span id="score" class="game-stat">Score : 0</span>
+        </div>
+        <div class="game-timer">
+          <span id="chrono" class="game-stat game-stat--animated">60</span>
+        </div>
+      </div>
+      <div id="scoreModal" class="modal" style="display: none">
+        <div class="modal-content">
+          <h2>Partie terminée !</h2>
+          <div id="finalScore" class="score-details"></div>
+          <input
+            type="text"
+            id="usernameInput"
+            placeholder="Entrez votre nom"
+            required
+          />
+          <div class="button-group">
+            <button id="saveScore" class="btn btn--primary">Sauvegarder</button>
+            <button id="restartGame" class="btn btn--secondary">
+              Recommencer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <table id="scoreTable" class="score-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Score</th>
+            <th>Vitesse</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Les scores seront ajoutés ici dynamiquement -->
+        </tbody>
+      </table>
+
+      <footer class="footer">
+        <a href="/" class="home-button">
+          <i class="fas fa-home"></i>
+          Home
+        </a>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+.btn {
+  padding: 12px 25px;
+  border-radius: var(--border-radius-lg);
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all var(--transition-speed) ease;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn--primary {
+  background: var(--gradient);
+  color: white;
+}
+
+.btn--secondary {
+  background: white;
+  color: var(--primary-color);
+  border: 2px solid rgba(67, 97, 238, 0.2);
+}
+
+.menu-button {
+  composes: btn btn--primary;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .btn {
+    padding: 8px 20px;
+    font-size: 1rem;
+  }
+}

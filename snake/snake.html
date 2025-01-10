@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game</title>
+    <link rel="stylesheet" href="snake.css" />
+    <link rel="stylesheet" href="../css/components/modal.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script src="snake.js" defer></script>
+  </head>
+  <body class="app-body">
+    <div class="wrapper">
+      <div class="controls">
+        <button
+          id="fullscreenBtn"
+          class="btn-fullscreen"
+          aria-label="Toggle fullscreen"
+        >
+          <i class="fas fa-expand"></i>
+        </button>
+      </div>
+      <h1 class="app-title">🐍 Snake Game 🐍</h1>
+      <div class="game-details">
+        <span class="score"></span>
+        <span class="high-score"></span>
+      </div>
+      <div class="play-board"></div>
+    </div>
+    <div id="scoreModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h2>Game Over!</h2>
+        <div id="finalScore" class="score-details"></div>
+        <input
+          type="text"
+          id="usernameInput"
+          placeholder="Enter your name"
+          required
+        />
+        <div class="button-group">
+          <button id="saveScore" class="btn btn--primary">Save</button>
+          <button id="restartGame" class="btn btn--secondary">Restart</button>
+        </div>
+      </div>
+    </div>
+    <table id="scoreTable" class="score-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Les scores seront ajoutés ici dynamiquement -->
+      </tbody>
+    </table>
+    <footer class="footer">
+      <a href="/" class="home-button">
+        <i class="fas fa-home"></i>
+        Home
+      </a>
+    </footer>
+  </body>
+</html>
