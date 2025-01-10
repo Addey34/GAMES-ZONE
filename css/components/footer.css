@@ -1,20 +1,27 @@
+:root {
+  --footer-height: 70px;
+  --footer-border-radius: 20px;
+  --footer-glow: 0 -5px 20px rgba(67, 97, 238, 0.15);
+}
+
 .footer {
   position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: var(--container-width);
+  width: min(100%, var(--container-width));
   height: var(--footer-height);
-  background: var(--gradient);
+  background: linear-gradient(135deg, #4361ee, #3a0ca3);
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: var(--shadow);
-  z-index: 900;
-  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  box-shadow: var(--shadow), var(--footer-glow);
+  z-index: 1000;
+  border-radius: var(--footer-border-radius) var(--footer-border-radius) 0 0;
   margin: 0 auto;
   padding: var(--spacing-sm);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .footer .home-button {
@@ -22,33 +29,80 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background: white;
+  padding: 10px 25px;
+  background: rgba(255, 255, 255, 0.95);
   color: var(--primary-color);
   text-decoration: none;
-  border-radius: var(--border-radius-xl);
+  border-radius: 30px;
   font-weight: 600;
   font-size: 1.1rem;
-  transition: all var(--transition-speed) ease;
-  box-shadow: var(--shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   min-width: 120px;
+  position: relative;
+  overflow: hidden;
 }
 
 .footer .home-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  background: white;
+}
+
+.footer .home-button i {
+  transition: transform 0.3s ease;
+}
+
+.footer .home-button:hover i {
+  transform: scale(1.2);
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 @media (max-width: 600px) {
+  :root {
+    --footer-height: 60px;
+  }
+
   .footer {
-    width: 95%;
-    height: 50px;
-    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+    width: 100%;
+    left: 0;
+    transform: none;
+    border-radius: 0;
+    bottom: 0;
+    padding: var(--spacing-xs);
   }
 
   .footer .home-button {
-    padding: var(--spacing-xs) var(--spacing-md);
-    font-size: 1rem;
+    padding: 8px 20px;
+    font-size: 0.95rem;
     min-width: 100px;
+  }
+
+  .footer .home-button i {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 350px) {
+  :root {
+    --footer-height: 50px;
+  }
+
+  .footer .home-button {
+    padding: 6px 15px;
+    font-size: 0.9rem;
   }
 }

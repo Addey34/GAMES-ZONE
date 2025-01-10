@@ -158,6 +158,18 @@
   margin: 1rem 0;
 }
 
+.game-container {
+  width: 100%;
+  min-height: calc(100vh - var(--footer-height));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  padding-bottom: calc(var(--footer-height) + 2rem);
+  box-sizing: border-box;
+}
+
 /* Garder les animations spécifiques au jeu */
 @keyframes successPulse {
   0% {
@@ -199,8 +211,8 @@
 /* Media queries spécifiques au jeu */
 @media (max-width: 600px) {
   body {
-    padding: 0.5rem;
-    padding-bottom: calc(0.5rem + var(--footer-height));
+    padding: 0;
+    margin: 0;
   }
 
   #wordContainer {
@@ -261,6 +273,15 @@
   .game-score {
     font-size: 2rem;
     padding: 10px 20px;
+  }
+
+  .game-container {
+    padding: 1rem;
+    padding-bottom: calc(var(--footer-height) + 1rem);
+  }
+
+  .game-container {
+    padding-bottom: calc(50px + 1rem); /* Ajustement pour les mobiles */
   }
 }
 

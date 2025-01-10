@@ -57,7 +57,10 @@ body {
   justify-content: flex-start;
   min-height: 100vh;
   background: var(--background-color);
-  padding: 4rem 2rem 2rem; /* Augmentation du padding-top */
+  padding: 4rem 1rem 2rem;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .app-title {
@@ -69,13 +72,13 @@ body {
 }
 
 .menu {
-  margin-top: 2rem;
+  width: min(95%, 1200px);
+  margin: 2rem auto;
+  padding: 1rem;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
-  width: 100%;
-  max-width: 1200px;
-  padding: 1rem;
 }
 
 .menu a {
@@ -120,7 +123,7 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-body {
-    padding: 3rem 1rem 1rem;
+    padding: 2rem 0.5rem 1rem;
   }
 
   .app-title {
@@ -129,12 +132,17 @@ body {
   }
 
   .menu {
+    width: 100%;
+    padding: 0.5rem;
+    margin: 1rem auto;
     grid-template-columns: 1fr;
     gap: 1rem;
-    padding: 0.5rem;
   }
 
   .menu a {
+    width: calc(100% - 1rem);
+    margin: 0 0.5rem;
+    box-sizing: border-box;
     padding: 1.5rem;
     font-size: 1.1rem;
   }
@@ -146,6 +154,9 @@ body {
   }
 
   .app-title {
+    width: 100%;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
     font-size: 2rem;
     margin-bottom: 1.5rem;
   }
