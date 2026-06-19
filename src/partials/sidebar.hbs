@@ -1,0 +1,39 @@
+<!--
+  Sidebar globale (rail neon) — incluse sur toutes les pages (accueil + jeux),
+  elle remplace l'ancien footer. Compacte (icones seules) par defaut, elle se
+  deploie au survol sur desktop ; sur mobile elle est hors-champ et s'ouvre via
+  le bouton .sidebar-toggle.
+  L'item actif est marque en JS (.is-active) selon l'URL, et colore dans le
+  degrade du jeu via --nav-accent (mappe par data-nav dans sidebar.css).
+-->
+<button
+  class="sidebar-toggle"
+  type="button"
+  aria-label="Ouvrir le menu"
+  aria-expanded="false"
+>
+  <i class="fas fa-bars" aria-hidden="true"></i>
+</button>
+<div class="sidebar-scrim" hidden></div>
+<nav class="sidebar" aria-label="Navigation des jeux">
+  <a class="sidebar-brand" href="/" data-nav="home">
+    <span class="sidebar-icon"><i class="fas fa-gamepad" aria-hidden="true"></i></span>
+    <span class="sidebar-label">Games Zone</span>
+  </a>
+  <ul class="sidebar-nav">
+    {{#each games}}
+    <li>
+      <a
+        class="sidebar-link"
+        href="/{{key}}/{{key}}.html"
+        data-nav="{{key}}"
+        style="--nav-accent: var({{color}})"
+      >
+        <span class="sidebar-icon"><span class="game-icon" style="--game-icon: url(/icons/{{key}}.svg)" aria-hidden="true"></span></span>
+        <span class="sidebar-label">{{label}}</span>
+      </a>
+    </li>
+    {{/each}}
+  </ul>
+</nav>
+<script type="module" src="/shared/sidebar.ts"></script>

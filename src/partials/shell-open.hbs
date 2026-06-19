@@ -1,0 +1,46 @@
+<!--
+  Ouverture du shell de page unifie, commun a tous les jeux : un seul conteneur
+  (.game-shell) qui englobe le titre puis le contenu propre au jeu.
+  Parametres :
+    - title : texte du titre.
+    - key   : cle du jeu (ex. snake) ; affiche son logo SVG (/icons/<key>.svg) de
+              part et d'autre du titre (optionnel).
+  A refermer avec le partial shell-close.
+-->
+<main class="game-container">
+  <section class="game-shell">
+    <h1 class="app-title">
+      {{#if key}}<span class="game-icon" style="--game-icon: url(/icons/{{key}}.svg)" aria-hidden="true"></span>{{/if}}
+      {{title}}
+      {{#if key}}<span class="game-icon" style="--game-icon: url(/icons/{{key}}.svg)" aria-hidden="true"></span>{{/if}}
+    </h1>
+    {{#if game}}
+    {{#if game.controls}}
+    <!-- Aide : panneau révélé au survol (ou au focus clavier / tap mobile), en CSS pur. -->
+    <div class="game-info">
+      <button
+        class="game-info-toggle"
+        type="button"
+        aria-label="Aide : comment jouer"
+        aria-controls="gameInfoPanel"
+      >
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+      </button>
+      <div class="game-info-panel" id="gameInfoPanel" role="dialog" aria-label="Comment jouer">
+        <h2 class="game-info-title">Comment jouer</h2>
+        <ul class="game-info-list">
+          {{#each game.controls}}
+          <li class="game-info-item">
+            <span class="game-info-keys">{{{this.keys}}}</span>
+            <span class="game-info-action">{{this.action}}</span>
+          </li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+    {{/if}}
+    <button class="game-fullscreen-toggle" type="button" aria-label="Plein écran" aria-pressed="false">
+      <i class="fas fa-expand" aria-hidden="true"></i>
+    </button>
+    <script type="module" src="/shared/fullscreen.ts"></script>
+    {{/if}}

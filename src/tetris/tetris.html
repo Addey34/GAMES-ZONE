@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="fr">
+  {{> head title="Tetris" css="/css/games/tetris.css" script="./tetris-main.ts"}}
+  <body class="app-body">
+    {{> shell-open title="Tetris" key="tetris"}}
+    <div class="game-details">
+      <span class="score"></span>
+      <span class="lines"></span>
+      <span class="high-score"></span>
+    </div>
+    <div class="play-area">
+      <div class="tetris-board" id="board"></div>
+    </div>
+    {{> shell-close}} {{> game-chrome}}
+  </body>
+</html>

@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="fr">
+  {{> head title="Snake Game" css="/css/games/snake.css" script="./snake-main.ts"}}
+  <body class="app-body">
+    {{> shell-open title="Snake" key="snake"}}
+    <div class="game-details">
+      <span class="score"></span>
+      <span class="high-score"></span>
+    </div>
+    <div class="play-board"></div>
+    {{> shell-close}} {{> game-chrome}}
+  </body>
+</html>

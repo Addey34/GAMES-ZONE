@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr">
+  {{> head title="Dactylographie Game" css="/css/games/dactylographie.css"
+  script="./dactylographie-main.ts"}}
+  <body class="app-body">
+    {{> shell-open title="Dactylographie" key="dactylographie"}}
+    <div class="game-details">
+      <span id="score">Score : 0</span>
+      <span class="timer">Temps : <span id="chrono">60</span> s</span>
+    </div>
+    <div class="typing-area">
+      <div id="wordContainer" class="word-container"></div>
+      <input
+        type="text"
+        id="wordInput"
+        class="input-field input-field--game"
+        placeholder="Tapez le mot ici..."
+      />
+    </div>
+    {{> shell-close}} {{> game-chrome speed=true}}
+  </body>
+</html>

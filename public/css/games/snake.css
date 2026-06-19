@@ -1,0 +1,202 @@
+@import url('../global.css');
+
+/* Couleur d'accent du jeu (titre + item actif du rail). */
+.app-body {
+  --title-color: var(--color-snake);
+}
+
+/* =============================================================================
+   Snake — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
+   ========================================================================== */
+
+/* Texte score / high-score dans la barre de détails. */
+.score,
+.high-score {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+/* --- Plateau --- */
+.play-board {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  /* Repli : la vraie taille est posée en JS via gridSize. */
+  grid-template: repeat(25, 1fr) / repeat(25, 1fr);
+  gap: 1px;
+  background: var(--background-color-dark);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+/* Calque d'effets : couvre le plateau, persiste entre les rendus (le serpent et
+   la souris sont redessinés à chaque frame, pas lui). Hors flux de la grille. */
+.snake-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Score flottant « +N » à l'endroit de la souris mangée. Positionné en % par le
+   JS ; se nettoie tout seul à la fin de l'animation. */
+.score-float {
+  position: absolute;
+  font-size: clamp(0.75rem, 2.4vw, var(--font-size-md));
+  font-weight: var(--font-weight-bolder);
+  color: var(--secondary-color);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  animation: scoreFloat 0.8s ease-out forwards;
+}
+
+/* --- Serpent --- */
+.snake-body {
+  background-color: var(--primary-color);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.snake-head {
+  position: relative;
+  z-index: 2;
+  background-color: var(--primary-color-dark);
+  border-radius: var(--border-radius-md);
+}
+
+/* Yeux du serpent (orientés selon la direction). */
+.snake-head::before,
+.snake-head::after {
+  content: '';
+  position: absolute;
+  width: 14%;
+  height: 14%;
+  background-color: var(--white-color);
+  border-radius: 50%;
+  box-shadow: var(--shadow-xs-inset);
+}
+
+.snake-head.up::before {
+  left: 22%;
+  top: 16%;
+}
+.snake-head.up::after {
+  right: 22%;
+  top: 16%;
+}
+.snake-head.down::before {
+  left: 22%;
+  bottom: 16%;
+}
+.snake-head.down::after {
+  right: 22%;
+  bottom: 16%;
+}
+.snake-head.left::before {
+  left: 16%;
+  top: 22%;
+}
+.snake-head.left::after {
+  left: 16%;
+  bottom: 22%;
+}
+.snake-head.right::before {
+  right: 16%;
+  top: 22%;
+}
+.snake-head.right::after {
+  right: 16%;
+  bottom: 22%;
+}
+
+/* --- Nourriture (petite souris) ---
+   La couleur du pelage passe par --mouse-color : un modèle (gris/brun/blanc) est
+   tiré au hasard à chaque apparition et posé en classe (.food--<variante>) par le
+   rendu JS. Yeux et intérieur d'oreille restent fixes. */
+.food {
+  position: relative;
+  --mouse-color: var(--mouse-gray);
+}
+.food--gray {
+  --mouse-color: var(--mouse-gray);
+}
+.food--brown {
+  --mouse-color: var(--mouse-brown);
+}
+.food--white {
+  --mouse-color: var(--mouse-white);
+}
+
+.food-body {
+  position: absolute;
+  width: 70%;
+  height: 70%;
+  top: 15%;
+  left: 15%;
+  background-color: var(--mouse-color);
+  border-radius: 60% 60% 50% 50%;
+}
+
+.food-ear {
+  position: absolute;
+  width: 25%;
+  height: 25%;
+  top: 5%;
+  background-color: var(--mouse-color);
+  border-radius: 50%;
+}
+.food-ear.left {
+  left: 20%;
+}
+.food-ear.right {
+  right: 20%;
+}
+/* Intérieur d'oreille rose. */
+.food-ear::after {
+  content: '';
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  background-color: var(--mouse-ear-inner);
+  border-radius: 50%;
+}
+
+.food-eye {
+  position: absolute;
+  width: 10%;
+  height: 10%;
+  top: 30%;
+  background-color: var(--black-color);
+  border-radius: 50%;
+}
+.food-eye.left {
+  left: 28%;
+}
+.food-eye.right {
+  right: 28%;
+}
+
+/* Museau rose, entre les yeux. */
+.food-nose {
+  position: absolute;
+  width: 12%;
+  height: 10%;
+  top: 44%;
+  left: 44%;
+  background-color: var(--mouse-ear-inner);
+  border-radius: 50%;
+}
+
+.food-tail {
+  position: absolute;
+  width: 40%;
+  height: 2px;
+  bottom: 18%;
+  left: 30%;
+  background-color: var(--mouse-color);
+  border-radius: var(--border-radius-xs);
+  transform: rotate(45deg);
+}

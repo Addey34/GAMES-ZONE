@@ -1,0 +1,23 @@
+/* =============================================================================
+   Point d'entrée CSS partagé : agrège tokens, base, composants et layouts.
+   Chaque page (home + jeux) importe UN SEUL fichier qui lui-même importe ceci.
+   Ordre = cascade : tokens → reset → composants → layouts.
+   ========================================================================== */
+
+/* Tokens & base */
+@import url('./base/variables.css');
+@import url('./base/reset.css');
+
+/* Composants réutilisables */
+@import url('./components/animations.css');
+@import url('./components/buttons.css');
+@import url('./components/icon.css');
+@import url('./components/info.css');
+@import url('./components/forms.css');
+@import url('./components/modal.css');
+@import url('./components/table.css');
+@import url('./components/sidebar.css');
+
+/* Layouts */
+@import url('./layouts/app-shell.css');
+@import url('./layouts/game-layout.css');

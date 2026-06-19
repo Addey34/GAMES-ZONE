@@ -1,0 +1,195 @@
+/* =============================================================================
+   Sidebar globale — rail neon vertical, remplace l'ancien footer.
+   Mobile-first :
+     - base (mobile)  : hors-champ, ouverte via le bouton hamburger (.sidebar-toggle) ;
+     - desktop (md+)  : rail compact fixe (icones seules) qui se deploie au survol.
+   L'item actif est rempli avec le degrade du jeu (--nav-accent, mappe par data-nav).
+   ========================================================================== */
+
+/* Couleur d'accent de l'item actif : fournie en inline (style="--nav-accent: …")
+   depuis la liste `games` de vite.config.ts. Fallback ici si jamais absente. */
+.sidebar-link {
+  --nav-accent: var(--primary-color);
+}
+
+/* --- Le rail ------------------------------------------------------------- */
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 1100;
+  width: var(--sidebar-width-expanded);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) 0 var(--spacing-md);
+  background: var(--sidebar-bg);
+  box-shadow: var(--shadow-lg);
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Mobile : hors-champ, glisse a l'ouverture. */
+  transform: translateX(-100%);
+  transition: transform var(--transition-speed) ease;
+}
+
+body.sidebar-open .sidebar {
+  transform: translateX(0);
+}
+
+/* Liseré degrade sur le bord droit du rail (signature visuelle). */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 2px;
+  background: var(--gradient-light);
+  opacity: 0.6;
+}
+
+/* --- Logo / marque ------------------------------------------------------- */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  color: var(--white-color);
+  font-weight: var(--font-weight-bolder);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.sidebar-brand .sidebar-icon {
+  color: transparent;
+  background-image: var(--gradient-light);
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-size: var(--font-size-xl);
+}
+
+/* --- Liste & liens ------------------------------------------------------- */
+.sidebar-nav {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.sidebar-link,
+.sidebar-brand {
+  position: relative;
+  border-radius: var(--border-radius-lg);
+  margin-inline: var(--spacing-sm);
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+  transition:
+    background var(--transition-speed) ease,
+    color var(--transition-speed) ease,
+    transform var(--transition-speed) ease;
+}
+
+/* Boite d'icone a largeur fixe : l'icone reste centree sur le rail compact
+   et ne bouge pas quand le rail se deploie. */
+.sidebar-icon {
+  flex: 0 0 calc(var(--sidebar-width) - 2 * var(--spacing-sm));
+  display: grid;
+  place-items: center;
+  height: 44px;
+  font-size: var(--font-size-lg);
+}
+
+/* Le libelle flexe de 0 (compact, clippe) a sa pleine largeur (deploye) sans
+   jamais s'enrouler : nowrap empeche tout reflux vertical, min-width:0 + flex
+   l'autorisent a se reduire a 0 au lieu de deborder. L'icone, elle, est figee. */
+.sidebar-label {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white-color);
+  transform: translateX(2px);
+}
+
+/* Item actif : rempli de la couleur du jeu + glow neon. */
+.sidebar-link.is-active {
+  background-color: var(--nav-accent);
+  color: var(--white-color);
+  box-shadow: var(--shadow-lg);
+}
+
+.sidebar-link.is-active .sidebar-icon {
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.55));
+}
+
+/* --- Bouton hamburger (mobile uniquement) -------------------------------- */
+.sidebar-toggle {
+  position: fixed;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: 1200;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: var(--font-size-lg);
+  color: var(--white-color);
+  background: var(--gradient);
+  border: none;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+/* --- Scrim mobile -------------------------------------------------------- */
+.sidebar-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: rgba(26, 26, 46, 0.55);
+  backdrop-filter: blur(2px);
+}
+.sidebar-scrim[hidden] {
+  display: none;
+}
+
+/* =============================================================================
+   Desktop : rail compact fixe + deploiement au survol.
+   ========================================================================== */
+@media (min-width: 768px) {
+  .sidebar {
+    width: var(--sidebar-width);
+    transform: none;
+    transition: width var(--transition-speed) ease;
+  }
+
+  .sidebar:hover {
+    width: var(--sidebar-width-expanded);
+  }
+
+  /* Libelles caches en mode compact, reveles au survol du rail. */
+  .sidebar-label {
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+  }
+  .sidebar:hover .sidebar-label {
+    opacity: 1;
+  }
+
+  /* Plus de toggle ni de scrim en desktop. */
+  .sidebar-toggle,
+  .sidebar-scrim {
+    display: none;
+  }
+}
+
+/* Le rail est un calque fixe : il N'AJOUTE AUCUN offset au contenu. Les pages
+   restent centrees sur le viewport reel (centrage gere par .app-body, partage),
+   le rail compact flotte par-dessus la gouttiere gauche et son deploiement au
+   survol passe en overlay. Rien a faire pour les futures pages : .app-body suffit. */

@@ -1,0 +1,101 @@
+@import url('../global.css');
+
+/* Couleur d'accent du jeu (titre + item actif du rail). */
+.app-body {
+  --title-color: var(--color-2048);
+}
+
+/* =============================================================================
+   2048 — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
+   ========================================================================== */
+
+/* Texte score / meilleur score dans la barre de détails. */
+.score,
+.high-score {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+/* --- Plateau carré : grille 4x4 (taille logique posée en JS) --- */
+.grid-board {
+  width: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template: repeat(4, 1fr) / repeat(4, 1fr);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--tile-board-bg);
+  border-radius: var(--border-radius-md);
+}
+
+/* --- Tuile --- */
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+  background: var(--tile-empty-bg);
+  color: var(--tile-text-dark);
+  font-weight: var(--font-weight-bolder);
+  font-size: clamp(1.1rem, 7vmin, 2.2rem);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+/* Réduction de la police pour les grands nombres. */
+.tile--3digits {
+  font-size: clamp(0.9rem, 5.5vmin, 1.7rem);
+}
+.tile--4digits {
+  font-size: clamp(0.75rem, 4.5vmin, 1.4rem);
+}
+
+/* Palette des valeurs : texte sombre jusqu'à 4, clair au-delà. */
+.tile--2 {
+  background: var(--tile-2-bg);
+}
+.tile--4 {
+  background: var(--tile-4-bg);
+}
+.tile--8 {
+  background: var(--tile-8-bg);
+  color: var(--tile-text-light);
+}
+.tile--16 {
+  background: var(--tile-16-bg);
+  color: var(--tile-text-light);
+}
+.tile--32 {
+  background: var(--tile-32-bg);
+  color: var(--tile-text-light);
+}
+.tile--64 {
+  background: var(--tile-64-bg);
+  color: var(--tile-text-light);
+}
+.tile--128 {
+  background: var(--tile-128-bg);
+  color: var(--tile-text-light);
+}
+.tile--256 {
+  background: var(--tile-256-bg);
+  color: var(--tile-text-light);
+}
+.tile--512 {
+  background: var(--tile-512-bg);
+  color: var(--tile-text-light);
+}
+.tile--1024 {
+  background: var(--tile-1024-bg);
+  color: var(--tile-text-light);
+}
+.tile--2048 {
+  background: var(--tile-2048-bg);
+  color: var(--tile-text-light);
+  box-shadow: var(--shadow-sm);
+}
+.tile--super {
+  background: var(--tile-super-bg);
+  color: var(--tile-text-light);
+  box-shadow: var(--shadow-sm);
+}

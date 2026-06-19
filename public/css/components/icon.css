@@ -1,0 +1,24 @@
+/* =============================================================================
+   Logos de jeu (SVG monochromes pilotés par masque CSS).
+   Chaque usage fournit l'URL du SVG via la variable --game-icon (inline, dérivée
+   de la `key` du jeu) ; la couleur vient de `currentColor` — le SVG n'est qu'une
+   silhouette. Taille = 1em (suit la font-size du contexte : titre, rail, menu).
+   ========================================================================== */
+.game-icon {
+  display: inline-block;
+  /* Taille relative à la font-size du contexte (titre, rail, menu). Réglable
+     par contexte via --game-icon-size. Au-delà de 1em car le SVG a une marge
+     interne dans son viewBox. */
+  width: var(--game-icon-size, 1.4em);
+  height: var(--game-icon-size, 1.4em);
+  flex: 0 0 auto;
+  background-color: currentColor;
+  -webkit-mask: var(--game-icon) no-repeat center / contain;
+  mask: var(--game-icon) no-repeat center / contain;
+}
+
+/* Dans le titre de page, l'icône est plus grande ; sa couleur suit currentColor
+   (= la couleur unie du titre), donc rien à surcharger côté remplissage. */
+.app-title .game-icon {
+  --game-icon-size: 1.7em;
+}

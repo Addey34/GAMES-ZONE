@@ -1,0 +1,42 @@
+/* =============================================================================
+   Coquille de page : conteneur centré + titre + barre supérieure.
+   Mobile-first.
+   ========================================================================== */
+.app-body {
+  width: 100%;
+  max-width: var(--content-width-max);
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 2vw, 2rem);
+  /* Air en bas de page (l'offset gauche pour la sidebar est gere dans sidebar.css). */
+  padding-bottom: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Barre dégradée fixe en haut de toutes les pages. */
+.app-body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 5px;
+  background: var(--gradient);
+  z-index: 1000;
+}
+
+.app-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  font-size: clamp(1.5rem, 4vw, var(--font-size-xxl));
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  margin-bottom: clamp(1rem, 3vw, var(--spacing-lg));
+  /* Couleur unie du titre : accent propre à chaque page (bleu du site par
+     défaut), surchargé via --title-color sur .app-body de chaque jeu. */
+  color: var(--title-color, var(--primary-color));
+}

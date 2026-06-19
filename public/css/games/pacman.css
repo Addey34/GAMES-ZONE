@@ -1,0 +1,104 @@
+@import url('../global.css');
+
+/* Couleur d'accent du jeu (titre + item actif du rail). */
+.app-body {
+  --title-color: var(--color-pacman);
+}
+
+/* =============================================================================
+   Pac-Man — styles spécifiques au jeu.
+   La carte fait 21 colonnes × 18 lignes ; chaque case est une div à laquelle le
+   JS ajoute .wall / .food / .nofood, puis .pacman / .ghost par-dessus.
+   Les personnages sont dessinés en radial-gradient (aucune image externe).
+   ========================================================================== */
+
+/* Zone de jeu carrée (même empreinte que le plateau de Snake) : le labyrinthe
+   21×18 y est centré, les bandes haut/bas restent noires (fond du plateau). */
+.body {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--black-color);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+#map {
+  width: 100%;
+  max-height: 100%;
+  aspect-ratio: 21 / 18;
+  display: grid;
+  grid-template-columns: repeat(21, 1fr);
+  grid-template-rows: repeat(18, 1fr);
+  background-color: var(--black-color);
+}
+
+/* Mur : tuile bleue légèrement arrondie avec liseré clair (look labyrinthe). */
+.wall {
+  background-color: var(--pacman-wall);
+  border-radius: 22%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+/* Couloir avec pastille (dégradé radial, ton crème de la palette). */
+.food {
+  background: radial-gradient(circle, var(--pacman-dot) 0 18%, transparent 19%);
+}
+
+/* Couloir déjà mangé. */
+.nofood {
+  background-color: var(--black-color);
+}
+
+/* --- Pac-Man : disque jaune avec une bouche (secteur transparent) orientée
+   selon le déplacement. Déclaré après .food/.nofood pour primer sur la case. */
+.pacman {
+  border-radius: 50%;
+  /* Œil (point sombre) posé au-dessus du corps ; orienté pour la bouche à droite. */
+  background:
+    radial-gradient(circle at 56% 30%, var(--background-color-dark) 0 7%, transparent 8%),
+    conic-gradient(
+      var(--pacman-yellow) 0 60deg,
+      transparent 60deg 120deg,
+      var(--pacman-yellow) 120deg 360deg
+    );
+  transform: scale(0.92);
+}
+/* Gauche = miroir horizontal (l'œil reste en haut) ; haut/bas = rotations. */
+.pacman--right {
+  transform: scale(0.92);
+}
+.pacman--left {
+  transform: scale(-0.92, 0.92);
+}
+.pacman--down {
+  transform: rotate(90deg) scale(0.92);
+}
+.pacman--up {
+  transform: rotate(-90deg) scale(0.92);
+}
+
+/* --- Fantômes : corps en dôme + deux yeux dessinés en dégradés radial
+   superposés. La couleur dépend de l'index (.ghost--0/1/2). --- */
+.ghost {
+  --ghost-color: var(--ghost-red);
+  border-radius: 50% 50% 20% 20%;
+  background-color: var(--ghost-color);
+  background-image:
+    radial-gradient(circle at 36% 46%, var(--background-color-dark) 0 6%, transparent 7%),
+    radial-gradient(circle at 64% 46%, var(--background-color-dark) 0 6%, transparent 7%),
+    radial-gradient(circle at 37% 43%, var(--white-color) 0 13%, transparent 14%),
+    radial-gradient(circle at 63% 43%, var(--white-color) 0 13%, transparent 14%);
+  transform: scale(0.96);
+}
+.ghost--0 {
+  --ghost-color: var(--ghost-red);
+}
+.ghost--1 {
+  --ghost-color: var(--ghost-pink);
+}
+.ghost--2 {
+  --ghost-color: var(--ghost-cyan);
+}

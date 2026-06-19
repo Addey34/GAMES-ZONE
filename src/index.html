@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+  {{> head title="Games Zone" css="/css/home.css"}}
+  <body class="app-body">
+    {{> sidebar}}
+    <h1 class="app-title">
+      <i class="fas fa-gamepad" aria-hidden="true"></i>
+      Games Zone
+      <i class="fas fa-gamepad" aria-hidden="true"></i>
+    </h1>
+    <div class="menu">
+      {{#each games}}
+      <a href="/{{key}}/{{key}}.html" data-game="{{key}}">
+        <span
+          class="game-icon"
+          style="--game-icon: url(/icons/{{key}}.svg)"
+          aria-hidden="true"
+        ></span>
+        {{label}}
+      </a>
+      {{/each}}
+    </div>
+  </body>
+</html>

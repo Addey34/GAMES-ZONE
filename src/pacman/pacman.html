@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="fr">
+  {{> head title="PAC MAN" css="/css/games/pacman.css" script="./pacman-main.ts"}}
+  <body class="app-body">
+    {{> shell-open title="Pac-Man" key="pacman"}}
+    <div class="game-details">
+      <span id="header">SCORE : <span id="score">0</span></span>
+    </div>
+    <div class="body">
+      <div id="map" class="map"></div>
+    </div>
+    {{> shell-close}} {{> game-chrome}}
+  </body>
+</html>

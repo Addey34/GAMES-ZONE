@@ -1,0 +1,116 @@
+@import url('../global.css');
+
+/* Couleur d'accent du jeu (titre + item actif du rail). */
+.app-body {
+  --title-color: var(--color-dactylo);
+}
+
+/* =============================================================================
+   Dactylographie — styles spécifiques au jeu.
+   La saisie (.input-field--game), le score et le chrono (.game-stat) viennent
+   des composants/layouts partagés.
+   ========================================================================== */
+
+/* Chrono dans la barre de détails partagée : devient rouge sous 10 s. */
+#chrono {
+  font-weight: var(--font-weight-bolder);
+}
+
+#chrono.is-low {
+  color: var(--error-color);
+}
+
+/* Zone de jeu carrée (même empreinte que les autres jeux). Mode « focus » : le
+   mot courant en grand, l'aperçu des suivants dessous, la saisie ancrée en bas. */
+.typing-area {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--background-color-light);
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+/* Mot courant + aperçu. Mobile-first : calés vers le HAUT pour rester visibles
+   au-dessus du clavier tactile ; centrés sur grand écran (pas de clavier). */
+.word-container {
+  flex: 1 1 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .word-container {
+    justify-content: center;
+    padding-top: 0;
+  }
+}
+
+/* Mot à taper, en grand. Une lettre par span pour la coloration en direct ;
+   les mots longs passent à la ligne plutôt que de déborder. */
+.focus-word {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.02em;
+  font-size: clamp(2rem, 11vw, 4rem);
+  font-weight: var(--font-weight-bolder);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+.focus-letter {
+  color: var(--text-color-muted);
+  transition: color 0.08s ease;
+}
+
+/* Lettre correctement tapée / erronée. */
+.focus-letter.correct {
+  color: var(--secondary-color);
+}
+
+.focus-letter.incorrect {
+  color: var(--error-color);
+  text-decoration: underline;
+}
+
+/* Prochaine lettre attendue (curseur visuel). */
+.focus-letter.active {
+  color: var(--text-color);
+  border-bottom: 3px solid var(--primary-color);
+}
+
+/* Aperçu discret des mots suivants. */
+.upcoming {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  max-width: 100%;
+}
+
+.upcoming-word {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-md);
+  color: var(--text-color-muted);
+  background: var(--white-color);
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--border-radius-sm);
+  white-space: nowrap;
+}
+
+/* Saisie ancrée en bas de la zone de frappe, centrée. */
+.input-field--game {
+  align-self: center;
+  flex: 0 0 auto;
+}

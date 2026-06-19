@@ -1,0 +1,88 @@
+@import url('../global.css');
+
+/* Couleur d'accent du jeu (titre + item actif du rail). */
+.app-body {
+  --title-color: var(--color-memory);
+}
+
+/* =============================================================================
+   Memory — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
+   ========================================================================== */
+
+/* Textes score / coups / meilleur score dans la barre de détails. */
+.score,
+.moves,
+.high-score {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+/* --- Plateau carré : grille N×N (nombre de colonnes posé en JS) --- */
+.memory-board {
+  width: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--memory-board-bg);
+  border-radius: var(--border-radius-md);
+}
+
+/* --- Carte : bouton carré qui se retourne en 3D --- */
+.memory-card {
+  aspect-ratio: 1;
+  padding: 0;
+  border: none;
+  background: transparent;
+  perspective: 600px;
+  cursor: pointer;
+}
+
+.memory-card-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform var(--transition-speed);
+}
+
+/* La carte retournée (paire en cours ou trouvée) montre sa face avant. */
+.memory-card.is-flipped .memory-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* --- Faces de la carte --- */
+.memory-card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+  backface-visibility: hidden;
+  font-size: clamp(1.2rem, 8vmin, 2.4rem);
+}
+
+/* Dos (visible au repos) : motif uni avec un point d'interrogation discret. */
+.memory-card-back {
+  background: var(--memory-card-back-bg);
+  color: var(--memory-card-back-icon);
+}
+
+/* Face avant (le symbole) : pré-tournée pour apparaître au retournement. */
+.memory-card-front {
+  background: var(--memory-card-front-bg);
+  color: var(--memory-card-front-icon);
+  transform: rotateY(180deg);
+}
+
+/* Paire trouvée : on verrouille le curseur et on signale la réussite. */
+.memory-card.is-matched {
+  cursor: default;
+}
+
+.memory-card.is-matched .memory-card-front {
+  background: var(--memory-card-matched-bg);
+  color: var(--memory-card-matched-icon);
+}

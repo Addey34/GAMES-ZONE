@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="fr">
+  {{> head title="2048" css="/css/games/2048.css" script="./2048-main.ts"}}
+  <body class="app-body">
+    {{> shell-open title="2048" key="2048"}}
+    <div class="game-details">
+      <span class="score"></span>
+      <span class="high-score"></span>
+    </div>
+    <div class="grid-board" id="board"></div>
+    {{> shell-close}} {{> game-chrome}}
+  </body>
+</html>
