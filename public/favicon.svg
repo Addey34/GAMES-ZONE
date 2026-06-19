@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect x="3.5" y="3.5" width="57" height="57" rx="14"
+        fill="#e0e7ff" stroke="#3f37c9" stroke-width="3" />
+  <text x="32" y="33" text-anchor="middle" dominant-baseline="central"
+        font-family="'Segoe UI', Arial, sans-serif" font-weight="800"
+        font-size="30" letter-spacing="-1.5" fill="#3f37c9">GZ</text>
+</svg>
