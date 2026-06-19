@@ -1,85 +1,87 @@
 # 🎮 GamesZone
 
-Une collection de jeux d'arcade jouables dans le navigateur, réunis dans une seule
-application web. Aucun backend : les scores sont sauvegardés localement dans le navigateur pour l'instant
-(`localStorage`).
+A collection of browser arcade games gathered into a single web app. No backend:
+scores are saved locally in the browser for now (`localStorage`).
 
-## Jeux disponibles
+> Note: the user-facing interface is currently in French.
 
-- ⌨️ **Dactylographie** — entraînement à la frappe rapide
+## Available games
+
+- ⌨️ **Typing** (Dactylographie) — fast-typing practice
 - 🐍 **Snake**
 - 🟡 **Pacman**
 - 🔢 **2048**
 - 🧱 **Tetris**
 - 🃏 **Memory**
-- 🧱 **Casse-brique** (Breakout)
+- 🧱 **Breakout** (Casse-brique)
 
-## Contrôles
+## Controls
 
-Chaque jeu est jouable au **clavier** (flèches **ou** ZQSD/WASD) **et au tactile**
-(glissé/swipe sur mobile). Une aide « ⓘ » (au survol) rappelle les contrôles de chaque
-jeu, et un bouton **plein écran** est disponible.
+Every game can be played with the **keyboard** (arrow keys **or** ZQSD/WASD) **and by
+touch** (swipe on mobile). A help tooltip "ⓘ" (on hover) recalls each game's controls,
+and a **fullscreen** button is available.
 
-## Stack technique
+## Tech stack
 
-- [Vite](https://vitejs.dev/) — application multi-pages (une page par jeu)
-- **TypeScript** (mode `strict`)
-- [Handlebars](https://handlebarsjs.com/) — partials HTML partagés (en-tête, navigation, modale)
-- CSS modulaire (design tokens, mobile-first), sans framework
-- [Vitest](https://vitest.dev/) — tests unitaires ; **ESLint** + **Prettier** — qualité et format
-- Intégration continue (GitHub Actions) : build + tests à chaque push / pull request
+- [Vite](https://vitejs.dev/) — multi-page app (one page per game)
+- **TypeScript** (`strict` mode)
+- [Handlebars](https://handlebarsjs.com/) — shared HTML partials (head, navigation, modal)
+- Modular CSS (design tokens, mobile-first), no framework
+- [Vitest](https://vitest.dev/) — unit tests; **ESLint** + **Prettier** — quality and format
+- Continuous integration (GitHub Actions): build + tests on every push / pull request
 
-## Démarrage
+## Getting started
 
-Prérequis : [Node.js](https://nodejs.org/).
+Requirement: [Node.js](https://nodejs.org/).
 
 ```bash
-npm install      # installer les dépendances
-npm run dev      # serveur de dev sur http://localhost:3000
+npm install      # install dependencies
+npm run dev      # dev server on http://localhost:3000
 ```
 
 ## Scripts
 
-| Commande             | Description                                              |
-| -------------------- | -------------------------------------------------------- |
-| `npm run dev`        | Serveur de développement (rechargement à chaud)          |
-| `npm run build`      | Vérification des types puis build de prod → `dist/`      |
-| `npm run preview`    | Sert le build de production en local                     |
-| `npm run type-check` | Vérifie les types sans générer de build (`tsc --noEmit`) |
-| `npm test`           | Lance les tests unitaires (Vitest)                       |
-| `npm run lint`       | Analyse le code (ESLint) ; `lint:fix` corrige            |
-| `npm run format`     | Formate le code (Prettier) ; `format:check` vérifie      |
+| Command              | Description                                            |
+| -------------------- | ------------------------------------------------------ |
+| `npm run dev`        | Development server (hot reload)                         |
+| `npm run build`      | Type-check then production build → `dist/`              |
+| `npm run preview`    | Serve the production build locally                      |
+| `npm run type-check` | Check types without building (`tsc --noEmit`)          |
+| `npm test`           | Run unit tests (Vitest)                                 |
+| `npm run lint`       | Analyze the code (ESLint); `lint:fix` auto-fixes        |
+| `npm run format`     | Format the code (Prettier); `format:check` verifies     |
 
-## Structure du projet
+## Project structure
 
 ```
 src/
-  index.html            # page d'accueil
-  <jeu>/                # un dossier par jeu
-    index.html          #   page du jeu (servie en URL propre /<jeu>)
-    <jeu>-main.ts       #   point d'entrée
-    <Jeu>.ts            #   logique du jeu
-  shared/               # moteur de jeu et utilitaires partagés
-  partials/             # partials HTML Handlebars (en-tête, navigation, modale)
+  index.html            # home page
+  <game>/               # one folder per game
+    index.html          #   game page (served at the clean URL /<game>)
+    <game>-main.ts      #   entry point
+    <Game>.ts           #   game logic
+  shared/               # shared game engine and utilities
+  partials/             # Handlebars HTML partials (head, navigation, modal)
 public/
-  css/                  # feuilles de style (servies à la racine)
-  words.txt             # liste de mots pour la dactylographie
-vite.config.ts          # config Vite + liste centrale des jeux
+  css/                  # stylesheets (served from the root)
+  words.txt             # word list for the typing game
+vite.config.ts          # Vite config + central game list
 ```
 
-Tous les jeux partagent un moteur commun (`src/shared/GameEngine.ts`) qui gère la boucle de
-jeu, le score et la modale de fin de partie.
+All games share a common engine (`src/shared/GameEngine.ts`) that handles the game
+loop, the score, and the game-over modal.
 
-### Ajouter un jeu
+### Adding a game
 
-1. Ajouter une ligne dans le tableau `games` de `vite.config.ts`.
-2. Créer `src/<jeu>/index.html`, `src/<jeu>/<jeu>-main.ts`, `src/<jeu>/<Jeu>.ts`
-   et l'icône `public/icons/<jeu>.svg`.
+1. Add one line to the `games` array in `vite.config.ts`.
+2. Create `src/<game>/index.html`, `src/<game>/<game>-main.ts`, `src/<game>/<Game>.ts`
+   and the icon `public/icons/<game>.svg`.
 
-Le jeu apparaît alors automatiquement dans la navigation et sur la page d'accueil.
+The game then appears automatically in the navigation and on the home page.
 
-## Contribuer
+## Contributing
 
-Les contributions sont les bienvenues ! Le projet fonctionne par **Pull Request**.
-Consulte le guide [CONTRIBUTING.md](CONTRIBUTING.md) pour les étapes détaillées
-(fork, branche, vérifications, ajout d'un jeu).
+Contributions are welcome! The project works through **Pull Requests**.
+See the [CONTRIBUTING.md](CONTRIBUTING.md) guide for the detailed steps
+(fork, branch, checks, adding a game).
+</content>
