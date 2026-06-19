@@ -184,8 +184,12 @@ export class PacmanGame extends GameEngine {
     if (this.lastMoveTime < this.gameSpeed) return;
     this.lastMoveTime = 0;
 
+    // Remember Pac-Man's cell before he moves so the ghosts can detect a
+    // "swap" (Pac-Man and a ghost exchanging cells in the same tick) — without
+    // it, two entities crossing each other would slip through uncaught.
+    const pacmanPrev = { ...this.pacman };
     this.movePacman();
-    this.moveGhosts();
+    this.moveGhosts(pacmanPrev);
   }
 
   /**
@@ -233,10 +237,12 @@ export class PacmanGame extends GameEngine {
    * Moves each ghost randomly, avoiding the U-turn except when it is the only way
    * out (more natural movement). Contact with Pac-Man ends the game (loss).
    */
-  private moveGhosts(): void {
+  private moveGhosts(pacmanPrev: Position): void {
     const directions: Direction[] = ['up', 'down', 'left', 'right'];
 
     this.ghosts.forEach((ghost) => {
+      const ghostPrev = { x: ghost.x, y: ghost.y };
+
       let valid = directions.filter((dir) => this.canMove(ghost, dir));
 
       const forward = valid.filter((dir) => dir !== OPPOSITE_DIRECTION[ghost.direction]);
@@ -249,7 +255,17 @@ export class PacmanGame extends GameEngine {
         ghost.y = next.y;
       }
 
-      if (ghost.x === this.pacman.x && ghost.y === this.pacman.y) {
+      // Collision when they land on the same cell, OR when they swapped cells
+      // (Pac-Man took the ghost's old cell while the ghost took Pac-Man's) —
+      // the latter is the "passing through a ghost" case.
+      const sameCell = ghost.x === this.pacman.x && ghost.y === this.pacman.y;
+      const swapped =
+        ghost.x === pacmanPrev.x &&
+        ghost.y === pacmanPrev.y &&
+        ghostPrev.x === this.pacman.x &&
+        ghostPrev.y === this.pacman.y;
+
+      if (sameCell || swapped) {
         this.endGame(false);
       }
     });
