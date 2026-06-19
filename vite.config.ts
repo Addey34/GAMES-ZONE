@@ -96,12 +96,52 @@ const games = [
   },
 ];
 
+// Dev/preview equivalent of render.yaml's clean-URL rewrites. Without it Vite's
+// SPA fallback serves the home page for every clean game URL. Two steps:
+//   1. `/<key>`  -> 301 to `/<key>/` so the page-relative module script
+//      (`./<key>-main.ts`) resolves against the game folder, not the site root
+//      (otherwise the page renders but the game's JS 404s — "just the front").
+//   2. `/<key>/` -> internally serve the real file `/<key>/index.html`.
+const games_keys = new Set(games.map((g) => g.key));
+interface RewriteRes {
+  writeHead(status: number, headers: Record<string, string>): void;
+  end(): void;
+}
+function rewriteCleanUrl(req: { url?: string }, res: RewriteRes, next: () => void): void {
+  if (req.url) {
+    const [path, rest = ''] = req.url.split(/(?=[?#])/);
+    const key = path.replace(/^\//, '').replace(/\/$/, '');
+    if (games_keys.has(key)) {
+      if (!path.endsWith('/')) {
+        res.writeHead(301, { Location: `/${key}/${rest}` });
+        res.end();
+        return;
+      }
+      req.url = `/${key}/index.html${rest}`;
+    }
+  }
+  next();
+}
+
 export default defineConfig({
   // The HTML pages (= entry points) live in src/, co-located with their code.
   // `publicDir` and `outDir` stay at the project root.
   root: srcRoot,
   publicDir: resolve(projectRoot, 'public'),
+  // Multi-page app: disable the SPA fallback that would otherwise serve the home
+  // index.html for any unmatched route (the bug where game URLs showed the home).
+  appType: 'mpa',
   plugins: [
+    // Clean URLs in dev & preview, mirroring render.yaml's rewrites in prod.
+    {
+      name: 'gameszone-clean-urls',
+      configureServer(server) {
+        server.middlewares.use(rewriteCleanUrl);
+      },
+      configurePreviewServer(server) {
+        server.middlewares.use(rewriteCleanUrl);
+      },
+    },
     // Shared HTML partials (head, game chrome, sidebar) included via {{> name }}.
     // `games` is exposed to every page ({{#each}} loop); `game` is the current
     // page's game (derived from the path), used by shell-open for the help.
