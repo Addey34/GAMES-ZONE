@@ -1,16 +1,16 @@
-// Comportement de la sidebar globale (rail neon). Chargé sur toutes les pages.
-//  1. Marque le lien correspondant à la page courante (.is-active) d'après l'URL.
-//  2. Gère l'ouverture/fermeture en mode mobile (bouton hamburger + scrim).
-// Pas d'expansion au survol ici : c'est du CSS pur (desktop). Ce script ne fait
-// que l'état actif et le toggle tactile.
+// Behavior of the global sidebar (neon rail). Loaded on every page.
+//  1. Marks the link matching the current page (.is-active) based on the URL.
+//  2. Handles open/close in mobile mode (hamburger button + scrim).
+// No hover expansion here: that is pure CSS (desktop). This script only handles
+// the active state and the touch toggle.
 
 const sidebar = document.querySelector('.sidebar');
 if (sidebar) {
-  // --- 1. État actif selon l'URL ---------------------------------------------
-  // URLs propres : chaque jeu est servi en /<key> (ex. /snake, /2048). On marque
-  // le lien dont le data-nav correspond au 1er segment du chemin — en couvrant
-  // aussi /<key>/ et /<key>/index.html (accès direct ou serveur de dev). La page
-  // d'accueil n'a pas d'entrée dédiée (le logo Games Zone fait office de retour).
+  // --- 1. Active state based on the URL ---------------------------------------
+  // Clean URLs: each game is served at /<key> (e.g. /snake, /2048). We mark
+  // the link whose data-nav matches the 1st path segment — also covering
+  // /<key>/ and /<key>/index.html (direct access or dev server). The home page
+  // has no dedicated entry (the Games Zone logo acts as the way back).
   const path = window.location.pathname;
   for (const link of document.querySelectorAll<HTMLElement>('.sidebar-link')) {
     const nav = link.dataset.nav;
@@ -24,7 +24,7 @@ if (sidebar) {
     document.querySelector('.sidebar-brand')?.setAttribute('aria-current', 'page');
   }
 
-  // --- 2. Toggle mobile ------------------------------------------------------
+  // --- 2. Mobile toggle ------------------------------------------------------
   const toggle = document.querySelector('.sidebar-toggle');
   const scrim = document.querySelector<HTMLElement>('.sidebar-scrim');
 
@@ -43,5 +43,5 @@ if (sidebar) {
   });
 }
 
-// Fichier traité comme module ESM (chargé via <script type="module">).
+// File treated as an ESM module (loaded via <script type="module">).
 export {};

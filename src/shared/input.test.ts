@@ -7,52 +7,52 @@ import {
 } from './input.js';
 
 describe('keyboardDirection', () => {
-  it('mappe les flèches vers les directions', () => {
+  it('maps the arrow keys to directions', () => {
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'ArrowUp' }))).toBe('up');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'ArrowDown' }))).toBe('down');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'ArrowLeft' }))).toBe('left');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'ArrowRight' }))).toBe('right');
   });
 
-  it('mappe les touches WASD vers les directions', () => {
+  it('maps the WASD keys to directions', () => {
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'w' }))).toBe('up');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 's' }))).toBe('down');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'a' }))).toBe('left');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'd' }))).toBe('right');
   });
 
-  it('mappe les touches ZQSD (AZERTY) vers les directions', () => {
+  it('maps the ZQSD (AZERTY) keys to directions', () => {
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'z' }))).toBe('up');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 's' }))).toBe('down');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'q' }))).toBe('left');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'd' }))).toBe('right');
   });
 
-  it('ignore la casse (Maj / Verr. Maj)', () => {
+  it('ignores case (Shift / Caps Lock)', () => {
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'Z' }))).toBe('up');
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'D' }))).toBe('right');
   });
 
-  it('renvoie null pour une touche non gérée', () => {
+  it('returns null for an unhandled key', () => {
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'Enter' }))).toBeNull();
     expect(keyboardDirection(new KeyboardEvent('keydown', { key: 'x' }))).toBeNull();
   });
 });
 
-describe('tables de directions', () => {
+describe('direction tables', () => {
   const directions: Direction[] = ['up', 'down', 'left', 'right'];
 
-  it('chaque opposé est réciproque', () => {
+  it('each opposite is reciprocal', () => {
     for (const d of directions) {
       expect(OPPOSITE_DIRECTION[OPPOSITE_DIRECTION[d]]).toBe(d);
     }
   });
 
-  it('le delta de la direction opposée est le vecteur inverse', () => {
+  it('the opposite direction delta is the inverse vector', () => {
     for (const d of directions) {
       const delta = DIRECTION_DELTAS[d];
       const opposite = DIRECTION_DELTAS[OPPOSITE_DIRECTION[d]];
-      // delta + opposé doit s'annuler (évite le piège -0 ≠ 0 de Object.is).
+      // delta + opposite must cancel out (avoids the -0 ≠ 0 pitfall of Object.is).
       expect(delta.x + opposite.x).toBe(0);
       expect(delta.y + opposite.y).toBe(0);
     }

@@ -1,18 +1,18 @@
-// Bouton plein écran d'une page de jeu : bascule le plein écran sur la zone de
-// jeu (.game-container) et alterne l'icône expand/compress.
-// Chargé sur chaque page de jeu (inclus par shell-open).
+// Fullscreen button of a game page: toggles fullscreen on the game area
+// (.game-container) and switches the expand/compress icon.
+// Loaded on every game page (included by shell-open).
 
 const toggle = document.querySelector<HTMLButtonElement>('.game-fullscreen-toggle');
 const target = document.querySelector<HTMLElement>('.game-container');
 
 if (toggle && target) {
-  // API plein écran indisponible (ex. Safari iPhone) : on masque le bouton.
+  // Fullscreen API unavailable (e.g. Safari iPhone): hide the button.
   if (!document.fullscreenEnabled) {
     toggle.hidden = true;
   } else {
     const icon = toggle.querySelector('i');
 
-    // Reflète l'état courant sur l'icône et les attributs ARIA.
+    // Reflects the current state on the icon and the ARIA attributes.
     const sync = (): void => {
       const active = document.fullscreenElement === target;
       toggle.setAttribute('aria-pressed', String(active));
@@ -25,7 +25,7 @@ if (toggle && target) {
       const action = document.fullscreenElement
         ? document.exitFullscreen()
         : target.requestFullscreen();
-      // Refus/erreur (geste utilisateur requis, permission…) : sans gravité.
+      // Refusal/error (user gesture required, permission…): harmless.
       action.catch(() => {});
     });
 
@@ -34,5 +34,5 @@ if (toggle && target) {
   }
 }
 
-// Module ESM (chargé via <script type="module">).
+// ESM module (loaded via <script type="module">).
 export {};

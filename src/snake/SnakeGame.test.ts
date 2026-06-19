@@ -11,8 +11,8 @@ afterEach(() => {
 });
 
 /**
- * Force la position initiale (aléatoire) du serpent en bridant Math.random.
- * floor(value * gridSize) + 1 ; value=0 → (1,1).
+ * Forces the snake's (random) initial position by constraining Math.random.
+ * floor(value * gridSize) + 1; value=0 → (1,1).
  */
 function snakeAt(value: number, gridSize: number): Snake {
   const spy = vi.spyOn(Math, 'random').mockReturnValue(value);
@@ -21,7 +21,7 @@ function snakeAt(value: number, gridSize: number): Snake {
   return snake;
 }
 
-/** Allonge le serpent en le nourrissant en ligne droite vers la droite. */
+/** Grows the snake by feeding it in a straight line to the right. */
 function growRight(snake: Snake, segments: number): void {
   snake.setDirection('right');
   for (let i = 0; i < segments; i++) {
@@ -31,64 +31,64 @@ function growRight(snake: Snake, segments: number): void {
 }
 
 describe('Snake', () => {
-  it('démarre avec un seul segment, orienté à droite', () => {
+  it('starts with a single segment, facing right', () => {
     const snake = snakeAt(0, 10);
     expect(snake.getBody()).toHaveLength(1);
     expect(snake.getDirection()).toBe('right');
   });
 
-  it('interdit le demi-tour (direction opposée ignorée)', () => {
-    const snake = snakeAt(0, 10); // direction initiale : right
-    snake.setDirection('left'); // opposé → ignoré
+  it('forbids the U-turn (opposite direction ignored)', () => {
+    const snake = snakeAt(0, 10); // initial direction: right
+    snake.setDirection('left'); // opposite → ignored
     expect(snake.getDirection()).toBe('right');
 
-    snake.setDirection('up'); // perpendiculaire → accepté
+    snake.setDirection('up'); // perpendicular → accepted
     expect(snake.getDirection()).toBe('up');
 
-    snake.setDirection('down'); // opposé de up → ignoré
+    snake.setDirection('down'); // opposite of up → ignored
     expect(snake.getDirection()).toBe('up');
   });
 
-  it('traverse le bord droit et réapparaît à gauche (wrap)', () => {
-    const snake = snakeAt(0.95, 10); // tête en (10,10)
+  it('crosses the right edge and reappears on the left (wrap)', () => {
+    const snake = snakeAt(0.95, 10); // head at (10,10)
     snake.setDirection('right');
-    snake.move({ x: -1, y: -1 }); // nourriture hors-champ
+    snake.move({ x: -1, y: -1 }); // food off-screen
     expect(snake.getBody()[0]).toEqual({ x: 1, y: 10 });
   });
 
-  it('traverse le bord haut et réapparaît en bas (wrap)', () => {
-    const snake = snakeAt(0, 10); // tête en (1,1)
+  it('crosses the top edge and reappears at the bottom (wrap)', () => {
+    const snake = snakeAt(0, 10); // head at (1,1)
     snake.setDirection('up');
     snake.move({ x: -1, y: -1 });
     expect(snake.getBody()[0]).toEqual({ x: 1, y: 10 });
   });
 
-  it('grandit en mangeant et garde sa longueur sinon', () => {
-    const snake = snakeAt(0, 10); // tête en (1,1)
+  it('grows when eating and keeps its length otherwise', () => {
+    const snake = snakeAt(0, 10); // head at (1,1)
     snake.setDirection('right');
 
-    const eaten = snake.move({ x: 2, y: 1 }); // mange
+    const eaten = snake.move({ x: 2, y: 1 }); // eats
     expect(eaten).toBe(true);
     expect(snake.getBody()).toHaveLength(2);
 
-    const eatenAgain = snake.move({ x: 9, y: 9 }); // ne mange pas
+    const eatenAgain = snake.move({ x: 9, y: 9 }); // does not eat
     expect(eatenAgain).toBe(false);
     expect(snake.getBody()).toHaveLength(2);
   });
 
-  it("ne signale pas de collision tant qu'il fait 4 segments ou moins", () => {
+  it('does not report a collision while it is 4 segments or fewer', () => {
     const snake = snakeAt(0, 10);
-    growRight(snake, 3); // longueur 4
+    growRight(snake, 3); // length 4
     expect(snake.getBody()).toHaveLength(4);
     expect(snake.checkCollision()).toBe(false);
   });
 });
 
 describe('Food', () => {
-  it("n'apparaît jamais sur le corps du serpent", () => {
+  it('never appears on the snake body', () => {
     const gridSize = 6;
     const snake = snakeAt(0, gridSize);
-    growRight(snake, 3); // occupe (1,1)..(4,1)
+    growRight(snake, 3); // occupies (1,1)..(4,1)
 
     const food = new Food(snake, gridSize);
     const body: Position[] = snake.getBody();

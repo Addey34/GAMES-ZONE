@@ -1,5 +1,5 @@
 import { MemoryGame } from './MemoryGame.js';
 import { bootstrapGame } from '../shared/bootstrap.js';
 
-/** Point d'entrée de la page Memory : instancie et démarre le jeu. */
+/** Entry point of the Memory page: instantiates and starts the game. */
 bootstrapGame('memoryGame', () => new MemoryGame({ gridSize: 4 }));

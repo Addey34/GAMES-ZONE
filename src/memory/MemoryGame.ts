@@ -1,31 +1,31 @@
 import { GameEngine, GameConfig } from '../shared/GameEngine.js';
 
 /**
- * Configuration spécifique au jeu Memory.
+ * Configuration specific to the Memory game.
  */
 interface MemoryConfig extends GameConfig {
-  /** Nombre de cases par côté de la grille (doit donner un total pair ; défaut : 4). */
+  /** Number of cells per grid side (must yield an even total; default: 4). */
   gridSize?: number;
 }
 
 /**
- * État d'une carte de la grille.
+ * State of a grid card.
  */
 type CardState = 'hidden' | 'flipped' | 'matched';
 
 /**
- * Une carte du plateau.
+ * A board card.
  */
 interface Card {
-  /** Classe Font Awesome du symbole (deux cartes partagent le même). */
+  /** Font Awesome class of the symbol (two cards share the same one). */
   symbol: string;
-  /** État courant de la carte. */
+  /** Current state of the card. */
   state: CardState;
 }
 
 /**
- * Réserve de symboles (icônes Font Awesome). Doit compter au moins autant
- * d'entrées que de paires à former (8 pour une grille 4×4).
+ * Pool of symbols (Font Awesome icons). Must contain at least as many entries as
+ * pairs to form (8 for a 4×4 grid).
  */
 const SYMBOLS = [
   'fa-apple-whole',
@@ -43,31 +43,30 @@ const SYMBOLS = [
 ];
 
 /**
- * Jeu Memory (jeu de paires).
+ * Memory game (matching-pairs game).
  *
- * Sur une grille carrée de cartes face cachée, le joueur en retourne deux : si
- * elles portent le même symbole elles restent visibles (paire trouvée), sinon
- * elles se retournent après un court délai. La partie est gagnée quand toutes les
- * paires sont trouvées. Le score récompense l'efficacité (peu de coups) et la
- * rapidité, de sorte qu'un meilleur score = une meilleure partie.
+ * On a square grid of face-down cards, the player flips two: if they bear the
+ * same symbol they stay visible (pair found), otherwise they flip back after a
+ * short delay. The game is won when all pairs are found. The score rewards
+ * efficiency (few moves) and speed, so that a higher score = a better game.
  *
- * Comme 2048 et la dactylographie, ce jeu est piloté par les événements (clics
- * souris) et n'utilise pas la boucle `requestAnimationFrame` du moteur :
- * {@link start} se contente d'activer l'état et le rendu suit chaque action.
+ * Like 2048 and the typing game, this game is event-driven (mouse clicks) and
+ * does not use the engine's `requestAnimationFrame` loop: {@link start} merely
+ * activates the state and the render follows each action.
  */
 export class MemoryGame extends GameEngine {
   private readonly gridSize: number;
   private readonly totalPairs: number;
 
   private cards: Card[] = [];
-  /** Indices des cartes actuellement retournées en attente de comparaison. */
+  /** Indices of the cards currently flipped, waiting for comparison. */
   private flippedIndices: number[] = [];
-  /** Verrou pendant l'animation de retournement d'une paire ratée. */
+  /** Lock during the flip-back animation of a missed pair. */
   private locked = false;
 
   private moves = 0;
   private matchedPairs = 0;
-  /** Horodatage du premier coup (null tant que la partie n'a pas commencé). */
+  /** Timestamp of the first move (null until the game has started). */
   private startTime: number | null = null;
   private elapsedSeconds = 0;
 
@@ -77,7 +76,7 @@ export class MemoryGame extends GameEngine {
   private highScoreElement: HTMLElement | null = null;
 
   /**
-   * @param config Configuration du jeu (taille de grille).
+   * @param config Game configuration (grid size).
    */
   constructor(config: MemoryConfig = {}) {
     super({ ...config, storageKey: 'memory-scores' });
@@ -86,8 +85,8 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Lie les éléments du DOM, câble les clics, construit le plateau mélangé puis
-   * effectue le premier rendu (cartes, classement, score).
+   * Binds the DOM elements, wires up the clicks, builds the shuffled board then
+   * performs the first render (cards, leaderboard, score).
    */
   initialize(): void {
     this.boardElement = document.getElementById('board');
@@ -107,8 +106,8 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Câble l'écouteur de clic (délégué sur le plateau) propre à ce jeu, en lieu et
-   * place de l'écoute clavier par défaut du moteur.
+   * Wires up the click listener (delegated on the board) specific to this game,
+   * instead of the engine's default keyboard listening.
    */
   protected setupEventListeners(): void {
     this.boardElement?.addEventListener('click', (event) => {
@@ -120,8 +119,8 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Active l'état de jeu sans lancer la boucle `requestAnimationFrame` : Memory
-   * est piloté par les clics (voir {@link onCardClick}).
+   * Activates the game state without starting the `requestAnimationFrame` loop:
+   * Memory is driven by clicks (see {@link onCardClick}).
    */
   start(): void {
     if (this.state.isRunning) return;
@@ -131,21 +130,21 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * No-op : aucune logique continue à mettre à jour (jeu événementiel). Imposé
-   * par le contrat de {@link GameEngine}.
+   * No-op: no continuous logic to update (event-driven game). Required by the
+   * {@link GameEngine} contract.
    */
   update(_deltaTime: number): void {}
 
   /**
-   * No-op : le jeu n'utilise pas le clavier. Imposé par le contrat de
-   * {@link GameEngine} (l'entrée passe par {@link onCardClick}).
+   * No-op: the game does not use the keyboard. Required by the {@link GameEngine}
+   * contract (input goes through {@link onCardClick}).
    */
   handleInput(_event: KeyboardEvent): void {}
 
   /**
-   * Traite un clic sur la carte d'indice donné : retourne la carte, et dès qu'une
-   * seconde carte est retournée, compare la paire (succès → cartes verrouillées,
-   * échec → retournement après un court délai).
+   * Handles a click on the card at the given index: flips the card, and as soon
+   * as a second card is flipped, compares the pair (success → cards locked,
+   * failure → flip back after a short delay).
    */
   private onCardClick(index: number): void {
     if (this.locked || this.state.isGameOver) return;
@@ -167,8 +166,8 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Compare les deux cartes retournées : si elles correspondent, les marque
-   * trouvées et crédite le score, sinon les remet face cachée après un délai.
+   * Compares the two flipped cards: if they match, marks them found and credits
+   * the score, otherwise flips them face-down again after a delay.
    */
   private checkPair(): void {
     const [first, second] = this.flippedIndices;
@@ -198,8 +197,8 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Termine la partie gagnée : ajoute le bonus d'efficacité (peu de coups) et de
-   * rapidité, puis déclenche le flux de fin de partie.
+   * Ends the won game: adds the efficiency bonus (few moves) and the speed
+   * bonus, then triggers the game-over flow.
    */
   private finishGame(): void {
     this.elapsedSeconds = this.startTime ? Math.round((Date.now() - this.startTime) / 1000) : 0;
@@ -213,8 +212,8 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Reconstruit le plateau à partir d'un mélange de paires de symboles et crée
-   * les éléments de carte (icône au dos révélée au retournement).
+   * Rebuilds the board from a shuffle of symbol pairs and creates the card
+   * elements (icon on the back revealed on flip).
    */
   private buildBoard(): void {
     if (!this.boardElement) return;
@@ -243,8 +242,8 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Reflète l'état de chaque carte sur son élément DOM (classes `is-flipped` /
-   * `is-matched`), sans reconstruire le plateau.
+   * Reflects each card's state on its DOM element (classes `is-flipped` /
+   * `is-matched`), without rebuilding the board.
    */
   render(): void {
     if (!this.boardElement) return;
@@ -259,7 +258,7 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Mélange un tableau en place (Fisher–Yates).
+   * Shuffles an array in place (Fisher–Yates).
    */
   private shuffle<T>(array: T[]): void {
     for (let i = array.length - 1; i > 0; i--) {
@@ -269,7 +268,7 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Réinitialise plateau, score et compteurs, puis effectue le rendu.
+   * Resets board, score and counters, then performs the render.
    */
   reset(): void {
     this.state.score = 0;
@@ -287,7 +286,7 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Affiche score courant, nombre de coups et meilleur score dans l'en-tête.
+   * Shows the current score, the number of moves and the high score in the header.
    */
   protected updateScoreDisplay(): void {
     if (this.scoreElement) {
@@ -302,15 +301,14 @@ export class MemoryGame extends GameEngine {
   }
 
   /**
-   * Titre du modal : la partie se termine par une victoire (toutes les paires
-   * trouvées).
+   * Modal title: the game ends with a victory (all pairs found).
    */
   protected getGameOverTitle(): string {
     return 'Bravo !';
   }
 
   /**
-   * Récapitulatif riche affiché dans `.score-details` (coups, temps, score).
+   * Rich summary shown in `.score-details` (moves, time, score).
    */
   protected getGameOverContent(): string {
     return `

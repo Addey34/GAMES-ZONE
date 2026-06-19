@@ -7,21 +7,21 @@ const projectRoot = dirname(fileURLToPath(import.meta.url));
 const srcRoot = resolve(projectRoot, 'src');
 
 // =============================================================================
-// SOURCE DE VERITE UNIQUE des jeux. Tout en decoule :
-//   - les points d'entree du build (rollupOptions.input) ;
-//   - le contexte Handlebars (`games`) qui alimente le rail (sidebar.hbs) ET le
-//     menu d'accueil (index.html) via {{#each games}}.
-// Ajouter un jeu = AJOUTER UNE LIGNE ici (puis creer src/<key>/index.html +
-// <key>-main.ts + <Key>.ts). Convention : chaque jeu vit dans src/<key>/, sa page
-// est src/<key>/index.html (servie en URL propre /<key>). `key` est le nom du
-// dossier (il sert aussi de data-nav pour l'etat actif du rail ET de nom de son
-// logo SVG : public/icons/<key>.svg).
-// `color` = token de couleur unie (base/variables.css) pour colorer l'item actif
-// du rail (et, via --title-color, le titre de la page du jeu).
-// `controls` = lignes { keys, action } affichées dans l'aide « Comment jouer »
-// (bouton « i »), rendues par shell-open via le contexte par page (voir plus bas).
-// `keys` peut contenir du HTML <kbd>…</kbd> (rendu non échappé, contenu de
-// confiance défini ici) pour afficher de vraies touches ; ex. flèches + ZQSD.
+// SINGLE SOURCE OF TRUTH for the games. Everything derives from it:
+//   - the build entry points (rollupOptions.input);
+//   - the Handlebars context (`games`) that feeds the rail (sidebar.hbs) AND the
+//     home menu (index.html) via {{#each games}}.
+// Adding a game = ADD ONE LINE here (then create src/<key>/index.html +
+// <key>-main.ts + <Key>.ts). Convention: each game lives in src/<key>/, its page
+// is src/<key>/index.html (served at the clean URL /<key>). `key` is the folder
+// name (also used as data-nav for the rail's active state AND as the name of its
+// SVG logo: public/icons/<key>.svg).
+// `color` = a solid-color token (base/variables.css) to color the rail's active
+// item (and, via --title-color, the game page title).
+// `controls` = { keys, action } lines shown in the "How to play" help
+// (the "i" button), rendered by shell-open via the per-page context (see below).
+// `keys` may contain <kbd>…</kbd> HTML (rendered unescaped, trusted content
+// defined here) to display real keys; e.g. arrows + ZQSD.
 // =============================================================================
 const games = [
   {
@@ -97,19 +97,19 @@ const games = [
 ];
 
 export default defineConfig({
-  // Les pages HTML (= points d'entrée) vivent dans src/, co-localisées avec
-  // leur code. `publicDir` et `outDir` restent à la racine du projet.
+  // The HTML pages (= entry points) live in src/, co-located with their code.
+  // `publicDir` and `outDir` stay at the project root.
   root: srcRoot,
   publicDir: resolve(projectRoot, 'public'),
   plugins: [
-    // Partials HTML partagés (head, chrome de jeu, sidebar) inclus via {{> nom }}.
-    // `games` est exposé à toutes les pages (boucle {{#each}}) ; `game` est le jeu
-    // de la page courante (déduit du chemin), utilisé par shell-open pour l'aide.
+    // Shared HTML partials (head, game chrome, sidebar) included via {{> name }}.
+    // `games` is exposed to every page ({{#each}} loop); `game` is the current
+    // page's game (derived from the path), used by shell-open for the help.
     handlebars({
       partialDirectory: resolve(srcRoot, 'partials'),
       context(pagePath: string) {
-        // Chaque page de jeu vit dans src/<key>/index.html : on retrouve le jeu
-        // courant par son segment de dossier (la home, src/index.html, n'en a pas).
+        // Each game page lives in src/<key>/index.html: we find the current game
+        // by its folder segment (the home page, src/index.html, has none).
         const path = pagePath.replace(/\\/g, '/');
         const game = games.find((g) => path.includes(`/${g.key}/`));
         return { games, game };
@@ -120,9 +120,9 @@ export default defineConfig({
     outDir: resolve(projectRoot, 'dist'),
     emptyOutDir: true,
     rollupOptions: {
-      // index + une entree par jeu, derivees de la liste `games`. Chaque page de
-      // jeu est src/<key>/index.html -> build vers dist/<key>/index.html, servie
-      // en URL propre /<key> (voir render.yaml pour la reecriture).
+      // index + one entry per game, derived from the `games` list. Each game page
+      // is src/<key>/index.html -> built to dist/<key>/index.html, served at the
+      // clean URL /<key> (see render.yaml for the rewrite).
       input: {
         main: resolve(srcRoot, 'index.html'),
         ...Object.fromEntries(games.map((g) => [g.key, resolve(srcRoot, `${g.key}/index.html`)])),

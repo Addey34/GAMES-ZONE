@@ -2,24 +2,24 @@ import { GameEngine, GameConfig } from '../shared/GameEngine.js';
 import { keyboardDirection, setupSwipe } from '../shared/input.js';
 
 /**
- * Configuration spécifique au jeu Tetris.
+ * Configuration specific to the Tetris game.
  */
 interface TetrisConfig extends GameConfig {
-  /** Nombre de colonnes du plateau (défaut : 10). */
+  /** Number of board columns (default: 10). */
   cols?: number;
-  /** Nombre de lignes du plateau (défaut : 20). */
+  /** Number of board rows (default: 20). */
   rows?: number;
-  /** Intervalle de chute initial, en ms. */
+  /** Initial drop interval, in ms. */
   baseDropInterval?: number;
-  /** Intervalle de chute minimal (vitesse max), en ms. */
+  /** Minimum drop interval (max speed), in ms. */
   minDropInterval?: number;
 }
 
-/** Identifiant d'une pièce, sert aussi de clé de couleur CSS. */
+/** Identifier of a piece, also used as a CSS color key. */
 type TetrominoType = 'I' | 'O' | 'T' | 'S' | 'Z' | 'J' | 'L';
 
 /**
- * Définition d'une pièce : sa matrice carrée (1 = case pleine) et son type.
+ * Definition of a piece: its square matrix (1 = filled cell) and its type.
  */
 interface Tetromino {
   type: TetrominoType;
@@ -27,8 +27,8 @@ interface Tetromino {
 }
 
 /**
- * Pièce en cours de chute : sa matrice (orientation courante), son type et la
- * position de son coin haut-gauche dans la grille.
+ * Piece currently falling: its matrix (current orientation), its type and the
+ * position of its top-left corner in the grid.
  */
 interface ActivePiece {
   type: TetrominoType;
@@ -38,7 +38,7 @@ interface ActivePiece {
 }
 
 /**
- * Les sept tetrominoes dans leur orientation de départ.
+ * The seven tetrominoes in their starting orientation.
  */
 const TETROMINOES: Tetromino[] = [
   {
@@ -100,39 +100,38 @@ const TETROMINOES: Tetromino[] = [
 ];
 
 /**
- * Points attribués selon le nombre de lignes effacées d'un coup (index = lignes),
- * multipliés par le niveau courant.
+ * Points awarded based on the number of lines cleared at once (index = lines),
+ * multiplied by the current level.
  */
 const LINE_SCORES = [0, 40, 100, 300, 1200];
 
-/** Décalages horizontaux tentés lors d'une rotation (« wall kicks » basiques). */
+/** Horizontal offsets tried during a rotation (basic "wall kicks"). */
 const ROTATION_KICKS = [0, -1, 1, -2, 2];
 
 /**
- * Jeu Tetris.
+ * Tetris game.
  *
- * Des pièces tombent à cadence régulière dans une grille ; le joueur les déplace
- * et les fait pivoter pour compléter des lignes, qui s'effacent et rapportent des
- * points. La vitesse de chute augmente avec le niveau (tous les 10 lignes). La
- * partie s'achève lorsqu'une nouvelle pièce ne peut plus apparaître.
+ * Pieces fall at a regular rate into a grid; the player moves and rotates them
+ * to complete lines, which clear and earn points. The drop speed increases with
+ * the level (every 10 lines). The game ends when a new piece can no longer
+ * appear.
  *
- * Le jeu réutilise la boucle `requestAnimationFrame` du moteur : la chute est
- * cadencée par un accumulateur de temps (comme Snake), indépendamment des 60 fps
- * de rendu.
+ * The game reuses the engine's `requestAnimationFrame` loop: the fall is paced
+ * by a time accumulator (like Snake), independently of the render's 60 fps.
  */
 export class TetrisGame extends GameEngine {
   private readonly cols: number;
   private readonly rows: number;
 
-  /** Grille des cases figées ; `null` = vide, sinon le type de la pièce posée. */
+  /** Grid of frozen cells; `null` = empty, otherwise the type of the placed piece. */
   private grid: (TetrominoType | null)[][] = [];
   private current: ActivePiece | null = null;
 
-  /** Cadence de chute (ms). */
+  /** Drop rate (ms). */
   private readonly baseDropInterval: number;
   private readonly minDropInterval: number;
   private dropInterval: number;
-  /** Temps accumulé depuis la dernière descente (ms). */
+  /** Time accumulated since the last descent (ms). */
   private dropAccumulator: number = 0;
 
   private lines: number = 0;
@@ -144,7 +143,7 @@ export class TetrisGame extends GameEngine {
   private highScoreElement: HTMLElement | null = null;
 
   /**
-   * @param config Configuration du jeu (dimensions, cadence de chute).
+   * @param config Game configuration (dimensions, drop rate).
    */
   constructor(config: TetrisConfig = {}) {
     super({ ...config, storageKey: 'tetris-high-scores' });
@@ -156,8 +155,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Lie les éléments du DOM, câble le clavier, prépare une grille vide avec une
-   * première pièce, puis effectue le premier rendu.
+   * Binds the DOM elements, wires up the keyboard, prepares an empty grid with a
+   * first piece, then performs the first render.
    */
   initialize(): void {
     this.boardElement = document.getElementById('board');
@@ -167,8 +166,8 @@ export class TetrisGame extends GameEngine {
 
     this.setupEventListeners();
 
-    // Contrôle tactile (mobile) : glisser ←/→ déplace, ↓ accélère la descente,
-    // ↑ ou tap fait pivoter la pièce.
+    // Touch control (mobile): swiping ←/→ moves, ↓ speeds up the descent,
+    // ↑ or tap rotates the piece.
     if (this.boardElement) {
       setupSwipe(this.boardElement, {
         onSwipe: (direction) => {
@@ -192,8 +191,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Fait descendre la pièce d'une case au rythme de `dropInterval` (et non à
-   * chaque frame). Quand elle ne peut plus descendre, la pièce est figée.
+   * Drops the piece by one cell at the `dropInterval` rate (not every frame).
+   * When it can no longer descend, the piece is frozen.
    */
   update(deltaTime: number): void {
     if (this.state.isPaused || this.state.isGameOver) return;
@@ -206,8 +205,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Fait descendre la pièce courante d'une case, ou la fige si elle a atteint le
-   * fond ou une autre pièce.
+   * Drops the current piece by one cell, or freezes it if it has reached the
+   * bottom or another piece.
    */
   private step(): void {
     if (!this.current) return;
@@ -220,7 +219,7 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Reconstruit l'affichage du plateau : cases figées et pièce courante fusionnées.
+   * Rebuilds the board display: frozen cells and current piece merged.
    */
   render(): void {
     if (!this.boardElement) return;
@@ -238,8 +237,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Construit la grille à afficher : copie des cases figées sur laquelle on
-   * estampe la pièce courante.
+   * Builds the grid to display: a copy of the frozen cells onto which the
+   * current piece is stamped.
    */
   private composeBoard(): (TetrominoType | null)[][] {
     const cells = this.grid.map((row) => [...row]);
@@ -262,8 +261,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Traduit la touche en action : déplacement latéral (gauche/droite), descente
-   * douce (bas), rotation (haut) ou chute instantanée (espace).
+   * Translates the key into an action: lateral move (left/right), soft drop
+   * (down), rotation (up) or hard drop (space).
    */
   handleInput(event: KeyboardEvent): void {
     if (this.state.isGameOver || !this.current) return;
@@ -289,7 +288,7 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Décale la pièce d'une colonne si la position cible est libre.
+   * Shifts the piece by one column if the target position is free.
    */
   private moveHorizontal(dx: number): void {
     if (!this.current) return;
@@ -299,8 +298,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Descente douce : avance la pièce d'une case, crédite un point et réarme le
-   * compteur de chute pour éviter un verrouillage immédiat.
+   * Soft drop: advances the piece by one cell, credits one point and rearms the
+   * drop counter to avoid an immediate lock.
    */
   private softDrop(): void {
     if (!this.current) return;
@@ -312,8 +311,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Chute instantanée : descend la pièce jusqu'au contact, crédite la distance
-   * parcourue, puis la fige.
+   * Hard drop: drops the piece down to contact, credits the distance traveled,
+   * then freezes it.
    */
   private hardDrop(): void {
     if (!this.current) return;
@@ -330,8 +329,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Pivote la pièce dans le sens horaire, en tentant quelques décalages latéraux
-   * ({@link ROTATION_KICKS}) si l'orientation cible heurte un mur ou une pièce.
+   * Rotates the piece clockwise, trying a few lateral offsets
+   * ({@link ROTATION_KICKS}) if the target orientation hits a wall or a piece.
    */
   private rotate(): void {
     if (!this.current) return;
@@ -347,7 +346,7 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Renvoie une copie de la matrice pivotée de 90° dans le sens horaire.
+   * Returns a copy of the matrix rotated 90° clockwise.
    */
   private rotateMatrix(matrix: number[][]): number[][] {
     const n = matrix.length;
@@ -361,9 +360,9 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Indique si une matrice peut occuper la position donnée : chaque case pleine
-   * doit rester dans les colonnes/le bas de la grille et ne pas chevaucher une
-   * case figée (le dépassement par le haut est toléré pour l'apparition).
+   * Tells whether a matrix can occupy the given position: each filled cell must
+   * stay within the columns/the bottom of the grid and not overlap a frozen
+   * cell (overflow through the top is tolerated for spawning).
    */
   private canPlace(matrix: number[][], posX: number, posY: number): boolean {
     for (let r = 0; r < matrix.length; r++) {
@@ -379,8 +378,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Fige la pièce courante dans la grille, efface les lignes complètes puis fait
-   * apparaître la pièce suivante.
+   * Freezes the current piece into the grid, clears the complete lines then
+   * spawns the next piece.
    */
   private lockPiece(): void {
     if (!this.current) return;
@@ -408,8 +407,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Efface toutes les lignes pleines et fait descendre celles du dessus.
-   * @returns Le nombre de lignes effacées.
+   * Clears all full lines and drops down the ones above.
+   * @returns The number of lines cleared.
    */
   private clearLines(): number {
     let cleared = 0;
@@ -429,8 +428,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Recalcule le niveau (un palier tous les 10 lignes) et accélère la chute en
-   * conséquence, sans descendre sous `minDropInterval`.
+   * Recomputes the level (one tier every 10 lines) and speeds up the fall
+   * accordingly, without going below `minDropInterval`.
    */
   private updateLevel(): void {
     this.level = Math.floor(this.lines / 10) + 1;
@@ -441,8 +440,8 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Fait apparaître une nouvelle pièce aléatoire, centrée en haut. Si elle ne
-   * peut pas être placée, la partie est terminée.
+   * Spawns a new random piece, centered at the top. If it cannot be placed, the
+   * game is over.
    */
   private spawnPiece(): void {
     const template = TETROMINOES[Math.floor(Math.random() * TETROMINOES.length)];
@@ -458,7 +457,7 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Crée une grille vide et fait apparaître la première pièce.
+   * Creates an empty grid and spawns the first piece.
    */
   private resetBoard(): void {
     this.grid = Array.from({ length: this.rows }, () =>
@@ -468,8 +467,7 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Réinitialise grille, score, lignes, niveau, cadence et état, puis effectue le
-   * rendu.
+   * Resets grid, score, lines, level, rate and state, then performs the render.
    */
   reset(): void {
     this.state.score = 0;
@@ -485,14 +483,14 @@ export class TetrisGame extends GameEngine {
   }
 
   /**
-   * Détails affichés dans le modal de fin : score et lignes effacées.
+   * Details shown in the game-over modal: score and lines cleared.
    */
   protected getGameOverContent(): string {
     return `<div>Score : ${this.state.score}</div><div>Lignes : ${this.lines}</div>`;
   }
 
   /**
-   * Affiche score, lignes et meilleur score dans l'en-tête du jeu.
+   * Shows score, lines and high score in the game header.
    */
   protected updateScoreDisplay(): void {
     if (this.scoreElement) {

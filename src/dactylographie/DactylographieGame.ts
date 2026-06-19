@@ -2,43 +2,43 @@ import { GameEngine, GameConfig } from '../shared/GameEngine.js';
 import { ScoreEntry } from '../shared/ScoreManager.js';
 
 /**
- * Configuration spécifique au jeu de dactylographie.
+ * Configuration specific to the typing game.
  */
 interface DactylographieConfig extends GameConfig {
-  /** Durée de la partie, en secondes. */
+  /** Game duration, in seconds. */
   timeLimit?: number;
 }
 
 /**
- * Mesures de vitesse de frappe.
+ * Typing speed metrics.
  */
 interface SpeedMetrics {
-  /** Mots par minute. */
+  /** Words per minute. */
   wpm: number;
-  /** Lettres par minute. */
+  /** Letters per minute. */
   lpm: number;
 }
 
 /**
- * Entrée de classement enrichie des métriques de frappe.
+ * Leaderboard entry enriched with the typing metrics.
  */
 interface DactylographieScoreEntry extends ScoreEntry {
-  /** Nombre total de lettres correctement tapées. */
+  /** Total number of correctly typed letters. */
   letters: number;
-  /** Mots par minute. */
+  /** Words per minute. */
   wpm: number;
-  /** Lettres par minute. */
+  /** Letters per minute. */
   lpm: number;
 }
 
 /**
- * Jeu de dactylographie.
+ * Typing game.
  *
- * Le joueur tape les mots affichés pendant un temps limité ; chaque mot correct
- * rapporte un point. À l'inverse des autres jeux, celui-ci n'utilise pas la
- * boucle `requestAnimationFrame` : `start()` est surchargé par un `setInterval`
- * d'une seconde (le chrono), et l'affichage est piloté par les événements de
- * frappe et de redimensionnement.
+ * The player types the displayed words within a time limit; each correct word
+ * earns one point. Unlike the other games, this one does not use the
+ * `requestAnimationFrame` loop: `start()` is overridden with a one-second
+ * `setInterval` (the timer), and the display is driven by typing and resize
+ * events.
  */
 export class DactylographieGame extends GameEngine {
   private words: string[] = [];
@@ -53,11 +53,11 @@ export class DactylographieGame extends GameEngine {
   private scoreDisplay: HTMLElement | null = null;
   private chronoDisplay: HTMLElement | null = null;
 
-  /** Nombre de mots suivants affichés en aperçu sous le mot courant. */
+  /** Number of upcoming words shown as a preview below the current word. */
   private static readonly UPCOMING_COUNT = 3;
 
   /**
-   * @param config Configuration du jeu (durée de la partie).
+   * @param config Game configuration (game duration).
    */
   constructor(config: DactylographieConfig = {}) {
     super({ ...config, storageKey: 'dactylographie-scores' });
@@ -66,8 +66,8 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Lie les éléments du DOM, câble les écouteurs, charge la liste de mots puis
-   * effectue le premier affichage (mots, classement, score, chrono).
+   * Binds the DOM elements, wires up the listeners, loads the word list then
+   * performs the first display (words, leaderboard, score, timer).
    */
   async initialize(): Promise<void> {
     this.wordContainer = document.getElementById('wordContainer');
@@ -84,9 +84,9 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Câble les écouteurs propres à ce jeu : frappe dans le champ de saisie
-   * (Espace valide le mot, la première frappe démarre le chrono). Les boutons du
-   * modal sont câblés par le `ModalManager` via {@link GameEngine.onGameOver}.
+   * Wires up the listeners specific to this game: typing in the input field
+   * (Space validates the word, the first keystroke starts the timer). The modal
+   * buttons are wired by the `ModalManager` via {@link GameEngine.onGameOver}.
    */
   protected setupEventListeners(): void {
     if (this.wordInput) {
@@ -107,8 +107,8 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Charge la liste de mots depuis `/words.txt`, nettoyée et mélangée. En cas
-   * d'erreur réseau, renvoie une liste de repli.
+   * Loads the word list from `/words.txt`, cleaned up and shuffled. On a network
+   * error, returns a fallback list.
    */
   private async loadWords(): Promise<string[]> {
     try {
@@ -121,13 +121,13 @@ export class DactylographieGame extends GameEngine {
           .filter((word) => word.length > 0)
       );
     } catch (error) {
-      console.error('Erreur lors du chargement des mots:', error);
+      console.error('Error while loading the words:', error);
       return ['erreur', 'chargement', 'mots'];
     }
   }
 
   /**
-   * Mélange un tableau en place (Fisher-Yates) et le renvoie.
+   * Shuffles an array in place (Fisher-Yates) and returns it.
    */
   private shuffleArray<T>(array: T[]): T[] {
     for (let i = array.length - 1; i > 0; i--) {
@@ -138,25 +138,25 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * No-op : ce jeu n'utilise pas la boucle `requestAnimationFrame` (affichage
-   * piloté par les événements). Imposé par le contrat de {@link GameEngine}.
+   * No-op: this game does not use the `requestAnimationFrame` loop (display
+   * driven by events). Required by the {@link GameEngine} contract.
    */
   update(_deltaTime: number): void {}
 
   /**
-   * No-op : voir {@link update}.
+   * No-op: see {@link update}.
    */
   render(): void {}
 
   /**
-   * No-op : les entrées sont gérées via les écouteurs de {@link setupEventListeners}.
+   * No-op: inputs are handled via the listeners in {@link setupEventListeners}.
    */
   handleInput(_event: KeyboardEvent): void {}
 
   /**
-   * Colore le mot courant lettre par lettre selon la saisie : vert si la lettre
-   * tapée est correcte, rouge sinon ; la prochaine lettre attendue est marquée
-   * `.active` (curseur visuel). Les lettres non encore tapées restent neutres.
+   * Colors the current word letter by letter according to the input: green if
+   * the typed letter is correct, red otherwise; the next expected letter is
+   * marked `.active` (visual cursor). Letters not yet typed stay neutral.
    */
   private handleInputChange(): void {
     if (!this.wordInput || !this.wordContainer) return;
@@ -177,8 +177,8 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Valide le mot saisi : compte le point et les lettres s'il est exact, avance
-   * au mot suivant, et termine la partie si la liste est épuisée.
+   * Validates the typed word: counts the point and the letters if it is exact,
+   * advances to the next word, and ends the game if the list is exhausted.
    */
   private checkWord(): void {
     if (!this.wordInput) return;
@@ -204,9 +204,9 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Réaffiche la zone de frappe en « mode focus » : le mot courant en grand (une
-   * lettre par `<span>` pour la coloration en direct), suivi d'un aperçu des
-   * prochains mots. Recolore aussitôt selon la saisie déjà présente.
+   * Re-renders the typing area in "focus mode": the current word in large size
+   * (one letter per `<span>` for live coloring), followed by a preview of the
+   * upcoming words. Immediately recolors according to the input already present.
    */
   private updateWords(): void {
     if (!this.wordContainer) return;
@@ -240,8 +240,8 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Calcule les vitesses de frappe (mots et lettres par minute) sur le temps
-   * écoulé depuis le début de la partie.
+   * Computes the typing speeds (words and letters per minute) over the time
+   * elapsed since the start of the game.
    */
   private calculateSpeed(): SpeedMetrics {
     const minutes = (this.timeLimit - this.timeLeft) / 60;
@@ -252,9 +252,9 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Démarre le chrono (décompte d'une seconde). Surcharge le `start()` du moteur
-   * pour ne pas utiliser la boucle `requestAnimationFrame`. La partie se termine
-   * à zéro seconde restante.
+   * Starts the timer (one-second countdown). Overrides the engine's `start()`
+   * so as not to use the `requestAnimationFrame` loop. The game ends at zero
+   * seconds remaining.
    */
   start(): void {
     if (this.state.isRunning) return;
@@ -274,7 +274,7 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Arrête le chrono.
+   * Stops the timer.
    */
   stop(): void {
     this.state.isRunning = false;
@@ -285,8 +285,8 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Réinitialise la partie : chrono, index de mot, score et état, et réactive le
-   * champ de saisie.
+   * Resets the game: timer, word index, score and state, and re-enables the
+   * input field.
    */
   reset(): void {
     this.stop();
@@ -311,8 +311,8 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Arrête le chrono, désactive la saisie, puis délègue au flux de fin partagé
-   * (modal Sauvegarder/Recommencer).
+   * Stops the timer, disables the input, then delegates to the shared game-over
+   * flow (Save/Restart modal).
    */
   protected onGameOver(): void {
     this.stop();
@@ -328,14 +328,14 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Titre du modal de fin.
+   * Title of the game-over modal.
    */
   protected getGameOverTitle(): string {
     return 'Partie terminée !';
   }
 
   /**
-   * Détails affichés dans le modal : mots corrects, lettres tapées et vitesses.
+   * Details shown in the modal: correct words, typed letters and speeds.
    */
   protected getGameOverContent(): string {
     const speed = this.calculateSpeed();
@@ -348,7 +348,7 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Construit l'entrée de classement enrichie des métriques de frappe.
+   * Builds the leaderboard entry enriched with the typing metrics.
    */
   protected buildScoreEntry(username: string): DactylographieScoreEntry {
     const speed = this.calculateSpeed();
@@ -363,15 +363,15 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Redémarrage par simple `reset()` (sans relancer la boucle) : la partie
-   * repart automatiquement à la prochaine frappe.
+   * Restart via a plain `reset()` (without restarting the loop): the game starts
+   * again automatically on the next keystroke.
    */
   protected restartAfterGameOver(): void {
     this.reset();
   }
 
   /**
-   * Ligne de classement enrichie d'une colonne « Vitesse » (mots/min et lettres/min).
+   * Leaderboard row enriched with a "Vitesse" column (words/min and letters/min).
    */
   protected scoreTableRow(entry: ScoreEntry): string {
     const e = entry as DactylographieScoreEntry;
@@ -379,7 +379,7 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Affiche le score courant dans l'en-tête du jeu.
+   * Shows the current score in the game header.
    */
   protected updateScoreDisplay(): void {
     if (this.scoreDisplay) {
@@ -388,7 +388,7 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Affiche le temps restant et passe le chrono en rouge sous les 10 secondes.
+   * Shows the remaining time and turns the timer red below 10 seconds.
    */
   private updateChronoDisplay(): void {
     if (this.chronoDisplay) {

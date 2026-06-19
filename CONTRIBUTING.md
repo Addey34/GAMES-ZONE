@@ -74,4 +74,3 @@ driven by the `games` array). Take inspiration from an existing game such as `sn
 - A question or an idea before coding? Open an **Issue** to discuss it.
 
 Thanks! 🙌
-</content>

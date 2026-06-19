@@ -27,4 +27,3 @@ labels: bug
 ## Captures d'écran
 
 <!-- Si possible, ajoute une image -->
-</content>

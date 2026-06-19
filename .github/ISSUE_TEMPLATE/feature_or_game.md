@@ -21,4 +21,3 @@ labels: enhancement
 
 - [ ] Oui, je proposerai une Pull Request
 - [ ] Non, c'est juste une suggestion
-</content>

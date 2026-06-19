@@ -1,20 +1,20 @@
 import { GameEngine, GameConfig } from '../shared/GameEngine.js';
 
 /**
- * Configuration spécifique au casse-brique.
+ * Configuration specific to Breakout.
  */
 interface BreakoutConfig extends GameConfig {
-  /** Nombre de rangées de briques (défaut : 5). */
+  /** Number of brick rows (default: 5). */
   brickRows?: number;
-  /** Nombre de colonnes de briques (défaut : 9). */
+  /** Number of brick columns (default: 9). */
   brickCols?: number;
-  /** Nombre de vies au départ (défaut : 3). */
+  /** Number of lives at the start (default: 3). */
   lives?: number;
 }
 
 /**
- * La balle, en coordonnées logiques du plateau (0–100 sur chaque axe). `vx`/`vy`
- * sont exprimés en unités par milliseconde.
+ * The ball, in logical board coordinates (0–100 on each axis). `vx`/`vy` are
+ * expressed in units per millisecond.
  */
 interface Ball {
   x: number;
@@ -24,7 +24,7 @@ interface Ball {
 }
 
 /**
- * Une brique : sa position/taille logiques, son état et sa rangée (couleur/points).
+ * A brick: its logical position/size, its state and its row (color/points).
  */
 interface Brick {
   x: number;
@@ -35,7 +35,7 @@ interface Brick {
   row: number;
 }
 
-/* --- Géométrie logique du plateau (carré 100×100) --- */
+/* --- Logical board geometry (100×100 square) --- */
 const BOARD = 100;
 const BALL_R = 1.6;
 const PADDLE_W = 16;
@@ -46,26 +46,26 @@ const TOP_MARGIN = 8;
 const BRICK_GAP = 1;
 const BRICK_H = 3.5;
 
-/** Vitesse de base de la balle (unités/ms) et accélération par niveau. */
+/** Base ball speed (units/ms) and acceleration per level. */
 const BASE_SPEED = 0.055;
 const SPEED_PER_LEVEL = 1.06;
-/** Vitesse de déplacement de la raquette au clavier (unités/ms). */
+/** Paddle movement speed with the keyboard (units/ms). */
 const PADDLE_SPEED = 0.12;
-/** Angle de rebond maximal sur les bords de la raquette (radians). */
+/** Maximum bounce angle on the paddle edges (radians). */
 const MAX_BOUNCE_ANGLE = (60 * Math.PI) / 180;
 
 /**
- * Casse-brique (Breakout).
+ * Breakout.
  *
- * Une balle rebondit dans un plateau carré ; le joueur déplace une raquette en
- * bas (flèches/A-D ou souris) pour la renvoyer et détruire toutes les briques.
- * L'angle de renvoi dépend du point d'impact sur la raquette. Manquer la balle
- * coûte une vie ; vider le plateau passe au niveau suivant (briques régénérées,
- * balle plus rapide). La partie s'achève quand il ne reste plus de vie.
+ * A ball bounces in a square board; the player moves a paddle at the bottom
+ * (arrows/A-D or mouse) to send it back and destroy all the bricks. The return
+ * angle depends on the impact point on the paddle. Missing the ball costs a
+ * life; clearing the board moves to the next level (bricks regenerated, faster
+ * ball). The game ends when no life is left.
  *
- * Le jeu réutilise la boucle `requestAnimationFrame` du moteur : la balle avance
- * proportionnellement au `deltaTime` (par petits pas pour éviter de traverser une
- * brique à grande vitesse), indépendamment des 60 fps de rendu.
+ * The game reuses the engine's `requestAnimationFrame` loop: the ball advances
+ * proportionally to the `deltaTime` (in small steps to avoid going through a
+ * brick at high speed), independently of the render's 60 fps.
  */
 export class BreakoutGame extends GameEngine {
   private readonly brickRows: number;
@@ -73,14 +73,14 @@ export class BreakoutGame extends GameEngine {
   private readonly maxLives: number;
 
   private ball: Ball = { x: 50, y: 80, vx: 0, vy: 0 };
-  /** Position du centre de la raquette sur l'axe x. */
+  /** Position of the paddle's center on the x axis. */
   private paddleX = 50;
   private bricks: Brick[] = [];
   private lives: number;
   private level = 1;
   private speed = BASE_SPEED;
 
-  /** Touches de déplacement maintenues. */
+  /** Movement keys held down. */
   private readonly keys = { left: false, right: false };
 
   private boardElement: HTMLElement | null = null;
@@ -94,7 +94,7 @@ export class BreakoutGame extends GameEngine {
   private highScoreElement: HTMLElement | null = null;
 
   /**
-   * @param config Configuration du jeu (rangées/colonnes de briques, vies).
+   * @param config Game configuration (brick rows/columns, lives).
    */
   constructor(config: BreakoutConfig = {}) {
     super({ ...config, storageKey: 'breakout-high-scores' });
@@ -105,8 +105,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Lie les éléments du DOM, construit le plateau (raquette, balle, briques),
-   * câble les contrôles, puis effectue le premier rendu et lance la balle.
+   * Binds the DOM elements, builds the board (paddle, ball, bricks), wires up
+   * the controls, then performs the first render and launches the ball.
    */
   initialize(): void {
     this.boardElement = document.getElementById('board');
@@ -123,9 +123,9 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Câble les contrôles propres à ce jeu : maintien des flèches/A-D (déplacement
-   * continu géré dans {@link update}) et suivi de la souris/du doigt sur le
-   * plateau, en lieu et place de l'écoute clavier ponctuelle du moteur.
+   * Wires up the controls specific to this game: holding the arrows/A-D
+   * (continuous movement handled in {@link update}) and following the mouse/finger
+   * on the board, instead of the engine's one-shot keyboard listening.
    */
   protected setupEventListeners(): void {
     document.addEventListener('keydown', (e) => this.setKey(e, true));
@@ -134,8 +134,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Met à jour l'état d'une touche de déplacement (et empêche le défilement de la
-   * page sur les flèches).
+   * Updates the state of a movement key (and prevents the page from scrolling on
+   * the arrows).
    */
   private setKey(event: KeyboardEvent, pressed: boolean): void {
     if (this.isFormFieldTarget(event.target)) return;
@@ -150,8 +150,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Place le centre de la raquette sous le pointeur (coordonnée convertie en
-   * unités logiques du plateau).
+   * Places the paddle's center under the pointer (coordinate converted into
+   * logical board units).
    */
   private onPointerMove(event: PointerEvent): void {
     if (!this.boardElement) return;
@@ -161,14 +161,14 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Imposé par le contrat de {@link GameEngine} : le déplacement clavier est géré
-   * en continu (touches maintenues) dans {@link update}, pas ici.
+   * Required by the {@link GameEngine} contract: keyboard movement is handled
+   * continuously (held keys) in {@link update}, not here.
    */
   handleInput(_event: KeyboardEvent): void {}
 
   /**
-   * Déplace la raquette selon les touches maintenues, puis fait avancer la balle
-   * (par petits pas) avec gestion des rebonds et de la perte de vie.
+   * Moves the paddle according to the held keys, then advances the ball (in
+   * small steps) with bounce and life-loss handling.
    */
   update(deltaTime: number): void {
     if (this.state.isPaused || this.state.isGameOver) return;
@@ -179,8 +179,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Déplace la raquette à gauche/droite selon les touches maintenues, bornée au
-   * plateau.
+   * Moves the paddle left/right according to the held keys, clamped to the
+   * board.
    */
   private movePaddle(dt: number): void {
     let dir = 0;
@@ -192,15 +192,15 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Borne le centre de la raquette pour qu'elle reste entièrement dans le plateau.
+   * Clamps the paddle's center so it stays entirely within the board.
    */
   private clampPaddle(x: number): number {
     return Math.max(PADDLE_W / 2, Math.min(BOARD - PADDLE_W / 2, x));
   }
 
   /**
-   * Avance la balle de `dt` ms en plusieurs sous-pas (au plus ~un rayon par pas)
-   * pour fiabiliser les collisions à grande vitesse.
+   * Advances the ball by `dt` ms in several sub-steps (at most ~one radius per
+   * step) to make collisions reliable at high speed.
    */
   private moveBall(dt: number): void {
     const distance = Math.max(Math.abs(this.ball.vx), Math.abs(this.ball.vy)) * dt;
@@ -223,8 +223,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Rebonds sur les murs gauche, droit et haut (repositionne la balle au contact
-   * et inverse la composante de vitesse concernée).
+   * Bounces off the left, right and top walls (repositions the ball on contact
+   * and inverts the relevant velocity component).
    */
   private collideWalls(): void {
     if (this.ball.x - BALL_R <= 0) {
@@ -241,8 +241,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Rebond sur la raquette : l'angle de renvoi dépend du point d'impact (centre =
-   * vertical, bords = très incliné), ce qui donne au joueur le contrôle.
+   * Bounce on the paddle: the return angle depends on the impact point (center =
+   * vertical, edges = very steep), which gives the player control.
    */
   private collidePaddle(): void {
     if (this.ball.vy <= 0) return;
@@ -262,8 +262,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Détruit la première brique touchée et fait rebondir la balle sur l'axe de
-   * plus faible pénétration (côté vs dessus/dessous).
+   * Destroys the first brick hit and bounces the ball on the axis of least
+   * penetration (side vs top/bottom).
    */
   private collideBricks(): void {
     for (let i = 0; i < this.bricks.length; i++) {
@@ -293,8 +293,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Marque une brique détruite, la masque, crédite le score (les rangées hautes
-   * valent davantage) et déclenche le niveau suivant si le plateau est vidé.
+   * Marks a brick destroyed, hides it, credits the score (top rows are worth
+   * more) and triggers the next level if the board is cleared.
    */
   private destroyBrick(index: number): void {
     const brick = this.bricks[index];
@@ -308,8 +308,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Passe au niveau suivant : régénère les briques, accélère la balle et la
-   * relance depuis la raquette.
+   * Moves to the next level: regenerates the bricks, speeds up the ball and
+   * relaunches it from the paddle.
    */
   private nextLevel(): void {
     this.level++;
@@ -319,8 +319,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Perd une vie : termine la partie s'il n'en reste plus, sinon recentre la
-   * raquette et relance la balle.
+   * Loses a life: ends the game if none are left, otherwise recenters the paddle
+   * and relaunches the ball.
    */
   private loseLife(): void {
     this.lives--;
@@ -335,8 +335,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Replace la balle au-dessus de la raquette et la lance vers le haut avec un
-   * léger angle aléatoire, à la vitesse courante.
+   * Places the ball above the paddle and launches it upward with a slight random
+   * angle, at the current speed.
    */
   private resetBall(): void {
     const angle = (Math.random() * 2 - 1) * (MAX_BOUNCE_ANGLE / 2);
@@ -349,8 +349,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Construit la structure persistante du plateau (couche de briques, raquette,
-   * balle) une seule fois, puis remplit les briques.
+   * Builds the board's persistent structure (brick layer, paddle, ball) only
+   * once, then fills the bricks.
    */
   private buildBoard(): void {
     if (!this.boardElement) return;
@@ -378,8 +378,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * (Re)crée le modèle et les éléments DOM des briques, disposées en grille
-   * centrée en haut du plateau.
+   * (Re)creates the model and the DOM elements of the bricks, laid out in a grid
+   * centered at the top of the board.
    */
   private buildBricks(): void {
     const usableWidth = BOARD - 2 * SIDE_MARGIN - (this.brickCols - 1) * BRICK_GAP;
@@ -411,8 +411,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Positionne balle et raquette d'après leur état logique (les briques sont
-   * mises à jour à leur destruction, pas à chaque frame).
+   * Positions ball and paddle according to their logical state (the bricks are
+   * updated when destroyed, not every frame).
    */
   render(): void {
     if (this.ballElement) {
@@ -425,8 +425,8 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Réinitialise briques, balle, raquette, vies, niveau, vitesse et état, puis
-   * effectue le rendu.
+   * Resets bricks, ball, paddle, lives, level, speed and state, then performs
+   * the render.
    */
   reset(): void {
     this.state.score = 0;
@@ -443,7 +443,7 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Affiche score, vies restantes et meilleur score dans l'en-tête du jeu.
+   * Shows score, remaining lives and high score in the game header.
    */
   protected updateScoreDisplay(): void {
     if (this.scoreElement) {
@@ -458,7 +458,7 @@ export class BreakoutGame extends GameEngine {
   }
 
   /**
-   * Détails affichés dans le modal de fin : score et niveau atteint.
+   * Details shown in the game-over modal: score and level reached.
    */
   protected getGameOverContent(): string {
     return `<div>Score : ${this.state.score}</div><div>Niveau : ${this.level}</div>`;

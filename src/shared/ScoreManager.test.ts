@@ -8,13 +8,13 @@ describe('ScoreManager', () => {
     localStorage.clear();
   });
 
-  it("renvoie un classement vide quand rien n'est stocké", () => {
+  it('returns an empty leaderboard when nothing is stored', () => {
     const manager = new ScoreManager(KEY);
     expect(manager.getScores()).toEqual([]);
     expect(manager.getHighScore()).toBe(0);
   });
 
-  it('trie les scores par ordre décroissant', () => {
+  it('sorts scores in descending order', () => {
     const manager = new ScoreManager(KEY);
     manager.saveScore({ username: 'A', score: 10 });
     manager.saveScore({ username: 'B', score: 30 });
@@ -24,14 +24,14 @@ describe('ScoreManager', () => {
     expect(manager.getHighScore()).toBe(30);
   });
 
-  it('ne conserve que les maxScores meilleurs', () => {
+  it('only keeps the maxScores best ones', () => {
     const manager = new ScoreManager(KEY, 3);
     [5, 50, 15, 40, 25].forEach((score, i) => manager.saveScore({ username: `J${i}`, score }));
 
     expect(manager.getScores().map((s) => s.score)).toEqual([50, 40, 25]);
   });
 
-  it('utilise une clé de stockage distincte par jeu', () => {
+  it('uses a distinct storage key per game', () => {
     const snake = new ScoreManager('snake');
     const tetris = new ScoreManager('tetris');
     snake.saveScore({ username: 'A', score: 100 });
@@ -41,29 +41,29 @@ describe('ScoreManager', () => {
   });
 
   describe('isHighScore', () => {
-    it("est vrai tant que le classement n'est pas plein", () => {
+    it('is true as long as the leaderboard is not full', () => {
       const manager = new ScoreManager(KEY, 2);
       manager.saveScore({ username: 'A', score: 10 });
       expect(manager.isHighScore(1)).toBe(true);
     });
 
-    it('compare à la dernière entrée quand le classement est plein', () => {
+    it('compares to the last entry when the leaderboard is full', () => {
       const manager = new ScoreManager(KEY, 2);
       manager.saveScore({ username: 'A', score: 10 });
       manager.saveScore({ username: 'B', score: 20 });
 
-      expect(manager.isHighScore(15)).toBe(true); // bat le 10
-      expect(manager.isHighScore(5)).toBe(false); // ne bat pas le 10
+      expect(manager.isHighScore(15)).toBe(true); // beats the 10
+      expect(manager.isHighScore(5)).toBe(false); // does not beat the 10
     });
   });
 
-  it('renvoie un classement vide si le contenu stocké est illisible', () => {
+  it('returns an empty leaderboard if the stored content is unreadable', () => {
     localStorage.setItem(KEY, 'pas-du-json{');
     const manager = new ScoreManager(KEY);
     expect(manager.getScores()).toEqual([]);
   });
 
-  it('réhydrate les dates en objets Date', () => {
+  it('rehydrates dates into Date objects', () => {
     const manager = new ScoreManager(KEY);
     manager.saveScore({
       username: 'A',
@@ -73,7 +73,7 @@ describe('ScoreManager', () => {
     expect(manager.getScores()[0].date).toBeInstanceOf(Date);
   });
 
-  it('efface le classement', () => {
+  it('clears the leaderboard', () => {
     const manager = new ScoreManager(KEY);
     manager.saveScore({ username: 'A', score: 10 });
     manager.clearScores();

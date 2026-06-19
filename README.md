@@ -41,15 +41,15 @@ npm run dev      # dev server on http://localhost:3000
 
 ## Scripts
 
-| Command              | Description                                            |
-| -------------------- | ------------------------------------------------------ |
-| `npm run dev`        | Development server (hot reload)                         |
-| `npm run build`      | Type-check then production build → `dist/`              |
-| `npm run preview`    | Serve the production build locally                      |
-| `npm run type-check` | Check types without building (`tsc --noEmit`)          |
-| `npm test`           | Run unit tests (Vitest)                                 |
-| `npm run lint`       | Analyze the code (ESLint); `lint:fix` auto-fixes        |
-| `npm run format`     | Format the code (Prettier); `format:check` verifies     |
+| Command              | Description                                         |
+| -------------------- | --------------------------------------------------- |
+| `npm run dev`        | Development server (hot reload)                     |
+| `npm run build`      | Type-check then production build → `dist/`          |
+| `npm run preview`    | Serve the production build locally                  |
+| `npm run type-check` | Check types without building (`tsc --noEmit`)       |
+| `npm test`           | Run unit tests (Vitest)                             |
+| `npm run lint`       | Analyze the code (ESLint); `lint:fix` auto-fixes    |
+| `npm run format`     | Format the code (Prettier); `format:check` verifies |
 
 ## Project structure
 
@@ -84,4 +84,3 @@ The game then appears automatically in the navigation and on the home page.
 Contributions are welcome! The project works through **Pull Requests**.
 See the [CONTRIBUTING.md](CONTRIBUTING.md) guide for the detailed steps
 (fork, branch, checks, adding a game).
-</content>

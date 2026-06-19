@@ -1,31 +1,31 @@
 /**
- * Une entrée du classement d'un jeu.
+ * One entry of a game's leaderboard.
  */
 export interface ScoreEntry {
-  /** Nom saisi par le joueur. */
+  /** Name entered by the player. */
   username: string;
-  /** Score réalisé. */
+  /** Score achieved. */
   score: number;
-  /** Date de réalisation du score (défaut : maintenant). */
+  /** Date the score was achieved (default: now). */
   date?: Date;
-  /** Données spécifiques au jeu (ex. vitesse de frappe pour Dactylographie). */
+  /** Game-specific data (e.g. typing speed for Dactylographie). */
   additionalData?: Record<string, number>;
 }
 
 /**
- * Gère la persistance d'un classement (top-N) dans `localStorage`.
+ * Handles the persistence of a leaderboard (top-N) in `localStorage`.
  *
- * Chaque jeu instancie son propre `ScoreManager` avec une clé de stockage
- * distincte. Les scores sont conservés triés par ordre décroissant et limités
- * aux `maxScores` meilleurs.
+ * Each game instantiates its own `ScoreManager` with a distinct storage key.
+ * Scores are kept sorted in descending order and limited to the `maxScores`
+ * best ones.
  */
 export class ScoreManager {
   private storageKey: string;
   private maxScores: number;
 
   /**
-   * @param storageKey Clé `localStorage` propre au jeu.
-   * @param maxScores Nombre maximal d'entrées conservées au classement.
+   * @param storageKey `localStorage` key specific to the game.
+   * @param maxScores Maximum number of entries kept in the leaderboard.
    */
   constructor(storageKey: string, maxScores: number = 10) {
     this.storageKey = storageKey;
@@ -33,8 +33,8 @@ export class ScoreManager {
   }
 
   /**
-   * Ajoute une entrée au classement, le retrie par score décroissant et ne
-   * conserve que les `maxScores` meilleurs avant de persister.
+   * Adds an entry to the leaderboard, re-sorts it by descending score and only
+   * keeps the `maxScores` best ones before persisting.
    */
   saveScore(entry: ScoreEntry): void {
     const scores = this.getScores();
@@ -51,8 +51,8 @@ export class ScoreManager {
   }
 
   /**
-   * Lit le classement persisté. Renvoie un tableau vide si aucune donnée n'est
-   * stockée ou si le contenu est illisible.
+   * Reads the persisted leaderboard. Returns an empty array if no data is
+   * stored or if the content is unreadable.
    */
   getScores(): ScoreEntry[] {
     const stored = localStorage.getItem(this.storageKey);
@@ -60,8 +60,8 @@ export class ScoreManager {
 
     try {
       const parsed: unknown = JSON.parse(stored);
-      // Le contenu peut être un JSON valide mais pas un tableau (donnée corrompue
-      // ou format obsolète) : on retombe alors sur un classement vide.
+      // The content may be valid JSON but not an array (corrupted data or
+      // outdated format): in that case we fall back to an empty leaderboard.
       if (!Array.isArray(parsed)) return [];
       return parsed.map((raw): ScoreEntry => {
         const entry = raw as ScoreEntry;
@@ -76,7 +76,7 @@ export class ScoreManager {
   }
 
   /**
-   * Renvoie le meilleur score enregistré (0 si le classement est vide).
+   * Returns the best recorded score (0 if the leaderboard is empty).
    */
   getHighScore(): number {
     const scores = this.getScores();
@@ -84,15 +84,15 @@ export class ScoreManager {
   }
 
   /**
-   * Efface intégralement le classement persisté.
+   * Fully clears the persisted leaderboard.
    */
   clearScores(): void {
     localStorage.removeItem(this.storageKey);
   }
 
   /**
-   * Indique si un score mérite d'entrer au classement : vrai tant que le
-   * classement n'est pas plein, ou si le score dépasse la dernière entrée.
+   * Tells whether a score deserves to make the leaderboard: true as long as the
+   * leaderboard is not full, or if the score beats the last entry.
    */
   isHighScore(score: number): boolean {
     const scores = this.getScores();

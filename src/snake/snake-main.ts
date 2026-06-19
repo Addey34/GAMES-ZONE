@@ -1,7 +1,7 @@
 import { SnakeGame } from './SnakeGame.js';
 import { bootstrapGame } from '../shared/bootstrap.js';
 
-/** Point d'entrée de la page Snake : instancie et démarre le jeu. */
+/** Entry point of the Snake page: instantiates and starts the game. */
 bootstrapGame(
   'snakeGame',
   () =>

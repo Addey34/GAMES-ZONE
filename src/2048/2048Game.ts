@@ -2,42 +2,41 @@ import { GameEngine, GameConfig } from '../shared/GameEngine.js';
 import { Direction, keyboardDirection, setupSwipe } from '../shared/input.js';
 
 /**
- * Configuration spécifique au jeu 2048.
+ * Configuration specific to the 2048 game.
  */
 interface Game2048Config extends GameConfig {
-  /** Nombre de cases par côté de la grille (défaut : 4). */
+  /** Number of cells per grid side (default: 4). */
   gridSize?: number;
 }
 
 /**
- * Résultat du glissement d'une ligne vers la gauche.
+ * Result of sliding a row to the left.
  */
 interface SlideResult {
-  /** Ligne après compression et fusions. */
+  /** Row after compression and merges. */
   row: number[];
-  /** Points gagnés par les fusions de cette ligne. */
+  /** Points earned by this row's merges. */
   gained: number;
-  /** La ligne a-t-elle changé par rapport à l'originale. */
+  /** Whether the row changed compared to the original. */
   changed: boolean;
 }
 
 /**
- * Jeu 2048.
+ * 2048 game.
  *
- * Sur une grille carrée, les flèches font glisser toutes les tuiles dans une
- * direction ; deux tuiles de même valeur qui se rencontrent fusionnent en leur
- * somme (une seule fusion par tuile et par coup) et créditent cette somme au
- * score. Après chaque coup valide, une nouvelle tuile (2 à 90 %, 4 à 10 %)
- * apparaît sur une case libre. La partie s'achève quand plus aucun coup n'est
- * possible.
+ * On a square grid, the arrows slide all the tiles in one direction; two tiles
+ * of the same value that meet merge into their sum (a single merge per tile per
+ * move) and credit that sum to the score. After each valid move, a new tile (2
+ * at 90%, 4 at 10%) appears on a free cell. The game ends when no move is
+ * possible anymore.
  *
- * Comme la dactylographie, ce jeu est piloté par les événements et n'utilise pas
- * la boucle `requestAnimationFrame` du moteur : {@link start} se contente
- * d'activer l'état, et le rendu est déclenché après chaque coup.
+ * Like the typing game, this game is event-driven and does not use the engine's
+ * `requestAnimationFrame` loop: {@link start} merely activates the state, and the
+ * render is triggered after each move.
  */
 export class Game2048 extends GameEngine {
   private readonly gridSize: number;
-  /** Grille de valeurs ; 0 = case vide, sinon une puissance de deux. */
+  /** Grid of values; 0 = empty cell, otherwise a power of two. */
   private board: number[][] = [];
 
   private boardElement: HTMLElement | null = null;
@@ -45,7 +44,7 @@ export class Game2048 extends GameEngine {
   private highScoreElement: HTMLElement | null = null;
 
   /**
-   * @param config Configuration du jeu (taille de grille).
+   * @param config Game configuration (grid size).
    */
   constructor(config: Game2048Config = {}) {
     super({ ...config, storageKey: '2048-high-scores' });
@@ -53,8 +52,8 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Lie les éléments du DOM, câble le clavier, initialise la grille avec deux
-   * tuiles puis effectue le premier rendu.
+   * Binds the DOM elements, wires up the keyboard, initializes the grid with two
+   * tiles then performs the first render.
    */
   initialize(): void {
     this.boardElement = document.getElementById('board');
@@ -63,7 +62,7 @@ export class Game2048 extends GameEngine {
 
     this.setupEventListeners();
 
-    // Contrôle tactile (mobile) : glisser sur la grille joue le coup.
+    // Touch control (mobile): swiping on the grid plays the move.
     if (this.boardElement) {
       setupSwipe(this.boardElement, {
         onSwipe: (direction) => this.applyMove(direction),
@@ -77,8 +76,8 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Active l'état de jeu sans lancer la boucle `requestAnimationFrame` : 2048 est
-   * piloté par les événements clavier (voir {@link handleInput}).
+   * Activates the game state without starting the `requestAnimationFrame` loop:
+   * 2048 is driven by keyboard events (see {@link handleInput}).
    */
   start(): void {
     if (this.state.isRunning) return;
@@ -88,15 +87,15 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * No-op : aucune logique continue à mettre à jour (jeu événementiel). Imposé
-   * par le contrat de {@link GameEngine}.
+   * No-op: no continuous logic to update (event-driven game). Required by the
+   * {@link GameEngine} contract.
    */
   update(_deltaTime: number): void {}
 
   /**
-   * Reconstruit l'affichage de la grille à partir de {@link board}. Chaque tuile
-   * porte une classe `tile--<valeur>` (et un modificateur selon son nombre de
-   * chiffres) pour son style.
+   * Rebuilds the grid display from {@link board}. Each tile carries a
+   * `tile--<value>` class (and a modifier based on its number of digits) for its
+   * styling.
    */
   render(): void {
     if (!this.boardElement) return;
@@ -114,23 +113,22 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Classe CSS d'une tuile selon sa valeur et son nombre de chiffres (les grands
-   * nombres réduisent la taille de police).
+   * CSS class of a tile based on its value and its number of digits (large
+   * numbers shrink the font size).
    */
   private tileClass(value: number): string {
     if (value === 0) return 'tile';
 
     const digits = value.toString().length;
     const sizeModifier = digits >= 4 ? ' tile--4digits' : digits === 3 ? ' tile--3digits' : '';
-    // Au-delà de 2048, palette unique (pas de couleur dédiée par valeur).
+    // Beyond 2048, single palette (no dedicated color per value).
     const colorClass = value <= 2048 ? `tile--${value}` : 'tile--super';
     return `tile ${colorClass}${sizeModifier}`;
   }
 
   /**
-   * Applique le coup correspondant à la touche pressée. Si la grille change, fait
-   * apparaître une nouvelle tuile, met à jour l'affichage et vérifie la fin de
-   * partie.
+   * Applies the move matching the pressed key. If the grid changes, spawns a new
+   * tile, updates the display and checks for game over.
    */
   handleInput(event: KeyboardEvent): void {
     const direction = keyboardDirection(event);
@@ -141,9 +139,8 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Joue un coup dans la direction donnée (clavier ou swipe). Si la grille
-   * change, fait apparaître une tuile, rafraîchit l'affichage et vérifie la fin
-   * de partie.
+   * Plays a move in the given direction (keyboard or swipe). If the grid
+   * changes, spawns a tile, refreshes the display and checks for game over.
    */
   private applyMove(direction: Direction): void {
     if (this.state.isGameOver) return;
@@ -158,13 +155,13 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Fait glisser et fusionne toutes les tuiles dans la direction donnée, en
-   * créditant le score des fusions.
+   * Slides and merges all the tiles in the given direction, crediting the score
+   * with the merges.
    *
-   * Toutes les directions se ramènent à un glissement vers la gauche par
-   * rotation/réflexion de la grille, suivi de la transformation inverse.
+   * All directions reduce to a leftward slide via rotation/reflection of the
+   * grid, followed by the inverse transformation.
    *
-   * @returns `true` si la grille a changé (coup valide).
+   * @returns `true` if the grid changed (valid move).
    */
   private move(direction: Direction): boolean {
     const rotated = this.toLeftOriented(this.board, direction);
@@ -187,8 +184,8 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Oriente la grille pour qu'un glissement « vers la gauche » corresponde à la
-   * direction demandée.
+   * Orients the grid so that a "leftward" slide corresponds to the requested
+   * direction.
    */
   private toLeftOriented(board: number[][], direction: Direction): number[][] {
     switch (direction) {
@@ -204,8 +201,8 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Transformation inverse de {@link toLeftOriented} : ramène la grille glissée
-   * dans son orientation d'origine.
+   * Inverse transformation of {@link toLeftOriented}: brings the slid grid back
+   * to its original orientation.
    */
   private fromLeftOriented(board: number[][], direction: Direction): number[][] {
     switch (direction) {
@@ -221,8 +218,8 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Compresse une ligne vers la gauche puis fusionne les tuiles égales adjacentes
-   * (une fusion par tuile), et complète à droite avec des cases vides.
+   * Compresses a row to the left then merges equal adjacent tiles (one merge per
+   * tile), and pads on the right with empty cells.
    */
   private slideRow(row: number[]): SlideResult {
     const nonZero = row.filter((value) => value !== 0);
@@ -247,22 +244,22 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Transpose la grille (échange lignes et colonnes).
+   * Transposes the grid (swaps rows and columns).
    */
   private transpose(board: number[][]): number[][] {
     return board[0].map((_, col) => board.map((row) => row[col]));
   }
 
   /**
-   * Renvoie une copie de la grille dont chaque ligne est inversée.
+   * Returns a copy of the grid with each row reversed.
    */
   private reverseRows(board: number[][]): number[][] {
     return board.map((row) => [...row].reverse());
   }
 
   /**
-   * Fait apparaître une tuile (2 à 90 %, 4 à 10 %) sur une case libre choisie au
-   * hasard. Sans effet si la grille est pleine.
+   * Spawns a tile (2 at 90%, 4 at 10%) on a randomly chosen free cell. No-op if
+   * the grid is full.
    */
   private spawnTile(): void {
     const empty: Array<{ x: number; y: number }> = [];
@@ -279,8 +276,8 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Indique s'il reste un coup possible : une case libre, ou deux tuiles égales
-   * adjacentes (horizontalement ou verticalement).
+   * Tells whether a move is still possible: a free cell, or two equal adjacent
+   * tiles (horizontally or vertically).
    */
   private canMove(): boolean {
     for (let y = 0; y < this.gridSize; y++) {
@@ -295,7 +292,7 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Crée une grille vide et y place les deux tuiles de départ.
+   * Creates an empty grid and places the two starting tiles on it.
    */
   private resetBoard(): void {
     this.board = Array.from({ length: this.gridSize }, () =>
@@ -306,7 +303,7 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Réinitialise la grille, le score et l'état, puis effectue le rendu.
+   * Resets the grid, the score and the state, then performs the render.
    */
   reset(): void {
     this.state.score = 0;
@@ -318,7 +315,7 @@ export class Game2048 extends GameEngine {
   }
 
   /**
-   * Affiche le score courant et le meilleur score dans l'en-tête du jeu.
+   * Shows the current score and the high score in the game header.
    */
   protected updateScoreDisplay(): void {
     if (this.scoreElement) {

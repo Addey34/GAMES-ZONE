@@ -24,4 +24,3 @@
 ## Captures d'écran (si pertinent)
 
 <!-- Glisse une image ou un GIF du jeu / de la fonctionnalité -->
-</content>

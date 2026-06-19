@@ -1,68 +1,68 @@
 /**
- * Options d'affichage du modal de fin de partie.
+ * Display options for the game-over modal.
  */
 export interface ModalOptions {
-  /** Titre affiché en tête du modal. */
+  /** Title shown at the top of the modal. */
   title: string;
-  /** HTML injecté dans `.score-details` (prioritaire sur `showScore`). */
+  /** HTML injected into `.score-details` (takes precedence over `showScore`). */
   content?: string;
-  /** Affiche le champ de saisie du nom du joueur. */
+  /** Shows the player name input field. */
   showUsernameInput?: boolean;
-  /** Affiche un score brut « Score: N » si aucun `content` n'est fourni. */
+  /** Shows a plain score "Score: N" if no `content` is provided. */
   showScore?: boolean;
-  /** Valeur du score affichée quand `showScore` est actif. */
+  /** Score value shown when `showScore` is active. */
   score?: number;
-  /** Boutons d'action à câbler dans le modal (Sauvegarder, Recommencer…). */
+  /** Action buttons to wire into the modal (Save, Restart…). */
   buttons?: ModalButton[];
 }
 
 /**
- * Description d'un bouton d'action du modal.
+ * Description of a modal action button.
  */
 export interface ModalButton {
-  /** Libellé du bouton. */
+  /** Button label. */
   text: string;
-  /** Applique le style principal (`btn--primary`) plutôt que secondaire. */
+  /** Applies the primary style (`btn--primary`) rather than secondary. */
   primary?: boolean;
-  /** Callback exécuté au clic. */
+  /** Callback run on click. */
   onClick: () => void;
 }
 
 /**
- * Pilote le modal de fin de partie.
+ * Drives the game-over modal.
  *
- * Le manager se lie à des éléments DOM aux ids/classes fixes attendus dans le
+ * The manager binds to DOM elements with fixed ids/classes expected in the
  * HTML (`.modal-content`, `h2`, `.score-details`, `#usernameInput`,
- * `.button-group`). Le contenu (titre, détails, boutons) est injecté à
- * l'exécution via {@link show}.
+ * `.button-group`). The content (title, details, buttons) is injected at
+ * runtime via {@link show}.
  */
 export class ModalManager {
   private modalElement: HTMLElement | null = null;
   private modalContentElement: HTMLElement | null = null;
   private usernameInputElement: HTMLInputElement | null = null;
-  /** Écouteur clavier actif tant que le modal est affiché (Entrée/Échap/Tab). */
+  /** Keyboard listener active while the modal is shown (Enter/Escape/Tab). */
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
-  /** Élément qui avait le focus avant l'ouverture, restauré à la fermeture. */
+  /** Element that had focus before opening, restored on close. */
   private previouslyFocused: HTMLElement | null = null;
 
   /**
-   * @param modalId id de l'élément racine du modal dans le HTML.
+   * @param modalId id of the modal root element in the HTML.
    */
   constructor(modalId: string) {
     this.modalElement = document.getElementById(modalId);
     if (this.modalElement) {
       this.modalContentElement = this.modalElement.querySelector('.modal-content');
       this.usernameInputElement = document.getElementById('usernameInput') as HTMLInputElement;
-      // Sémantique de fenêtre modale pour les lecteurs d'écran.
+      // Modal window semantics for screen readers.
       this.modalElement.setAttribute('role', 'dialog');
       this.modalElement.setAttribute('aria-modal', 'true');
     }
   }
 
   /**
-   * Remplit puis affiche le modal : titre, contenu (HTML riche ou score brut),
-   * champ de nom optionnel et boutons d'action. Donne le focus au champ de nom
-   * lorsqu'il est visible.
+   * Fills then shows the modal: title, content (rich HTML or plain score),
+   * optional name field and action buttons. Focuses the name field when it is
+   * visible.
    */
   show(options: ModalOptions): void {
     if (!this.modalElement || !this.modalContentElement) return;
@@ -70,7 +70,7 @@ export class ModalManager {
     const titleElement = this.modalContentElement.querySelector('h2');
     if (titleElement) {
       titleElement.textContent = options.title;
-      // Lie le titre au dialogue pour les lecteurs d'écran (aria-labelledby).
+      // Link the title to the dialog for screen readers (aria-labelledby).
       if (!titleElement.id) titleElement.id = 'modalTitle';
       this.modalElement.setAttribute('aria-labelledby', titleElement.id);
     }
@@ -97,8 +97,8 @@ export class ModalManager {
 
     this.modalElement.style.display = 'block';
 
-    // Mémorise le focus courant pour le rendre à la fermeture, puis place le
-    // focus dans le modal : le champ de nom s'il est visible, sinon le 1er bouton.
+    // Remember the current focus to restore it on close, then place the focus
+    // inside the modal: the name field if visible, otherwise the 1st button.
     this.previouslyFocused = document.activeElement as HTMLElement | null;
     if (options.showUsernameInput) {
       this.usernameInputElement?.focus();
@@ -110,8 +110,8 @@ export class ModalManager {
   }
 
   /**
-   * Masque le modal, détache l'écouteur clavier et rend le focus à l'élément
-   * qui l'avait avant l'ouverture.
+   * Hides the modal, detaches the keyboard listener and returns focus to the
+   * element that had it before opening.
    */
   hide(): void {
     if (!this.modalElement) return;
@@ -122,8 +122,8 @@ export class ModalManager {
   }
 
   /**
-   * Liste les éléments focusables du modal (champ de nom + boutons), dans
-   * l'ordre du DOM. Sert au focus initial et au piège de tabulation.
+   * Lists the modal's focusable elements (name field + buttons), in DOM order.
+   * Used for the initial focus and the tab trap.
    */
   private getFocusable(): HTMLElement[] {
     if (!this.modalContentElement) return [];
@@ -135,10 +135,10 @@ export class ModalManager {
   }
 
   /**
-   * Câble les raccourcis clavier le temps que le modal est ouvert :
-   *  - Entrée → bouton principal (Sauvegarder) ;
-   *  - Échap  → bouton secondaire (Recommencer), sinon simple fermeture ;
-   *  - Tab    → reste piégé dans le modal (cycle sur les éléments focusables).
+   * Wires up keyboard shortcuts while the modal is open:
+   *  - Enter  → primary button (Save);
+   *  - Escape → secondary button (Restart), otherwise just close;
+   *  - Tab    → stays trapped inside the modal (cycles over focusable elements).
    */
   private bindKeyboard(): void {
     if (!this.modalContentElement) return;
@@ -176,7 +176,7 @@ export class ModalManager {
     document.addEventListener('keydown', this.keydownHandler, true);
   }
 
-  /** Détache l'écouteur clavier du modal s'il est actif. */
+  /** Detaches the modal's keyboard listener if it is active. */
   private unbindKeyboard(): void {
     if (this.keydownHandler) {
       document.removeEventListener('keydown', this.keydownHandler, true);
@@ -185,21 +185,21 @@ export class ModalManager {
   }
 
   /**
-   * Renvoie le nom saisi par le joueur, espaces superflus retirés (`''` si vide).
+   * Returns the name entered by the player, trimmed of extra spaces (`''` if empty).
    */
   getUsername(): string {
     return this.usernameInputElement?.value.trim() || '';
   }
 
   /**
-   * Indique si le modal est actuellement affiché.
+   * Tells whether the modal is currently shown.
    */
   isVisible(): boolean {
     return this.modalElement?.style.display === 'block';
   }
 
   /**
-   * Remplace les boutons du modal par ceux fournis et câble leurs callbacks.
+   * Replaces the modal's buttons with the provided ones and wires their callbacks.
    */
   setupButtonHandlers(buttons: ModalButton[]): void {
     if (!this.modalContentElement) return;

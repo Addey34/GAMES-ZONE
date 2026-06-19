@@ -1,24 +1,24 @@
 import { GameEngine } from './GameEngine.js';
 
 /**
- * Options de démarrage d'un jeu.
+ * Startup options for a game.
  */
 interface BootstrapOptions {
-  /** Démarrer la boucle après l'initialisation (défaut : true). */
+  /** Start the loop after initialization (default: true). */
   autoStart?: boolean;
 }
 
 /**
- * Démarrage commun à tous les jeux.
+ * Startup shared by all games.
  *
- * Au `DOMContentLoaded`, instancie le jeu via `factory`, l'initialise
- * (`initialize()` peut être asynchrone), lance la boucle (sauf si
- * `autoStart: false`), puis expose l'instance sur `window[globalName]` pour le
- * débogage.
+ * On `DOMContentLoaded`, instantiates the game via `factory`, initializes it
+ * (`initialize()` may be asynchronous), starts the loop (unless
+ * `autoStart: false`), then exposes the instance on `window[globalName]` for
+ * debugging.
  *
- * @param globalName Nom sous lequel exposer l'instance sur `window`.
- * @param factory Fabrique créant l'instance du jeu.
- * @param options Options de démarrage.
+ * @param globalName Name under which to expose the instance on `window`.
+ * @param factory Factory creating the game instance.
+ * @param options Startup options.
  */
 export function bootstrapGame(
   globalName: string,

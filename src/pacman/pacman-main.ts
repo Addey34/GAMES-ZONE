@@ -1,5 +1,5 @@
 import { PacmanGame } from './PacmanGame.js';
 import { bootstrapGame } from '../shared/bootstrap.js';
 
-/** Point d'entrée de la page Pac-Man : instancie et démarre le jeu. */
+/** Entry point of the Pac-Man page: instantiates and starts the game. */
 bootstrapGame('pacmanGame', () => new PacmanGame({ gameSpeed: 200 }));

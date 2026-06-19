@@ -1,10 +1,10 @@
 /**
- * Une des quatre directions cardinales utilisées par les jeux à grille.
+ * One of the four cardinal directions used by grid games.
  */
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
 /**
- * Vecteur 2D entier (coordonnées de grille).
+ * Integer 2D vector (grid coordinates).
  */
 export interface Vec2 {
   x: number;
@@ -12,8 +12,8 @@ export interface Vec2 {
 }
 
 /**
- * Déplacement unitaire associé à chaque direction (origine en haut à gauche,
- * `y` croissant vers le bas).
+ * Unit movement associated with each direction (origin at the top left,
+ * `y` increasing downward).
  */
 export const DIRECTION_DELTAS: Record<Direction, Vec2> = {
   up: { x: 0, y: -1 },
@@ -23,7 +23,7 @@ export const DIRECTION_DELTAS: Record<Direction, Vec2> = {
 };
 
 /**
- * Direction opposée à une direction donnée (utile pour interdire les demi-tours).
+ * Direction opposite to a given direction (useful to forbid U-turns).
  */
 export const OPPOSITE_DIRECTION: Record<Direction, Direction> = {
   up: 'down',
@@ -33,14 +33,14 @@ export const OPPOSITE_DIRECTION: Record<Direction, Direction> = {
 };
 
 /**
- * Table de correspondance touche clavier → direction (flèches et ZQSD/WASD).
+ * Lookup table from keyboard key → direction (arrows and ZQSD/WASD).
  */
 const KEY_TO_DIRECTION: Record<string, Direction> = {
   ArrowUp: 'up',
   ArrowDown: 'down',
   ArrowLeft: 'left',
   ArrowRight: 'right',
-  // WASD (clavier QWERTY) et ZQSD (clavier AZERTY) : mêmes directions.
+  // WASD (QWERTY keyboard) and ZQSD (AZERTY keyboard): same directions.
   w: 'up',
   s: 'down',
   a: 'left',
@@ -50,38 +50,38 @@ const KEY_TO_DIRECTION: Record<string, Direction> = {
 };
 
 /**
- * Convertit un événement clavier en direction.
+ * Converts a keyboard event into a direction.
  *
- * @returns La direction correspondante, ou `null` si la touche n'en est pas une.
+ * @returns The matching direction, or `null` if the key is not one.
  */
 export function keyboardDirection(event: KeyboardEvent): Direction | null {
-  // event.key peut être en majuscule (Shift/Verr.Maj) : on normalise en minuscule
-  // pour que W/Z/Q/S/A/D fonctionnent aussi.
+  // event.key may be uppercase (Shift/Caps Lock): we normalize to lowercase
+  // so that W/Z/Q/S/A/D work too.
   return KEY_TO_DIRECTION[event.key] ?? KEY_TO_DIRECTION[event.key.toLowerCase()] ?? null;
 }
 
 /**
- * Options du détecteur de swipe tactile.
+ * Options for the touch swipe detector.
  */
 export interface SwipeOptions {
-  /** Déplacement minimal (px) pour qu'un geste compte comme swipe (défaut : 30). */
+  /** Minimum movement (px) for a gesture to count as a swipe (default: 30). */
   threshold?: number;
-  /** Appelé avec la direction d'un swipe validé. */
+  /** Called with the direction of a validated swipe. */
   onSwipe: (direction: Direction) => void;
-  /** Appelé pour un simple tap (déplacement sous le seuil), si fourni. */
+  /** Called for a simple tap (movement below the threshold), if provided. */
   onTap?: () => void;
 }
 
 /**
- * Câble la détection de swipe (et de tap) sur un élément, pour rendre les jeux à
- * directions jouables au doigt sur mobile.
+ * Wires up swipe (and tap) detection on an element, to make direction-based
+ * games playable by finger on mobile.
  *
- * Unifie souris et tactile via les Pointer Events ; pendant le geste, le
- * défilement/zoom natif du navigateur est neutralisé sur la cible
- * (`touch-action: none`) et le pointeur est capturé pour recevoir le relâchement
- * même si le doigt quitte l'élément.
+ * Unifies mouse and touch via Pointer Events; during the gesture, the browser's
+ * native scroll/zoom is neutralized on the target (`touch-action: none`) and the
+ * pointer is captured to receive the release even if the finger leaves the
+ * element.
  *
- * @returns Fonction de nettoyage retirant les écouteurs et restaurant le style.
+ * @returns Cleanup function removing the listeners and restoring the style.
  */
 export function setupSwipe(target: HTMLElement, options: SwipeOptions): () => void {
   const threshold = options.threshold ?? 30;
@@ -99,7 +99,7 @@ export function setupSwipe(target: HTMLElement, options: SwipeOptions): () => vo
     try {
       target.setPointerCapture(event.pointerId);
     } catch {
-      // Capture indisponible (pointeur déjà relâché) : sans gravité.
+      // Capture unavailable (pointer already released): harmless.
     }
   };
 

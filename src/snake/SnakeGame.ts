@@ -8,21 +8,21 @@ import {
 } from '../shared/input.js';
 
 /**
- * Configuration spécifique au jeu Snake.
+ * Configuration specific to the Snake game.
  */
 interface SnakeConfig extends GameConfig {
-  /** Nombre de cases par côté. Une grille plus grande = jeu plus facile. */
+  /** Number of cells per side. A larger grid = easier game. */
   gridSize?: number;
-  /** Intervalle initial entre deux déplacements, en ms. */
+  /** Initial interval between two moves, in ms. */
   baseSpeed?: number;
-  /** Intervalle minimal (vitesse max) atteint en accélérant, en ms. */
+  /** Minimum interval (max speed) reached when accelerating, in ms. */
   minSpeed?: number;
-  /** Facteur appliqué à l'intervalle à chaque nourriture mangée (<1 = accélère). */
+  /** Factor applied to the interval on each food eaten (<1 = speeds up). */
   speedFactor?: number;
 }
 
 /**
- * Coordonnées d'une case sur la grille (1-indexées).
+ * Coordinates of a cell on the grid (1-indexed).
  */
 interface Position {
   x: number;
@@ -30,10 +30,10 @@ interface Position {
 }
 
 /**
- * Le serpent : sa file de segments, sa direction et sa logique de déplacement.
+ * The snake: its queue of segments, its direction and its movement logic.
  *
- * Le corps « s'enroule » aux bords de la grille (traversée d'un mur =
- * réapparition du côté opposé).
+ * The body "wraps" at the grid edges (crossing a wall = reappearing on the
+ * opposite side).
  */
 export class Snake {
   private body: Position[];
@@ -42,8 +42,8 @@ export class Snake {
   private gridSize: number;
 
   /**
-   * Crée un serpent d'un segment à une position aléatoire, orienté à droite.
-   * @param gridSize Taille de la grille (nombre de cases par côté).
+   * Creates a one-segment snake at a random position, facing right.
+   * @param gridSize Grid size (number of cells per side).
    */
   constructor(gridSize: number) {
     this.gridSize = gridSize;
@@ -58,9 +58,9 @@ export class Snake {
   }
 
   /**
-   * Avance le serpent d'une case. Allonge le corps si la nourriture est mangée,
-   * sinon retire le dernier segment (longueur constante).
-   * @returns `true` si la nourriture a été mangée à ce déplacement.
+   * Moves the snake forward by one cell. Grows the body if the food is eaten,
+   * otherwise removes the last segment (constant length).
+   * @returns `true` if the food was eaten on this move.
    */
   move(food: Position): boolean {
     const head = this.body[0];
@@ -78,7 +78,7 @@ export class Snake {
   }
 
   /**
-   * Replie une coordonnée hors-grille sur le bord opposé (effet « wrap »).
+   * Folds an off-grid coordinate back onto the opposite edge ("wrap" effect).
    */
   private wrapPosition(pos: number): number {
     if (pos <= 0) return this.gridSize;
@@ -87,10 +87,10 @@ export class Snake {
   }
 
   /**
-   * Détecte une collision de la tête avec le corps. Les quatre premiers segments
-   * (indices 0 à 3) sont ignorés : le demi-tour étant interdit, il faut au moins
-   * une boucle de 2×2 cases (4 déplacements) pour que la tête rejoigne une case
-   * du corps — le segment d'indice 4 est donc le premier pouvant coïncider.
+   * Detects a collision of the head with the body. The first four segments
+   * (indices 0 to 3) are ignored: since the U-turn is forbidden, it takes at
+   * least a 2×2-cell loop (4 moves) for the head to reach a body cell — segment
+   * at index 4 is therefore the first one that can coincide.
    */
   checkCollision(): boolean {
     const head = this.body[0];
@@ -104,7 +104,7 @@ export class Snake {
   }
 
   /**
-   * Indique si la tête est sur la case de la nourriture.
+   * Tells whether the head is on the food cell.
    */
   private checkFoodCollision(food: Position): boolean {
     const head = this.body[0];
@@ -112,8 +112,8 @@ export class Snake {
   }
 
   /**
-   * Change la direction du serpent. Le demi-tour est ignoré : le serpent ne peut
-   * pas se retourner sur lui-même.
+   * Changes the snake's direction. The U-turn is ignored: the snake cannot turn
+   * back on itself.
    */
   setDirection(newDirection: Direction): void {
     if (OPPOSITE_DIRECTION[newDirection] === this.direction) return;
@@ -121,33 +121,33 @@ export class Snake {
     this.velocity = { ...DIRECTION_DELTAS[newDirection] };
   }
 
-  /** Renvoie les segments du corps (tête en tête de liste). */
+  /** Returns the body segments (head at the front of the list). */
   getBody(): Position[] {
     return this.body;
   }
 
-  /** Renvoie la direction courante. */
+  /** Returns the current direction. */
   getDirection(): Direction {
     return this.direction;
   }
 }
 
 /**
- * La nourriture : une case ne chevauchant jamais le serpent.
+ * The food: a cell that never overlaps the snake.
  */
 export class Food {
-  /** Modèles de souris disponibles (correspondent aux classes CSS .food--*). */
+  /** Available mouse variants (match the CSS classes .food--*). */
   private static readonly VARIANTS = ['gray', 'brown', 'white'] as const;
 
   private position: Position;
   private snake: Snake;
   private gridSize: number;
-  /** Modèle de souris courant, retiré au hasard à chaque réapparition. */
+  /** Current mouse variant, drawn at random on each respawn. */
   private variant: string = Food.VARIANTS[0];
 
   /**
-   * @param snake Serpent à éviter lors du placement.
-   * @param gridSize Taille de la grille.
+   * @param snake Snake to avoid when placing.
+   * @param gridSize Grid size.
    */
   constructor(snake: Snake, gridSize: number) {
     this.snake = snake;
@@ -157,8 +157,8 @@ export class Food {
   }
 
   /**
-   * Replace la nourriture sur une case aléatoire libre (hors du corps du serpent)
-   * et tire un nouveau modèle de souris.
+   * Moves the food to a random free cell (outside the snake body) and draws a
+   * new mouse variant.
    */
   randomize(): void {
     do {
@@ -172,7 +172,7 @@ export class Food {
   }
 
   /**
-   * Indique si la position courante chevauche un segment du serpent.
+   * Tells whether the current position overlaps a snake segment.
    */
   private isOnSnake(): boolean {
     return this.snake
@@ -180,50 +180,50 @@ export class Food {
       .some((segment) => segment.x === this.position.x && segment.y === this.position.y);
   }
 
-  /** Renvoie la position de la nourriture. */
+  /** Returns the food position. */
   getPosition(): Position {
     return this.position;
   }
 
-  /** Renvoie le modèle de souris courant (suffixe de classe CSS .food--*). */
+  /** Returns the current mouse variant (CSS class suffix .food--*). */
   getVariant(): string {
     return this.variant;
   }
 }
 
 /**
- * Jeu Snake.
+ * Snake game.
  *
- * Le serpent se déplace sur une grille carrée à cadence fixe (indépendante des
- * 60 fps de la boucle de rendu) ; chaque nourriture mangée rapporte des points
- * et accélère le jeu jusqu'à un plancher de vitesse.
+ * The snake moves on a square grid at a fixed rate (independent of the render
+ * loop's 60 fps); each food eaten earns points and speeds up the game down to a
+ * speed floor.
  */
 export class SnakeGame extends GameEngine {
   private snake: Snake;
   private food: Food;
   private gridSize: number;
   private playBoard: HTMLElement | null = null;
-  /** Calque d'effets superposé au plateau (non vidé à chaque frame). */
+  /** Effects layer overlaid on the board (not cleared every frame). */
   private fxLayer: HTMLElement | null = null;
   private scoreElement: HTMLElement | null = null;
   private highScoreElement: HTMLElement | null = null;
 
-  /** Points gagnés par souris mangée. */
+  /** Points earned per mouse eaten. */
   private static readonly FOOD_POINTS = 10;
 
-  /** Intervalle de base entre deux déplacements (ms). */
+  /** Base interval between two moves (ms). */
   private readonly baseInterval: number;
-  /** Intervalle minimal atteignable en accélérant (ms). */
+  /** Minimum interval reachable when accelerating (ms). */
   private readonly minInterval: number;
-  /** Facteur de réduction de l'intervalle à chaque nourriture (<1 = accélère). */
+  /** Interval reduction factor on each food (<1 = speeds up). */
   private readonly speedFactor: number;
-  /** Intervalle de déplacement courant (ms). */
+  /** Current move interval (ms). */
   private moveInterval: number;
-  /** Temps accumulé depuis le dernier déplacement (ms). */
+  /** Time accumulated since the last move (ms). */
   private moveAccumulator: number = 0;
 
   /**
-   * @param config Configuration du jeu (taille de grille, vitesses…).
+   * @param config Game configuration (grid size, speeds…).
    */
   constructor(config: SnakeConfig = {}) {
     super({ ...config, storageKey: 'snake-high-scores' });
@@ -238,8 +238,8 @@ export class SnakeGame extends GameEngine {
   }
 
   /**
-   * Lie les éléments du DOM, dimensionne la grille CSS d'après la taille logique
-   * du jeu, câble le clavier et effectue le premier rendu.
+   * Binds the DOM elements, sizes the CSS grid from the game's logical size,
+   * wires up the keyboard and performs the first render.
    */
   initialize(): void {
     this.playBoard = document.querySelector('.play-board');
@@ -252,7 +252,7 @@ export class SnakeGame extends GameEngine {
       this.fxLayer.className = 'snake-fx';
       this.playBoard.appendChild(this.fxLayer);
 
-      // Contrôle tactile (mobile) : glisser sur le plateau oriente le serpent.
+      // Touch control (mobile): swiping on the board steers the snake.
       setupSwipe(this.playBoard, {
         onSwipe: (direction) => {
           if (!this.state.isGameOver) this.snake.setDirection(direction);
@@ -267,8 +267,8 @@ export class SnakeGame extends GameEngine {
   }
 
   /**
-   * Avance le serpent au rythme de `moveInterval` (et non à chaque frame) : gère
-   * la prise de nourriture, l'accélération et la détection de collision.
+   * Moves the snake at the `moveInterval` rate (not every frame): handles eating
+   * food, acceleration and collision detection.
    */
   update(deltaTime: number): void {
     if (this.state.isPaused || this.state.isGameOver) return;
@@ -292,22 +292,22 @@ export class SnakeGame extends GameEngine {
   }
 
   /**
-   * Réduit l'intervalle de déplacement (difficulté progressive), sans descendre
-   * sous `minInterval` pour rester jouable.
+   * Reduces the move interval (progressive difficulty), without going below
+   * `minInterval` to stay playable.
    */
   private increaseSpeed(): void {
     this.moveInterval = Math.max(this.minInterval, this.moveInterval * this.speedFactor);
   }
 
   /**
-   * Reconstruit le plateau : segments du serpent (tête vs corps) puis la
-   * nourriture, positionnés via la grille CSS.
+   * Rebuilds the board: snake segments (head vs body) then the food, positioned
+   * via the CSS grid.
    */
   render(): void {
     if (!this.playBoard) return;
 
-    // On ne vide que le serpent et la souris : le calque d'effets (.snake-fx)
-    // et ses animations en cours doivent survivre d'une frame à l'autre.
+    // We only clear the snake and the mouse: the effects layer (.snake-fx)
+    // and its ongoing animations must survive from one frame to the next.
     this.playBoard.querySelectorAll('.snake-head, .snake-body, .food').forEach((el) => el.remove());
 
     this.snake.getBody().forEach((segment, index) => {
@@ -337,8 +337,8 @@ export class SnakeGame extends GameEngine {
   }
 
   /**
-   * Fait apparaître un « +N » flottant sur la case donnée, dans le calque
-   * d'effets. L'élément se retire tout seul à la fin de son animation CSS.
+   * Spawns a floating "+N" on the given cell, in the effects layer. The element
+   * removes itself at the end of its CSS animation.
    */
   private spawnScoreFloat(pos: Position, points: number): void {
     if (!this.fxLayer) return;
@@ -346,7 +346,7 @@ export class SnakeGame extends GameEngine {
     const float = document.createElement('div');
     float.className = 'score-float';
     float.textContent = `+${points}`;
-    // Centre de la case visée, en pourcentage du plateau.
+    // Center of the targeted cell, as a percentage of the board.
     float.style.left = `${((pos.x - 0.5) / this.gridSize) * 100}%`;
     float.style.top = `${((pos.y - 0.5) / this.gridSize) * 100}%`;
     float.addEventListener('animationend', () => float.remove());
@@ -355,8 +355,8 @@ export class SnakeGame extends GameEngine {
   }
 
   /**
-   * Traduit la touche en direction et oriente le serpent (les flèches/ZQSD ne
-   * font pas défiler la page).
+   * Translates the key into a direction and steers the snake (arrows/ZQSD do
+   * not scroll the page).
    */
   handleInput(event: KeyboardEvent): void {
     if (this.state.isGameOver) return;
@@ -369,7 +369,7 @@ export class SnakeGame extends GameEngine {
   }
 
   /**
-   * Recrée le serpent et la nourriture et remet score, vitesse et état à zéro.
+   * Recreates the snake and the food and resets score, speed and state to zero.
    */
   reset(): void {
     this.snake = new Snake(this.gridSize);
@@ -385,7 +385,7 @@ export class SnakeGame extends GameEngine {
   }
 
   /**
-   * Affiche le score courant et le meilleur score dans l'en-tête du jeu.
+   * Shows the current score and the high score in the game header.
    */
   protected updateScoreDisplay(): void {
     if (this.scoreElement) {

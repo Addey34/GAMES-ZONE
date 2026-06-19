@@ -9,53 +9,52 @@ import {
 } from '../shared/input.js';
 
 /**
- * Configuration spécifique au jeu Pac-Man.
+ * Configuration specific to the Pac-Man game.
  */
 interface PacmanConfig extends GameConfig {
-  /** Intervalle entre deux déplacements, en ms (plus petit = plus rapide). */
+  /** Interval between two moves, in ms (smaller = faster). */
   gameSpeed?: number;
 }
 
 /**
- * Un fantôme : sa position de grille et sa direction de déplacement courante.
+ * A ghost: its grid position and its current movement direction.
  */
 interface Ghost extends Position {
   direction: Direction;
 }
 
 /**
- * Jeu Pac-Man.
+ * Pac-Man game.
  *
- * Pac-Man parcourt une carte close (les cases hors-grille comptent comme des
- * murs) en mangeant la nourriture ; trois fantômes se déplacent aléatoirement.
- * La partie est gagnée quand toute la nourriture est mangée, perdue au contact
- * d'un fantôme. Rien ne bouge tant que le joueur n'a pas appuyé une première
- * touche.
+ * Pac-Man travels across a closed map (off-grid cells count as walls) eating the
+ * food; three ghosts move randomly. The game is won when all the food is eaten,
+ * lost on contact with a ghost. Nothing moves until the player presses a first
+ * key.
  */
 export class PacmanGame extends GameEngine {
-  /** Case de départ de Pac-Man (jamais comptée comme nourriture). */
+  /** Pac-Man's starting cell (never counted as food). */
   private static readonly PACMAN_START: Position = { x: 1, y: 1 };
 
   private wallMap: number[][];
   private totalFood: number;
   private pacman: Position;
   private ghosts: Ghost[];
-  /** Direction réellement suivie par Pac-Man. */
+  /** Direction actually followed by Pac-Man. */
   private currentDirection: Direction | null = null;
-  /** Direction demandée par le joueur, appliquée dès qu'un passage s'ouvre. */
+  /** Direction requested by the player, applied as soon as a passage opens. */
   private nextDirection: Direction | null = null;
-  /** Le jeu ne démarre qu'au premier appui de touche. */
+  /** The game only starts on the first key press. */
   private hasStarted: boolean = false;
-  /** Mémorise si la dernière fin de partie est une victoire (titre du modal). */
+  /** Remembers whether the last game over is a win (modal title). */
   private pendingWin: boolean = false;
   private mapElement: HTMLElement | null = null;
   private scoreElement: HTMLElement | null = null;
   private gameSpeed: number;
-  /** Temps accumulé depuis le dernier déplacement (ms). */
+  /** Time accumulated since the last move (ms). */
   private lastMoveTime: number = 0;
 
   /**
-   * @param config Configuration du jeu (vitesse de déplacement).
+   * @param config Game configuration (movement speed).
    */
   constructor(config: PacmanConfig = {}) {
     super({ ...config, storageKey: 'pacman-high-scores' });
@@ -82,8 +81,8 @@ export class PacmanGame extends GameEngine {
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ];
 
-    // Toute case libre porte une pastille, sauf la case de départ de Pac-Man
-    // (jamais traversée, donc jamais mangeable) : on l'exclut du total à manger.
+    // Every free cell carries a pellet, except Pac-Man's starting cell (never
+    // crossed, therefore never edible): we exclude it from the total to eat.
     this.totalFood = this.wallMap.flat().filter((c) => c === 0).length - 1;
 
     this.pacman = { ...PacmanGame.PACMAN_START };
@@ -91,8 +90,8 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Crée les trois fantômes à des positions fixes (les trois coins praticables
-   * autres que celui de Pac-Man, en haut à gauche).
+   * Creates the three ghosts at fixed positions (the three walkable corners
+   * other than Pac-Man's, top left).
    */
   private createGhosts(): Ghost[] {
     return [
@@ -103,8 +102,8 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Lie les éléments du DOM, construit la carte, câble le clavier et effectue le
-   * premier rendu.
+   * Binds the DOM elements, builds the map, wires up the keyboard and performs
+   * the first render.
    */
   initialize(): void {
     this.mapElement = document.getElementById('map');
@@ -112,7 +111,7 @@ export class PacmanGame extends GameEngine {
 
     this.setupEventListeners();
 
-    // Contrôle tactile (mobile) : glisser sur la carte oriente Pac-Man.
+    // Touch control (mobile): swiping on the map steers Pac-Man.
     if (this.mapElement) {
       setupSwipe(this.mapElement, {
         onSwipe: (direction) => {
@@ -130,8 +129,8 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Génère les cases de la carte (murs / nourriture) dans le DOM. La taille des
-   * cases est gérée par la grille CSS responsive, pas en pixels fixes.
+   * Generates the map cells (walls / food) in the DOM. The cell size is handled
+   * by the responsive CSS grid, not in fixed pixels.
    */
   private createMap(): void {
     if (!this.mapElement) return;
@@ -142,7 +141,7 @@ export class PacmanGame extends GameEngine {
       row.forEach((cell, x) => {
         const div = document.createElement('div');
         const isStart = x === PacmanGame.PACMAN_START.x && y === PacmanGame.PACMAN_START.y;
-        // Mur, couloir vide (case de départ) ou couloir avec pastille.
+        // Wall, empty corridor (starting cell) or corridor with a pellet.
         div.classList.add(cell === 1 ? 'wall' : isStart ? 'nofood' : 'food');
         div.dataset.x = x.toString();
         div.dataset.y = y.toString();
@@ -152,7 +151,7 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Renvoie la case voisine d'une position dans une direction donnée.
+   * Returns the neighboring cell of a position in a given direction.
    */
   private nextCell(pos: Position, dir: Direction): Position {
     const delta = DIRECTION_DELTAS[dir];
@@ -160,22 +159,22 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Indique si une case est praticable (hors-grille = mur ⇒ carte close).
+   * Tells whether a cell is walkable (off-grid = wall ⇒ closed map).
    */
   private isWalkable(pos: Position): boolean {
     return this.wallMap[pos.y]?.[pos.x] === 0;
   }
 
   /**
-   * Indique si un déplacement depuis `pos` dans la direction `dir` est possible.
+   * Tells whether a move from `pos` in direction `dir` is possible.
    */
   private canMove(pos: Position, dir: Direction): boolean {
     return this.isWalkable(this.nextCell(pos, dir));
   }
 
   /**
-   * Déplace Pac-Man et les fantômes au rythme de `gameSpeed`. Inerte tant que le
-   * joueur n'a pas appuyé de touche.
+   * Moves Pac-Man and the ghosts at the `gameSpeed` rate. Inert until the player
+   * has pressed a key.
    */
   update(deltaTime: number): void {
     if (this.state.isPaused || this.state.isGameOver) return;
@@ -190,7 +189,7 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Rend Pac-Man et les fantômes.
+   * Renders Pac-Man and the ghosts.
    */
   render(): void {
     this.renderPacman();
@@ -198,13 +197,12 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Déplace Pac-Man d'une case et mange la nourriture rencontrée.
+   * Moves Pac-Man by one cell and eats the food encountered.
    *
-   * Virage différé : la direction demandée s'applique dès qu'elle est libre, donc
-   * pointer vers un mur n'arrête pas Pac-Man, qui continue tout droit. Face à un
-   * mur, il reste sur place mais conserve direction et demande, et repart dès
-   * qu'un passage s'ouvre. La victoire est déclenchée une fois toute la
-   * nourriture mangée.
+   * Deferred turn: the requested direction applies as soon as it is free, so
+   * pointing toward a wall does not stop Pac-Man, who keeps going straight.
+   * Facing a wall, he stays put but keeps his direction and request, and resumes
+   * as soon as a passage opens. The win is triggered once all the food is eaten.
    */
   private movePacman(): void {
     if (this.state.isGameOver) return;
@@ -232,9 +230,8 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Déplace chaque fantôme aléatoirement, en évitant le demi-tour sauf lorsqu'il
-   * s'agit de la seule issue (déplacement plus naturel). Le contact avec Pac-Man
-   * met fin à la partie (défaite).
+   * Moves each ghost randomly, avoiding the U-turn except when it is the only way
+   * out (more natural movement). Contact with Pac-Man ends the game (loss).
    */
   private moveGhosts(): void {
     const directions: Direction[] = ['up', 'down', 'left', 'right'];
@@ -259,8 +256,8 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Positionne `.pacman` sur la case courante, avec une classe d'orientation
-   * (`.pacman--<direction>`) qui tourne la bouche vers le déplacement.
+   * Positions `.pacman` on the current cell, with an orientation class
+   * (`.pacman--<direction>`) that turns the mouth toward the movement.
    */
   private renderPacman(): void {
     document
@@ -277,8 +274,8 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Positionne `.ghost` sur la case de chaque fantôme, avec une classe d'index
-   * (`.ghost--0/1/2`) qui détermine sa couleur.
+   * Positions `.ghost` on each ghost's cell, with an index class
+   * (`.ghost--0/1/2`) that determines its color.
    */
   private renderGhosts(): void {
     document
@@ -291,8 +288,8 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Mémorise la direction demandée (virage différé) et démarre le jeu au premier
-   * appui de touche.
+   * Remembers the requested direction (deferred turn) and starts the game on the
+   * first key press.
    */
   handleInput(event: KeyboardEvent): void {
     if (this.state.isGameOver) return;
@@ -306,8 +303,8 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Replace Pac-Man et les fantômes, réinitialise score, directions et état, puis
-   * reconstruit la carte.
+   * Resets Pac-Man and the ghosts, resets score, directions and state, then
+   * rebuilds the map.
    */
   reset(): void {
     this.pacman = { ...PacmanGame.PACMAN_START };
@@ -327,7 +324,7 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Mémorise l'issue (victoire/défaite) puis délègue au flux de fin partagé.
+   * Remembers the outcome (win/loss) then delegates to the shared game-over flow.
    */
   private endGame(isWin: boolean): void {
     this.pendingWin = isWin;
@@ -335,14 +332,14 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Titre du modal : « Vous avez gagné ! » en cas de victoire, sinon « Game Over ! ».
+   * Modal title: "Vous avez gagné !" on a win, otherwise "Game Over !".
    */
   protected getGameOverTitle(): string {
     return this.pendingWin ? 'Vous avez gagné !' : 'Game Over !';
   }
 
   /**
-   * Affiche le score courant dans l'en-tête du jeu.
+   * Shows the current score in the game header.
    */
   protected updateScoreDisplay(): void {
     if (this.scoreElement) {
