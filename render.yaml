@@ -1,13 +1,19 @@
 # Configuration Render (Blueprint) — site statique.
-# Build Vite (sortie dans dist/), puis réécritures pour servir chaque jeu en URL
-# propre : /dactylographie au lieu de /dactylographie/dactylographie.html.
+# Build Vite (sortie dans dist/), puis routes pour ne servir chaque jeu QUE sur
+# son URL propre : /dactylographie (et non /dactylographie/dactylographie.html).
 #
-# Les routes sont des RÉÉCRITURES (rewrite) : l'URL reste /<jeu> dans le
-# navigateur, mais Render sert le fichier /<jeu>/index.html.
+# Deux types de règles (évaluées de haut en bas, 1re correspondance gagne) :
+#   - rewrite : l'URL reste /<jeu> dans le navigateur, mais Render sert le
+#     fichier /<jeu>/index.html.
+#   - redirect (301) : un attrape-tout /* renvoie tout le reste (anciennes URLs
+#     en .html, chemins inconnus) vers l'accueil /.
+# IMPORTANT : Render n'applique JAMAIS une règle si un fichier réel existe à ce
+# chemin (il le sert directement). Donc /* ne casse pas les assets (/assets, /css,
+# /icons, /words.txt) — ils sont servis tels quels.
 #
-# NB : ce fichier s'applique automatiquement si le service est géré par Blueprint.
-# Pour un service déjà créé à la main, reporter les mêmes réglages dans le
-# dashboard (Build Command, Publish Directory, Redirects/Rewrites).
+# NB : ce fichier ne s'applique PAS automatiquement (service créé à la main).
+# Reporter ces mêmes routes dans le dashboard (Settings > Redirects/Rewrites),
+# dans le même ordre.
 services:
   - type: web
     name: games-zone
@@ -15,6 +21,7 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     routes:
+      # URLs propres -> fichier réel (l'URL ne change pas dans la barre).
       - { type: rewrite, source: /dactylographie, destination: /dactylographie/index.html }
       - { type: rewrite, source: /snake, destination: /snake/index.html }
       - { type: rewrite, source: /pacman, destination: /pacman/index.html }
@@ -22,3 +29,6 @@ services:
       - { type: rewrite, source: /tetris, destination: /tetris/index.html }
       - { type: rewrite, source: /memory, destination: /memory/index.html }
       - { type: rewrite, source: /breakout, destination: /breakout/index.html }
+      # Tout le reste (anciennes URLs .html, chemins inconnus) -> accueil.
+      # En DERNIER : les règles ci-dessus ont priorité, les assets aussi.
+      - { type: redirect, source: /*, destination: / }
