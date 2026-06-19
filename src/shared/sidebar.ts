@@ -7,18 +7,20 @@
 const sidebar = document.querySelector('.sidebar');
 if (sidebar) {
   // --- 1. État actif selon l'URL ---------------------------------------------
-  // Chaque jeu vit dans son dossier (/snake/, /2048/...) : on marque le lien dont
-  // le data-nav apparaît dans le chemin. La page d'accueil n'a pas d'entrée dédiée
-  // (le logo Games Zone fait office de retour accueil) ; on le marque sur la home.
+  // URLs propres : chaque jeu est servi en /<key> (ex. /snake, /2048). On marque
+  // le lien dont le data-nav correspond au 1er segment du chemin — en couvrant
+  // aussi /<key>/ et /<key>/index.html (accès direct ou serveur de dev). La page
+  // d'accueil n'a pas d'entrée dédiée (le logo Games Zone fait office de retour).
   const path = window.location.pathname;
   for (const link of document.querySelectorAll<HTMLElement>('.sidebar-link')) {
-    if (link.dataset.nav && path.includes(`/${link.dataset.nav}/`)) {
+    const nav = link.dataset.nav;
+    if (nav && (path === `/${nav}` || path.startsWith(`/${nav}/`))) {
       link.classList.add('is-active');
       link.setAttribute('aria-current', 'page');
     }
   }
 
-  if (path === '/' || path.endsWith('/index.html')) {
+  if (path === '/' || path === '/index.html') {
     document.querySelector('.sidebar-brand')?.setAttribute('aria-current', 'page');
   }
 

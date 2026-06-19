@@ -1,0 +1,24 @@
+# Configuration Render (Blueprint) — site statique.
+# Build Vite (sortie dans dist/), puis réécritures pour servir chaque jeu en URL
+# propre : /dactylographie au lieu de /dactylographie/dactylographie.html.
+#
+# Les routes sont des RÉÉCRITURES (rewrite) : l'URL reste /<jeu> dans le
+# navigateur, mais Render sert le fichier /<jeu>/index.html.
+#
+# NB : ce fichier s'applique automatiquement si le service est géré par Blueprint.
+# Pour un service déjà créé à la main, reporter les mêmes réglages dans le
+# dashboard (Build Command, Publish Directory, Redirects/Rewrites).
+services:
+  - type: web
+    name: games-zone
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - { type: rewrite, source: /dactylographie, destination: /dactylographie/index.html }
+      - { type: rewrite, source: /snake, destination: /snake/index.html }
+      - { type: rewrite, source: /pacman, destination: /pacman/index.html }
+      - { type: rewrite, source: /2048, destination: /2048/index.html }
+      - { type: rewrite, source: /tetris, destination: /tetris/index.html }
+      - { type: rewrite, source: /memory, destination: /memory/index.html }
+      - { type: rewrite, source: /breakout, destination: /breakout/index.html }

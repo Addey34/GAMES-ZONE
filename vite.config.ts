@@ -11,10 +11,11 @@ const srcRoot = resolve(projectRoot, 'src');
 //   - les points d'entree du build (rollupOptions.input) ;
 //   - le contexte Handlebars (`games`) qui alimente le rail (sidebar.hbs) ET le
 //     menu d'accueil (index.html) via {{#each games}}.
-// Ajouter un jeu = AJOUTER UNE LIGNE ici (puis creer src/<key>/<key>.{html,ts}).
-// Convention : chaque jeu vit dans src/<key>/<key>.html ; `key` doit etre le nom
-// du dossier (il sert aussi de data-nav pour l'etat actif du rail ET de nom de
-// son logo SVG : public/icons/<key>.svg).
+// Ajouter un jeu = AJOUTER UNE LIGNE ici (puis creer src/<key>/index.html +
+// <key>-main.ts + <Key>.ts). Convention : chaque jeu vit dans src/<key>/, sa page
+// est src/<key>/index.html (servie en URL propre /<key>). `key` est le nom du
+// dossier (il sert aussi de data-nav pour l'etat actif du rail ET de nom de son
+// logo SVG : public/icons/<key>.svg).
 // `color` = token de couleur unie (base/variables.css) pour colorer l'item actif
 // du rail (et, via --title-color, le titre de la page du jeu).
 // `controls` = lignes { keys, action } affichées dans l'aide « Comment jouer »
@@ -107,10 +108,10 @@ export default defineConfig({
     handlebars({
       partialDirectory: resolve(srcRoot, 'partials'),
       context(pagePath: string) {
+        // Chaque page de jeu vit dans src/<key>/index.html : on retrouve le jeu
+        // courant par son segment de dossier (la home, src/index.html, n'en a pas).
         const path = pagePath.replace(/\\/g, '/');
-        const game = games.find(
-          (g) => path.includes(`/${g.key}/`) || path.endsWith(`/${g.key}.html`)
-        );
+        const game = games.find((g) => path.includes(`/${g.key}/`));
         return { games, game };
       },
     }),
@@ -119,12 +120,12 @@ export default defineConfig({
     outDir: resolve(projectRoot, 'dist'),
     emptyOutDir: true,
     rollupOptions: {
-      // index + une entree par jeu, derivees de la liste `games`.
+      // index + une entree par jeu, derivees de la liste `games`. Chaque page de
+      // jeu est src/<key>/index.html -> build vers dist/<key>/index.html, servie
+      // en URL propre /<key> (voir render.yaml pour la reecriture).
       input: {
         main: resolve(srcRoot, 'index.html'),
-        ...Object.fromEntries(
-          games.map((g) => [g.key, resolve(srcRoot, `${g.key}/${g.key}.html`)])
-        ),
+        ...Object.fromEntries(games.map((g) => [g.key, resolve(srcRoot, `${g.key}/index.html`)])),
       },
     },
   },
