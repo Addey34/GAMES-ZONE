@@ -56,7 +56,7 @@ npm run dev      # serveur de dev sur http://localhost:3000
 src/
   index.html            # page d'accueil
   <jeu>/                # un dossier par jeu
-    <jeu>.html          #   page du jeu
+    index.html          #   page du jeu (servie en URL propre /<jeu>)
     <jeu>-main.ts       #   point d'entrée
     <Jeu>.ts            #   logique du jeu
   shared/               # moteur de jeu et utilitaires partagés
@@ -73,6 +73,13 @@ jeu, le score et la modale de fin de partie.
 ### Ajouter un jeu
 
 1. Ajouter une ligne dans le tableau `games` de `vite.config.ts`.
-2. Créer `src/<jeu>/<jeu>.html` et le code TypeScript associé.
+2. Créer `src/<jeu>/index.html`, `src/<jeu>/<jeu>-main.ts`, `src/<jeu>/<Jeu>.ts`
+   et l'icône `public/icons/<jeu>.svg`.
 
 Le jeu apparaît alors automatiquement dans la navigation et sur la page d'accueil.
+
+## Contribuer
+
+Les contributions sont les bienvenues ! Le projet fonctionne par **Pull Request**.
+Consulte le guide [CONTRIBUTING.md](CONTRIBUTING.md) pour les étapes détaillées
+(fork, branche, vérifications, ajout d'un jeu).
