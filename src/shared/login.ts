@@ -60,11 +60,13 @@ async function renderAuthArea(area: HTMLElement): Promise<void> {
     area.innerHTML = '<div id="gsiButton"></div>';
     const target = area.querySelector<HTMLElement>('#gsiButton');
     if (target) {
+      // Icon-only button: compact and width-independent, so it fits the narrow
+      // rail (Google ignores attempts to shrink the text variant below its label).
       google.accounts.id.renderButton(target, {
+        type: 'icon',
         theme: 'filled_blue',
         size: 'large',
-        text: 'signin_with',
-        shape: 'pill',
+        shape: 'circle',
       });
     }
   }

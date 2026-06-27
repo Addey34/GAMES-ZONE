@@ -149,6 +149,12 @@ body.sidebar-open .sidebar {
   font-size: var(--font-size-sm);
 }
 
+/* Le widget Google a sa propre largeur : on l'empeche de deborder du rail. */
+.sidebar-auth > div {
+  max-width: 100%;
+  overflow: hidden;
+}
+
 .sidebar-auth-btn {
   width: 100%;
   padding: var(--spacing-xs) var(--spacing-sm);
