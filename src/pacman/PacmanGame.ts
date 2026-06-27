@@ -7,6 +7,8 @@ import {
   keyboardDirection,
   setupSwipe,
 } from '../shared/input.js';
+import { Difficulty } from '../shared/bot/difficulty.js';
+import { GHOST_PERSONALITIES, chooseGhostDirection } from './ghostAi.js';
 
 /**
  * Configuration specific to the Pac-Man game.
@@ -14,6 +16,8 @@ import {
 interface PacmanConfig extends GameConfig {
   /** Interval between two moves, in ms (smaller = faster). */
   gameSpeed?: number;
+  /** Ghost AI difficulty (`easy` = original purely-random ghosts). */
+  difficulty?: Difficulty;
 }
 
 /**
@@ -50,6 +54,7 @@ export class PacmanGame extends GameEngine {
   private mapElement: HTMLElement | null = null;
   private scoreElement: HTMLElement | null = null;
   private gameSpeed: number;
+  private difficulty: Difficulty;
   /** Time accumulated since the last move (ms). */
   private lastMoveTime: number = 0;
 
@@ -57,8 +62,9 @@ export class PacmanGame extends GameEngine {
    * @param config Game configuration (movement speed).
    */
   constructor(config: PacmanConfig = {}) {
-    super({ ...config, storageKey: 'pacman-high-scores' });
+    super({ ...config, storageKey: 'pacman-high-scores', leaderboardId: 'pacman' });
     this.gameSpeed = config.gameSpeed || 200;
+    this.difficulty = config.difficulty ?? 'medium';
 
     this.wallMap = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -234,13 +240,16 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Moves each ghost randomly, avoiding the U-turn except when it is the only way
-   * out (more natural movement). Contact with Pac-Man ends the game (loss).
+   * Moves each ghost, avoiding the U-turn except when it is the only way out
+   * (more natural movement). Each ghost's direction is chosen by its AI brain
+   * (see `ghostAi.ts`), which pursues Pac-Man according to its personality and
+   * the configured difficulty. Contact with Pac-Man ends the game (loss).
    */
   private moveGhosts(pacmanPrev: Position): void {
     const directions: Direction[] = ['up', 'down', 'left', 'right'];
+    const pacmanDir = this.currentDirection ?? 'left';
 
-    this.ghosts.forEach((ghost) => {
+    this.ghosts.forEach((ghost, index) => {
       const ghostPrev = { x: ghost.x, y: ghost.y };
 
       let valid = directions.filter((dir) => this.canMove(ghost, dir));
@@ -249,7 +258,12 @@ export class PacmanGame extends GameEngine {
       if (forward.length > 0) valid = forward;
 
       if (valid.length > 0) {
-        ghost.direction = valid[Math.floor(Math.random() * valid.length)];
+        ghost.direction = chooseGhostDirection(
+          valid,
+          { ghost: { x: ghost.x, y: ghost.y }, pacman: this.pacman, pacmanDir },
+          GHOST_PERSONALITIES[index % GHOST_PERSONALITIES.length],
+          this.difficulty
+        );
         const next = this.nextCell(ghost, ghost.direction);
         ghost.x = next.x;
         ghost.y = next.y;
