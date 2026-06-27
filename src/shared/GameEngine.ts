@@ -1,5 +1,6 @@
 import { ScoreManager, ScoreEntry } from './ScoreManager.js';
 import { ModalManager } from './ModalManager.js';
+import { submitLeaderboardScore, listLeaderboardScores } from './nakama.js';
 
 /**
  * Configuration shared by all games, passed to the engine constructor.
@@ -17,6 +18,12 @@ export interface GameConfig {
   maxScores?: number;
   /** id of the modal element in the HTML (default: 'scoreModal'). */
   modalId?: string;
+  /**
+   * id of the online Nakama leaderboard for this game (e.g. 'snake'). When set,
+   * scores are also submitted to and displayed from the backend; when omitted,
+   * the game stays local-only (localStorage). Backend calls are best-effort.
+   */
+  leaderboardId?: string;
 }
 
 /**
@@ -275,11 +282,27 @@ export abstract class GameEngine {
   private handleSaveScore(): void {
     const username = this.modalManager.getUsername();
     if (username && this.scoreManager.isHighScore(this.state.score)) {
-      this.scoreManager.saveScore(this.buildScoreEntry(username));
+      const entry = this.buildScoreEntry(username);
+      this.scoreManager.saveScore(entry);
+      this.submitOnlineScore(entry);
       this.onScoreSaved();
     }
     this.modalManager.hide();
     this.restartAfterGameOver();
+  }
+
+  /**
+   * Best-effort submission of the score to the online leaderboard (only if the
+   * game declares a `leaderboardId`). Failures are swallowed so a backend issue
+   * never blocks the local save or the restart flow. Refreshes the table once
+   * the write lands, so the new global score appears.
+   */
+  private submitOnlineScore(entry: ScoreEntry): void {
+    const leaderboardId = this.config.leaderboardId;
+    if (!leaderboardId) return;
+    submitLeaderboardScore(leaderboardId, entry)
+      .then(() => this.renderScoreTable())
+      .catch((err) => console.warn('[nakama] envoi du score en ligne échoué:', err));
   }
 
   /**
@@ -320,13 +343,25 @@ export abstract class GameEngine {
    * for the initial display; re-rendered automatically after each save.
    */
   protected renderScoreTable(): void {
+    // Immediate paint from the local leaderboard (also the offline fallback).
+    this.renderScoreRows(this.scoreManager.getScores());
+
+    // If the game has an online leaderboard, replace it with the global scores.
+    const leaderboardId = this.config.leaderboardId;
+    if (!leaderboardId) return;
+    listLeaderboardScores(leaderboardId, this.config.maxScores ?? 10)
+      .then((scores) => this.renderScoreRows(scores))
+      .catch((err) => console.warn('[nakama] classement en ligne indisponible:', err));
+  }
+
+  /** Fills `#scoreTable tbody` with the given entries (one `<tr>` each). */
+  private renderScoreRows(entries: ScoreEntry[]): void {
     if (!this.scoreTableBody) {
       this.scoreTableBody = document.querySelector('#scoreTable tbody');
     }
     if (!this.scoreTableBody) return;
 
-    this.scoreTableBody.innerHTML = this.scoreManager
-      .getScores()
+    this.scoreTableBody.innerHTML = entries
       .map((entry) => `<tr>${this.scoreTableRow(entry)}</tr>`)
       .join('');
   }

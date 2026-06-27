@@ -47,7 +47,7 @@ export class Game2048 extends GameEngine {
    * @param config Game configuration (grid size).
    */
   constructor(config: Game2048Config = {}) {
-    super({ ...config, storageKey: '2048-high-scores' });
+    super({ ...config, storageKey: '2048-high-scores', leaderboardId: '2048' });
     this.gridSize = config.gridSize || 4;
   }
 

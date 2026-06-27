@@ -79,7 +79,7 @@ export class MemoryGame extends GameEngine {
    * @param config Game configuration (grid size).
    */
   constructor(config: MemoryConfig = {}) {
-    super({ ...config, storageKey: 'memory-scores' });
+    super({ ...config, storageKey: 'memory-scores', leaderboardId: 'memory' });
     this.gridSize = config.gridSize || 4;
     this.totalPairs = (this.gridSize * this.gridSize) / 2;
   }

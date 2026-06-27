@@ -37,16 +37,40 @@ describe('Snake', () => {
     expect(snake.getDirection()).toBe('right');
   });
 
-  it('forbids the U-turn (opposite direction ignored)', () => {
-    const snake = snakeAt(0, 10); // initial direction: right
-    snake.setDirection('left'); // opposite → ignored
+  it('applies a direction change only on the next move', () => {
+    const snake = snakeAt(0, 10); // facing right
+    snake.setDirection('up'); // queued, not applied yet
     expect(snake.getDirection()).toBe('right');
 
-    snake.setDirection('up'); // perpendicular → accepted
+    snake.move({ x: -1, y: -1 }); // commit happens here
     expect(snake.getDirection()).toBe('up');
+  });
 
-    snake.setDirection('down'); // opposite of up → ignored
-    expect(snake.getDirection()).toBe('up');
+  it('forbids the U-turn (reversal rejected at move time)', () => {
+    const snake = snakeAt(0, 10); // facing right, head (1,1)
+    snake.setDirection('right');
+    snake.move({ x: -1, y: -1 }); // now travelling right, head (2,1)
+
+    snake.setDirection('left'); // opposite of right → rejected
+    snake.move({ x: -1, y: -1 });
+    expect(snake.getDirection()).toBe('right');
+    expect(snake.getBody()[0]).toEqual({ x: 3, y: 1 }); // kept going right
+  });
+
+  it('cannot reverse via two quick inputs within the same tick (regression)', () => {
+    const snake = snakeAt(0, 10); // facing right, head (1,1)
+    snake.setDirection('right');
+    snake.move({ x: -1, y: -1 }); // travelling right, head (2,1)
+
+    // Going right, press up then left before the next move. Naively chaining
+    // these (up then left, since left is not opposite of up) would flip the
+    // snake to 'left' and make it cross itself. It must stay on course.
+    snake.setDirection('up');
+    snake.setDirection('left');
+    snake.move({ x: -1, y: -1 });
+
+    expect(snake.getDirection()).toBe('right');
+    expect(snake.getBody()[0]).toEqual({ x: 3, y: 1 });
   });
 
   it('crosses the right edge and reappears on the left (wrap)', () => {

@@ -128,6 +128,44 @@ body.sidebar-open .sidebar {
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.55));
 }
 
+/* --- Connexion (bouton Google / joueur connecte) ------------------------- */
+/* Pousse le bloc tout en bas du rail (flex column) et le centre. */
+.sidebar-auth {
+  margin-top: auto;
+  padding: var(--spacing-sm) var(--spacing-sm) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.sidebar-user {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--white-color);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+}
+
+.sidebar-auth-btn {
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  color: var(--white-color);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--border-radius-md);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--transition-speed) ease;
+}
+.sidebar-auth-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
 /* --- Bouton hamburger (mobile uniquement) -------------------------------- */
 .sidebar-toggle {
   position: fixed;
@@ -179,6 +217,15 @@ body.sidebar-open .sidebar {
     transition: opacity var(--transition-speed) ease;
   }
   .sidebar:hover .sidebar-label {
+    opacity: 1;
+  }
+
+  /* Connexion masquee en compact, revelee au survol (comme les libelles). */
+  .sidebar-auth {
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+  }
+  .sidebar:hover .sidebar-auth {
     opacity: 1;
   }
 

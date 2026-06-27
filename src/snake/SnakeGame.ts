@@ -38,7 +38,12 @@ interface Position {
 export class Snake {
   private body: Position[];
   private velocity: Position;
+  /** Direction actually travelled on the last move (the "committed" one). */
   private direction: Direction;
+  /** Latest requested direction, applied at most once per move. */
+  private nextDirection: Direction;
+  /** Becomes true on the first input: the snake stays still until then. */
+  private started: boolean = false;
   private gridSize: number;
 
   /**
@@ -55,6 +60,7 @@ export class Snake {
     ];
     this.velocity = { x: 0, y: 0 };
     this.direction = 'right';
+    this.nextDirection = 'right';
   }
 
   /**
@@ -63,6 +69,16 @@ export class Snake {
    * @returns `true` if the food was eaten on this move.
    */
   move(food: Position): boolean {
+    // Commit at most one queued direction change per move, rejecting a 180°
+    // reversal relative to the direction actually travelled last move. Doing
+    // this here (not in setDirection) stops two quick key presses within the
+    // same move interval from chaining into a U-turn that makes the snake cross
+    // itself. The snake stays still until the first input (started === false).
+    if (this.started && OPPOSITE_DIRECTION[this.nextDirection] !== this.direction) {
+      this.direction = this.nextDirection;
+      this.velocity = { ...DIRECTION_DELTAS[this.direction] };
+    }
+
     const head = this.body[0];
     const newHead: Position = {
       x: this.wrapPosition(head.x + this.velocity.x),
@@ -116,9 +132,11 @@ export class Snake {
    * back on itself.
    */
   setDirection(newDirection: Direction): void {
-    if (OPPOSITE_DIRECTION[newDirection] === this.direction) return;
-    this.direction = newDirection;
-    this.velocity = { ...DIRECTION_DELTAS[newDirection] };
+    // Only record the request; it is validated and applied once per move (see
+    // move()), so multiple presses between two moves cannot chain into a 180°
+    // reversal that makes the snake cross itself.
+    this.started = true;
+    this.nextDirection = newDirection;
   }
 
   /** Returns the body segments (head at the front of the list). */
@@ -226,7 +244,7 @@ export class SnakeGame extends GameEngine {
    * @param config Game configuration (grid size, speeds…).
    */
   constructor(config: SnakeConfig = {}) {
-    super({ ...config, storageKey: 'snake-high-scores' });
+    super({ ...config, storageKey: 'snake-high-scores', leaderboardId: 'snake' });
     this.gridSize = config.gridSize || 25;
     this.baseInterval = config.baseSpeed || 200;
     this.minInterval = config.minSpeed || 75;

@@ -146,7 +146,7 @@ export class TetrisGame extends GameEngine {
    * @param config Game configuration (dimensions, drop rate).
    */
   constructor(config: TetrisConfig = {}) {
-    super({ ...config, storageKey: 'tetris-high-scores' });
+    super({ ...config, storageKey: 'tetris-high-scores', leaderboardId: 'tetris' });
     this.cols = config.cols || 10;
     this.rows = config.rows || 20;
     this.baseDropInterval = config.baseDropInterval || 800;

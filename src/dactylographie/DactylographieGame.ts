@@ -60,7 +60,7 @@ export class DactylographieGame extends GameEngine {
    * @param config Game configuration (game duration).
    */
   constructor(config: DactylographieConfig = {}) {
-    super({ ...config, storageKey: 'dactylographie-scores' });
+    super({ ...config, storageKey: 'dactylographie-scores', leaderboardId: 'dactylographie' });
     this.timeLimit = config.timeLimit || 60;
     this.timeLeft = this.timeLimit;
   }

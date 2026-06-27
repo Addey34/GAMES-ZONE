@@ -97,7 +97,7 @@ export class BreakoutGame extends GameEngine {
    * @param config Game configuration (brick rows/columns, lives).
    */
   constructor(config: BreakoutConfig = {}) {
-    super({ ...config, storageKey: 'breakout-high-scores' });
+    super({ ...config, storageKey: 'breakout-high-scores', leaderboardId: 'breakout' });
     this.brickRows = config.brickRows || 5;
     this.brickCols = config.brickCols || 9;
     this.maxLives = config.lives || 3;
