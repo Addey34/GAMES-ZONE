@@ -1,0 +1,55 @@
+@import url('../global.css');
+
+/* Couleur d'accent du jeu (titre + item actif du rail). */
+.app-body {
+  --title-color: var(--color-pong);
+}
+
+/* =============================================================================
+   Pong — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
+   ========================================================================== */
+
+/* --- Plateau carré : raquettes/balle positionnées en % par le JS. --- */
+.pong-board {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--pong-board-bg);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* Filet central pointillé. */
+.pong-net {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  border-left: 2px dashed var(--pong-net);
+  transform: translateX(-50%);
+}
+
+/* --- Raquettes --- */
+.pong-paddle {
+  position: absolute;
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.pong-paddle--player {
+  background: var(--pong-paddle-player);
+}
+
+.pong-paddle--opponent {
+  background: var(--pong-paddle-opponent);
+}
+
+/* --- Balle --- */
+.pong-ball {
+  position: absolute;
+  background: var(--pong-ball);
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+}
