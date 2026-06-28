@@ -57,7 +57,7 @@ The architecture is designed to make this simple. To add a game `pong`:
 2. Create the page and the code in `src/pong/`:
    - `src/pong/index.html` — the page (~15 lines, see an existing game)
    - `src/pong/pong-main.ts` — the entry point (~3 lines)
-   - `src/pong/Pong.ts` — the logic, which **extends `GameEngine`** (`src/shared/GameEngine.ts`)
+   - `src/pong/Pong.ts` — the logic, which **extends `GameEngine`** (`src/shared/engine/GameEngine.ts`)
 3. Create the icon `public/icons/pong.svg`.
 
 The game then appears **automatically** in the menu and on the home page (everything is
@@ -70,7 +70,8 @@ driven by the `games` array). Take inspiration from an existing game such as `sn
 - Follow the existing style (TypeScript `strict`, CSS design tokens, mobile-first).
   Formatting is handled by **Prettier** and code style by **ESLint** — run them before
   pushing.
-- No backend: scores stay in `localStorage`.
+- Scores persist in `localStorage` and, when a game opts in, in online leaderboards on the
+  Nakama backend (best-effort — `localStorage` is always the fallback).
 - A question or an idea before coding? Open an **Issue** to discuss it.
 
 Thanks! 🙌
