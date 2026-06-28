@@ -1,0 +1,30 @@
+/* =============================================================================
+   Compte à rebours de coup d'envoi : grand chiffre centré en surimpression du
+   plateau (monté dans .game-shell par src/shared/ui/countdown.ts).
+   ========================================================================== */
+
+.game-countdown {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  border-radius: var(--border-radius-lg);
+}
+
+.game-countdown-number {
+  font-size: clamp(3rem, 18vw, 7rem);
+  font-weight: var(--font-weight-bolder);
+  color: var(--white-color);
+  text-shadow: var(--shadow-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.game-countdown-label {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: rgba(255, 255, 255, 0.85);
+}

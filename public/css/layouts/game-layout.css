@@ -1,6 +1,6 @@
 /* =============================================================================
-   Layout commun à tous les jeux : conteneur, cadre de jeu (.wrapper),
-   barre de détails (score), contrôles et statistiques.
+   Layout commun à tous les jeux : conteneur (.game-container), cadre de jeu
+   unifié (.game-shell) et barre de détails (score).
    Mobile-first ; les dimensions du plateau sont définies par chaque jeu.
    ========================================================================== */
 
@@ -10,6 +10,8 @@
   width: 100%;
   max-width: var(--container-width);
   margin: 0 auto;
+  /* Remplit exactement le premier écran et y centre le cadre. La barre
+     .app-body::before est `position: fixed` (hors flux) : rien à déduire. */
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -52,7 +54,9 @@
 }
 
 /* --- Barre de détails (stats live : score, high-score, chrono…) au-dessus du
-   plateau. Même langage visuel pour TOUS les jeux. --- */
+   plateau. Même langage visuel pour TOUS les jeux. Les stats enfants
+   (.score, .high-score, .lives, .moves, .lines…) HÉRITENT de font-size +
+   font-weight d'ici : ne pas les redéclarer par jeu. --- */
 .game-details {
   width: 100%;
   display: flex;

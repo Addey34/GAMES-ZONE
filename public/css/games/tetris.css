@@ -9,14 +9,6 @@
    Tetris — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
    ========================================================================== */
 
-/* Textes de la barre de détails (score, lignes, meilleur). */
-.score,
-.lines,
-.high-score {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-}
-
 /* --- Zone de jeu carrée : le plateau (10x20) est centré, fond noir en
    letterbox sur les côtés (même principe que la carte de Pac-Man). --- */
 .play-area {

@@ -1,0 +1,56 @@
+/* =============================================================================
+   Panneau « Paramètres » : champs en contrôle segmenté (un choix parmi quelques
+   options), rendus par src/shared/ui/settingsPanel.ts dans un popover du shell.
+   Générique : réutilisable par tout jeu déclarant `settings: true`.
+   ========================================================================== */
+
+.game-setting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+.game-setting:last-child {
+  margin-bottom: 0;
+}
+
+.game-setting-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color-muted);
+}
+
+/* Le groupe segmenté : pistes côte à côte dans une gouttière arrondie. */
+.game-seg {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--background-color);
+  border-radius: var(--border-radius-md);
+}
+
+.game-seg-option {
+  flex: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color);
+  cursor: pointer;
+  transition:
+    background var(--transition-speed) ease,
+    color var(--transition-speed) ease;
+}
+
+.game-seg-option.is-active {
+  background: var(--title-color, var(--primary-color));
+  color: var(--white-color);
+}
+
+.game-seg-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

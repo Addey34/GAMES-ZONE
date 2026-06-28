@@ -9,13 +9,6 @@
    2048 — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
    ========================================================================== */
 
-/* Texte score / meilleur score dans la barre de détails. */
-.score,
-.high-score {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-}
-
 /* --- Plateau carré : grille 4x4 (taille logique posée en JS) --- */
 .grid-board {
   width: 100%;

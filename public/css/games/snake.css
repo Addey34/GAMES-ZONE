@@ -9,25 +9,26 @@
    Snake — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
    ========================================================================== */
 
-/* Texte score / high-score dans la barre de détails. */
-.score,
-.high-score {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-}
-
 /* --- Plateau --- */
 .play-board {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  display: grid;
-  /* Repli : la vraie taille est posée en JS via gridSize. */
-  grid-template: repeat(25, 1fr) / repeat(25, 1fr);
-  gap: 1px;
   background: var(--background-color-dark);
   border-radius: var(--border-radius-md);
   overflow: hidden;
+}
+
+/* Serpent & souris : positionnés en absolu et déplacés par transform (une case
+   = 100% de leur propre taille). --cell-size (= 100/gridSize %) est posé en JS. */
+.snake-head,
+.snake-body,
+.food {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--cell-size, 4%);
+  height: var(--cell-size, 4%);
 }
 
 /* Calque d'effets : couvre le plateau, persiste entre les rendus (le serpent et
@@ -51,18 +52,27 @@
   animation: scoreFloat 0.8s ease-out forwards;
 }
 
-/* --- Serpent --- */
+/* --- Serpent ---
+   Le glissement d'une case est animé par transition sur le transform, dont la
+   durée (--move-ms) est synchronisée sur la cadence de déplacement (posée en
+   JS). La bordure transparente recrée le « gap » d'1px d'antan entre segments
+   (box-sizing: border-box). */
 .snake-body {
   background-color: var(--primary-color);
+  border: 1px solid transparent;
+  background-clip: padding-box;
   border-radius: var(--border-radius-sm);
   box-shadow: var(--shadow-sm);
+  transition: transform var(--move-ms, 120ms) linear;
 }
 
 .snake-head {
-  position: relative;
   z-index: 2;
   background-color: var(--primary-color-dark);
+  border: 1px solid transparent;
+  background-clip: padding-box;
   border-radius: var(--border-radius-md);
+  transition: transform var(--move-ms, 120ms) linear;
 }
 
 /* Yeux du serpent (orientés selon la direction). */
@@ -115,7 +125,6 @@
    tiré au hasard à chaque apparition et posé en classe (.food--<variante>) par le
    rendu JS. Yeux et intérieur d'oreille restent fixes. */
 .food {
-  position: relative;
   --mouse-color: var(--mouse-gray);
 }
 .food--gray {

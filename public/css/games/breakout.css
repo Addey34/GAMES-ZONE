@@ -9,14 +9,6 @@
    Casse-brique — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
    ========================================================================== */
 
-/* Textes de la barre de détails (score, vies, meilleur). */
-.score,
-.lives,
-.high-score {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-}
-
 /* --- Plateau carré : balle/raquette/briques positionnées en % par le JS. --- */
 .breakout-board {
   position: relative;

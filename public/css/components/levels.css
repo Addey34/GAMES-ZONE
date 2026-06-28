@@ -1,0 +1,54 @@
+/* =============================================================================
+   Panneau « Niveaux » : la grille de niveaux affichée dans un .game-pop-panel
+   générique (voir panels.css). Les niveaux verrouillés sont désactivés.
+   Réutilisable par tout jeu déclarant `levels: true`.
+   ========================================================================== */
+
+.game-levels-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-xs);
+}
+
+.game-level {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--border-radius-md);
+  background: var(--background-color-light);
+  color: var(--text-color);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.game-level:hover:not(:disabled) {
+  background: var(--title-color, var(--primary-color));
+  color: var(--white-color);
+  transform: scale(1.06);
+}
+
+.game-level.is-selected {
+  outline: 2px solid var(--title-color, var(--primary-color));
+  outline-offset: 1px;
+}
+
+.game-level.is-locked {
+  color: var(--text-color-muted);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* Petit cadenas en coin sur les niveaux verrouillés. */
+.game-level.is-locked::after {
+  content: '🔒';
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  font-size: 0.6em;
+}

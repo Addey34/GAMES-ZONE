@@ -40,31 +40,6 @@
   border: 2px solid var(--border-color-light);
 }
 
-/* --- Bouton icône rond (ex: plein écran), partagé par les jeux --- */
-.btn-fullscreen {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: var(--primary-color);
-  color: var(--white-color);
-  font-size: var(--font-size-lg);
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition:
-    transform var(--transition-speed) ease,
-    box-shadow var(--transition-speed) ease,
-    background var(--transition-speed) ease;
-}
-
-.btn-fullscreen:hover {
-  transform: scale(1.1);
-  box-shadow: var(--shadow);
-}
-
 /* Desktop : boutons un peu plus généreux. */
 @media (min-width: 768px) {
   .btn {

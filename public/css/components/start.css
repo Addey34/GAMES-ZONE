@@ -1,0 +1,51 @@
+/* =============================================================================
+   Écran « Play » modulaire : bouton de lancement centré en surimpression du
+   plateau (monté dans .game-shell par src/shared/ui/startOverlay.ts). Partagé
+   par tous les jeux à démarrage automatique, pour ne lancer la partie qu'au clic.
+   ========================================================================== */
+
+.game-start {
+  position: absolute;
+  inset: 0;
+  /* Sous les boutons d'action en coin (z 5–6) pour qu'on puisse régler le jeu /
+     créer une session avant de lancer ; au-dessus du plateau seulement. */
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: inherit;
+}
+
+.game-start-button {
+  width: clamp(4.5rem, 18vw, 6rem);
+  height: clamp(4.5rem, 18vw, 6rem);
+  display: grid;
+  place-items: center;
+  padding-left: 0.35em; /* optically centre the play triangle */
+  border: none;
+  border-radius: 50%;
+  background: var(--title-color, var(--primary-color));
+  color: var(--white-color);
+  font-size: clamp(1.5rem, 7vw, 2.25rem);
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition:
+    transform var(--transition-speed) ease,
+    filter var(--transition-speed) ease;
+}
+
+.game-start-button:hover,
+.game-start-button:focus-visible {
+  transform: scale(1.06);
+  filter: brightness(1.08);
+}
+
+.game-start-label {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--white-color);
+  text-shadow: var(--shadow-sm);
+}

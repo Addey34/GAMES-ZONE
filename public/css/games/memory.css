@@ -9,23 +9,24 @@
    Memory — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
    ========================================================================== */
 
-/* Textes score / coups / meilleur score dans la barre de détails. */
-.score,
-.moves,
-.high-score {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-}
-
 /* --- Plateau carré : grille N×N (nombre de colonnes posé en JS) --- */
+/* `container-type: size` permet de dimensionner l'icône en `cqmin` (% du plus
+   petit côté du plateau), réglé en JS via --memory-icon selon la taille de grille
+   (4×4 / 6×6 / 8×8) pour que tout tienne. */
 .memory-board {
   width: 100%;
   aspect-ratio: 1;
+  container-type: size;
   display: grid;
-  gap: var(--spacing-sm);
+  gap: clamp(2px, 1cqmin, var(--spacing-sm));
   padding: var(--spacing-sm);
   background: var(--memory-board-bg);
   border-radius: var(--border-radius-md);
+}
+
+/* État de tour / chrono dans la barre de détails. */
+.memory-status.is-low {
+  font-weight: var(--font-weight-bolder);
 }
 
 /* --- Carte : bouton carré qui se retourne en 3D --- */
@@ -61,7 +62,8 @@
   justify-content: center;
   border-radius: var(--border-radius-sm);
   backface-visibility: hidden;
-  font-size: clamp(1.2rem, 8vmin, 2.4rem);
+  /* Taille d'icône relative au plateau (posée en JS selon la grille). */
+  font-size: var(--memory-icon, 8cqmin);
 }
 
 /* Dos (visible au repos) : motif uni avec un point d'interrogation discret. */

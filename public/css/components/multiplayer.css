@@ -1,0 +1,90 @@
+/* =============================================================================
+   Panneau « Multijoueur » : créer / rejoindre une session par code, état de
+   présence et bouton quitter. Rendu par src/shared/versus/multiplayerPanel.ts
+   dans un popover du shell ; générique pour tout jeu `multiplayer: true`.
+   ========================================================================== */
+
+.game-multiplayer-panel {
+  width: min(20rem, 85vw);
+}
+
+.mp-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.mp-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* Ligne « rejoindre » : champ code + bouton. */
+.mp-join {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.mp-join .input-field {
+  flex: 1;
+  min-width: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Code de session à partager : grand, lisible, copiable d'un coup d'œil. */
+.mp-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--background-color);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bolder);
+  letter-spacing: 0.2em;
+  font-variant-numeric: tabular-nums;
+  color: var(--title-color, var(--primary-color));
+}
+
+.mp-code-copy {
+  border: none;
+  background: transparent;
+  color: var(--text-color-muted);
+  font-size: var(--font-size-md);
+  cursor: pointer;
+}
+
+.mp-code-copy:hover {
+  color: var(--title-color, var(--primary-color));
+}
+
+/* Ligne d'état (en attente, connecté, erreur…). */
+.mp-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-color-muted);
+}
+
+.mp-status.is-error {
+  color: var(--error-color);
+}
+
+.mp-status.is-ready {
+  color: var(--secondary-color);
+}
+
+/* Petit séparateur « ou » entre créer et rejoindre. */
+.mp-or {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-color-disabled);
+}

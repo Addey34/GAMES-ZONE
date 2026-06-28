@@ -7,8 +7,8 @@
 
 /* =============================================================================
    Dactylographie — styles spécifiques au jeu.
-   La saisie (.input-field--game), le score et le chrono (.game-stat) viennent
-   des composants/layouts partagés.
+   La saisie (.input-field--game) et la barre de détails (.game-details, score +
+   chrono) viennent des composants/layouts partagés.
    ========================================================================== */
 
 /* Chrono dans la barre de détails partagée : devient rouge sous 10 s. */

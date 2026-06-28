@@ -7,8 +7,9 @@
   max-width: var(--content-width-max);
   margin: 0 auto;
   padding: 0 clamp(1rem, 2vw, 2rem);
-  /* Air en bas de page (l'offset gauche pour la sidebar est gere dans sidebar.css). */
-  padding-bottom: var(--spacing-lg);
+  /* Aligne le plancher du body sur le conteneur (qui vise 100dvh) : sans ça,
+     le 100vh de reset.css dépasse 100dvh sur mobile et recrée un vide en bas. */
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -36,7 +37,5 @@
   font-weight: var(--font-weight-bold);
   text-align: center;
   margin-bottom: clamp(1rem, 3vw, var(--spacing-lg));
-  /* Couleur unie du titre : accent propre à chaque page (bleu du site par
-     défaut), surchargé via --title-color sur .app-body de chaque jeu. */
   color: var(--title-color, var(--primary-color));
 }

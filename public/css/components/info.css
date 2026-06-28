@@ -3,19 +3,32 @@
      - à gauche : bouton « i » ; au SURVOL (ou focus clavier / tap mobile) il
        révèle le panneau d'aide « Comment jouer » (data-driven, liste `games`) ;
      - à droite : bouton plein écran.
+   Ce fichier porte aussi le STYLE COMMUN du bouton rond d'action (aide, plein
+   écran ET popovers .game-pop-toggle) ; le comportement déplié des popovers
+   vit dans panels.css.
    ========================================================================== */
 
-/* Conteneur de l'aide, ancré en haut à gauche. Le survol/focus de l'ensemble
-   (bouton + panneau) gère l'ouverture, sans JS. */
-.game-info {
+/* Cluster d'actions ancré en haut à gauche (niveaux + aide côte à côte). */
+.game-actions {
   position: absolute;
   top: var(--spacing-sm);
   left: var(--spacing-sm);
   z-index: 6;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
 }
 
+/* Conteneur de l'aide : le survol/focus de l'ensemble (bouton + panneau) gère
+   l'ouverture, sans JS. Positionné relativement pour ancrer son panneau. */
+.game-info {
+  position: relative;
+}
+
+/* Bouton rond d'action, commun à l'aide, au plein écran et aux popovers. */
 .game-info-toggle,
-.game-fullscreen-toggle {
+.game-fullscreen-toggle,
+.game-pop-toggle {
   width: 2rem;
   height: 2rem;
   display: grid;
@@ -42,7 +55,9 @@
 .game-info-toggle:hover,
 .game-info-toggle:focus-visible,
 .game-fullscreen-toggle:hover,
-.game-fullscreen-toggle:focus-visible {
+.game-fullscreen-toggle:focus-visible,
+.game-pop-toggle:hover,
+.game-pop-toggle:focus-visible {
   opacity: 1;
   transform: scale(1.08);
 }

@@ -63,6 +63,7 @@
   --color-tetris: #0891b2; /* cyan */
   --color-memory: #dc2626; /* rouge */
   --color-breakout: #db2777; /* magenta */
+  --color-pong: #14b8a6; /* teal */
 
   /* --- Espacements --- */
   --spacing-xxs: 0.125rem;
@@ -110,9 +111,9 @@
   --sidebar-bg: var(--background-color-dark);
   /* Taille du cadre de jeu unifié (.game-shell), commune à tous les jeux.
      Plafonnée en px ET en hauteur de viewport pour que le plateau carré tienne
-     toujours à l'écran et laisse de l'air autour (respiration verticale).
-     Le titre et le footer compacts libèrent assez de hauteur pour ~73vh. */
-  --game-frame-width: min(760px, 74vh);
+     toujours à l'écran sans défilement. On retranche ~7.5rem : la hauteur du
+     titre + barre de détails + paddings au-dessus du plateau carré. */
+  --game-frame-width: min(860px, calc(100vh - 7.5rem));
 
   /* --- Divers --- */
   --transition-speed: 0.3s;
@@ -162,4 +163,11 @@
   --breakout-brick-3: #ffd166;
   --breakout-brick-4: #06d6a0;
   --breakout-brick-5: #118ab2;
+
+  /* --- Pong : plateau, raquettes (joueur / adversaire) et balle --- */
+  --pong-board-bg: #0f172a;
+  --pong-net: rgba(255, 255, 255, 0.22);
+  --pong-paddle-player: #14b8a6;
+  --pong-paddle-opponent: #f43f5e;
+  --pong-ball: #ffffff;
 }

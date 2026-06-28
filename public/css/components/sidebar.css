@@ -72,13 +72,15 @@ body.sidebar-open .sidebar {
 }
 
 .sidebar-link,
+.sidebar-auth-item,
 .sidebar-brand {
   position: relative;
   border-radius: var(--border-radius-lg);
   margin-inline: var(--spacing-sm);
 }
 
-.sidebar-link {
+.sidebar-link,
+.sidebar-auth-item {
   display: flex;
   align-items: center;
   color: rgba(255, 255, 255, 0.78);
@@ -111,7 +113,8 @@ body.sidebar-open .sidebar {
   text-overflow: ellipsis;
 }
 
-.sidebar-link:hover {
+.sidebar-link:hover,
+.sidebar-auth-item:hover {
   background: rgba(255, 255, 255, 0.08);
   color: var(--white-color);
   transform: translateX(2px);
@@ -129,47 +132,47 @@ body.sidebar-open .sidebar {
 }
 
 /* --- Connexion (bouton Google / joueur connecte) ------------------------- */
-/* Pousse le bloc tout en bas du rail (flex column) et le centre. */
+/* Pousse le bloc tout en bas du rail ; l'item interne suit la meme dynamique
+   que les liens (icone fixe toujours visible + libelle revele au survol). */
 .sidebar-auth {
   margin-top: auto;
-  padding: var(--spacing-sm) var(--spacing-sm) 0;
+  padding-top: var(--spacing-sm);
+  /* Colonne flex : l'item s'etire sur toute la largeur (align-items: stretch
+     par defaut), donc la ligne entiere est cliquable comme les liens de jeu. */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-xs);
 }
 
-.sidebar-user {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--white-color);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-sm);
+/* Filet de separation entre les jeux et la connexion. */
+.sidebar-auth::before {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: 0 var(--spacing-sm) var(--spacing-xs);
+  background: rgba(255, 255, 255, 0.12);
 }
 
-/* Le widget Google a sa propre largeur : on l'empeche de deborder du rail. */
-.sidebar-auth > div {
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.sidebar-auth-btn {
-  width: 100%;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  color: var(--white-color);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: var(--border-radius-md);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
+/* Reset des styles bouton natif : l'apparence vient de .sidebar-auth-item
+   (mutualise avec .sidebar-link plus haut). padding:0 indispensable, sinon le
+   padding par defaut du <button> decale l'icone vs les liens de jeu (<a>). */
+.sidebar-auth-item {
+  width: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
-  transition: background var(--transition-speed) ease;
 }
-.sidebar-auth-btn:hover {
-  background: rgba(255, 255, 255, 0.16);
+
+/* Le widget Google rendu dans la boite d'icone reste centre et clippe. */
+.sidebar-auth-item .sidebar-icon {
+  overflow: hidden;
+}
+
+/* Icone de deconnexion : un peu plus petite pour equilibrer avec le logo G. */
+.sidebar-auth-item .sidebar-icon i {
+  font-size: 1.1em;
 }
 
 /* --- Bouton hamburger (mobile uniquement) -------------------------------- */
@@ -223,15 +226,6 @@ body.sidebar-open .sidebar {
     transition: opacity var(--transition-speed) ease;
   }
   .sidebar:hover .sidebar-label {
-    opacity: 1;
-  }
-
-  /* Connexion masquee en compact, revelee au survol (comme les libelles). */
-  .sidebar-auth {
-    opacity: 0;
-    transition: opacity var(--transition-speed) ease;
-  }
-  .sidebar:hover .sidebar-auth {
     opacity: 1;
   }
 

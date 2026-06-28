@@ -1,0 +1,85 @@
+/* =============================================================================
+   Overlay de fin de partie : remplace l'ancien modal. Il se superpose au
+   plateau (dans .game-shell, positionné) plutôt qu'en plein écran. Le score est
+   déjà sauvegardé automatiquement par le moteur ; l'overlay ne propose plus que
+   « Rejouer » / « Voir le classement » (et, une seule fois, le choix du pseudo).
+   ========================================================================== */
+
+.game-over {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: inherit;
+}
+
+.game-over-card {
+  width: min(22rem, 90%);
+  max-height: 90%;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  background: var(--white-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.game-over-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--title-color, var(--primary-color));
+}
+
+.game-over-body {
+  font-size: var(--font-size-md);
+  color: var(--text-color);
+}
+
+/* Multi-line rich content (e.g. Dactylo's word/letter/speed breakdown). */
+.game-over-body div {
+  margin: var(--spacing-xs) 0;
+}
+
+.game-over-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+/* Demande du pseudo (une seule fois). */
+.game-over-name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  text-align: left;
+}
+
+.game-over-name-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+}
+
+.game-over-name-row {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.game-over-name-row .input-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.game-over-name-done {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-color-muted);
+}
