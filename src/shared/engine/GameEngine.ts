@@ -1,6 +1,18 @@
-import { ScoreManager, ScoreEntry } from './ScoreManager.js';
-import { ModalManager } from './ModalManager.js';
-import { submitLeaderboardScore, listLeaderboardScores } from './nakama.js';
+import { ScoreManager, ScoreEntry } from '../score/ScoreManager.js';
+import { GameOverlay } from '../ui/gameOverlay.js';
+import { showStartOverlay, dismissStartOverlay } from '../ui/startOverlay.js';
+import { getPlayerName, setPlayerName } from '../net/playerName.js';
+import { submitLeaderboardScore, listLeaderboardScores } from '../net/nakama.js';
+import {
+  LevelsConfig,
+  LevelProgress,
+  isLevelUnlocked,
+  loadLocalProgress,
+  loadProgress,
+  saveProgress,
+} from '../levels/levels.js';
+import { setupLevelPanel, LevelPanelHandle } from '../levels/levelPanel.js';
+import { setupLeaderboardPanel, LeaderboardPanelHandle } from '../score/leaderboardPanel.js';
 
 /**
  * Configuration shared by all games, passed to the engine constructor.
@@ -16,14 +28,19 @@ export interface GameConfig {
   storageKey?: string;
   /** Number of entries kept in the leaderboard. */
   maxScores?: number;
-  /** id of the modal element in the HTML (default: 'scoreModal'). */
-  modalId?: string;
   /**
    * id of the online Nakama leaderboard for this game (e.g. 'snake'). When set,
    * scores are also submitted to and displayed from the backend; when omitted,
    * the game stays local-only (localStorage). Backend calls are best-effort.
    */
   leaderboardId?: string;
+  /**
+   * Level / unlocking configuration. When set (and the game calls
+   * {@link GameEngine.setupLevels} from `initialize`), the engine drives the
+   * "Niveaux" panel, level selection and progress persistence; the game only
+   * maps the selected level to its parameters via {@link GameEngine.onLevelSelected}.
+   */
+  levels?: LevelsConfig;
 }
 
 /**
@@ -46,8 +63,8 @@ export interface GameState {
  * `GameEngine` owns the `requestAnimationFrame` loop, the lifecycle
  * (`start`/`stop`/`pause`/`gameOver`) and the shared state ({@link GameState}). It
  * also composes the collaborators {@link ScoreManager} (leaderboard) and
- * {@link ModalManager} (game-over modal), and carries the whole game-over flow
- * (Save/Restart modal, score saving, score table).
+ * {@link GameOverlay} (game-over overlay), and carries the whole game-over flow
+ * (the optional save prompt, the Rejouer/Classement overlay, score table).
  *
  * A subclass must implement {@link initialize}, {@link update},
  * {@link render}, {@link handleInput} and {@link reset}, and only overrides the
@@ -77,8 +94,19 @@ export abstract class GameEngine {
 
   /** Persisted leaderboard of the game. */
   protected scoreManager: ScoreManager;
-  /** Game-over modal. */
-  protected modalManager: ModalManager;
+  /** Game-over overlay (replaces the old modal). */
+  protected overlay: GameOverlay;
+  /** Handle to the "Classement" panel, when the game opts into one. */
+  private leaderboardPanel: LeaderboardPanelHandle | null = null;
+  /** Whether the leaderboard panel has been wired (lazy, once). */
+  private leaderboardPanelReady = false;
+
+  /** Currently selected level (1 when the game has no levels). */
+  protected currentLevel: number = 1;
+  /** Player progress for the level system (null until {@link setupLevels}). */
+  private levelProgress: LevelProgress | null = null;
+  /** Handle to refresh the level panel after progress changes. */
+  private levelPanel: LevelPanelHandle | null = null;
 
   /**
    * @param config Game configuration (default values applied).
@@ -101,7 +129,7 @@ export abstract class GameEngine {
       this.config.storageKey ?? 'scores',
       this.config.maxScores ?? 10
     );
-    this.modalManager = new ModalManager(this.config.modalId ?? 'scoreModal');
+    this.overlay = new GameOverlay();
   }
 
   /** DOM binding, listeners and first render. Runs only once. */
@@ -149,6 +177,8 @@ export abstract class GameEngine {
    */
   start(): void {
     if (this.state.isRunning) return;
+    // Clear the Play screen if the loop is starting through any path.
+    dismissStartOverlay();
 
     this.state.isRunning = true;
     this.state.isGameOver = false;
@@ -156,6 +186,16 @@ export abstract class GameEngine {
     this.lastTime = performance.now();
 
     this.gameLoop();
+  }
+
+  /**
+   * Shows the modular Play screen and starts the loop only when the player clicks
+   * it. Called by `bootstrapGame` instead of an immediate auto-start, so no game
+   * begins before the player decides. Games with their own event-based start
+   * (`autoStart: false`, e.g. Dactylo) bypass this; override for a custom start.
+   */
+  presentStartScreen(): void {
+    showStartOverlay(() => this.start());
   }
 
   /**
@@ -194,7 +234,100 @@ export abstract class GameEngine {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
+    // Release the pointer (cursor-driven games grab it for immersive play), so
+    // the game-over overlay buttons are clickable again.
+    document.exitPointerLock?.();
+    this.updateLevelProgress();
     this.onGameOver();
+  }
+
+  /**
+   * Sets up the level system: loads progress (locally for an instant read, then
+   * merged with Nakama Storage), selects the saved level, builds the "Niveaux"
+   * panel and applies the level's parameters. Games with a `levels` config call
+   * this once from `initialize()`. No-op when no levels are configured.
+   */
+  protected setupLevels(): void {
+    const config = this.config.levels;
+    if (!config) return;
+
+    // Instant local read so the panel works offline; seed the best score from
+    // the local leaderboard so existing players keep their score-based unlocks.
+    this.levelProgress = loadLocalProgress(config.gameKey);
+    const topLocal = this.scoreManager.getScores()[0]?.score ?? 0;
+    this.levelProgress.bestScore = Math.max(this.levelProgress.bestScore, topLocal);
+
+    this.currentLevel = this.clampSelectedLevel(this.levelProgress.selected);
+    this.onLevelSelected(this.currentLevel);
+
+    this.levelPanel = setupLevelPanel({
+      config,
+      progress: this.levelProgress,
+      selected: this.currentLevel,
+      onSelect: (id) => this.selectLevel(id),
+    });
+
+    // Cross-device progress (best-effort): merge, then refresh the lock states.
+    loadProgress(config.gameKey).then((remote) => {
+      remote.bestScore = Math.max(remote.bestScore, topLocal);
+      this.levelProgress = remote;
+      this.levelPanel?.refresh(remote);
+    });
+  }
+
+  /**
+   * Applies a player-picked level: stores it, persists the choice, lets the game
+   * reconfigure ({@link onLevelSelected}), then restarts from a clean state.
+   */
+  private selectLevel(levelId: number): void {
+    const config = this.config.levels;
+    if (!config || !this.levelProgress) return;
+    this.currentLevel = levelId;
+    this.levelProgress.selected = levelId;
+    saveProgress(config.gameKey, this.levelProgress);
+    this.onLevelSelected(levelId);
+    this.reset();
+    this.start();
+  }
+
+  /** Clamps a saved level to one that is actually unlocked (else level 1). */
+  private clampSelectedLevel(levelId: number): number {
+    const config = this.config.levels;
+    if (!config || !this.levelProgress) return 1;
+    const level = config.levels.find((l) => l.id === levelId);
+    return level && isLevelUnlocked(level, this.levelProgress) ? levelId : 1;
+  }
+
+  /**
+   * Updates and persists level progress at game over: records the best score and,
+   * if the current level was cleared ({@link didWinLevel}), unlocks the next one.
+   */
+  private updateLevelProgress(): void {
+    const config = this.config.levels;
+    if (!config || !this.levelProgress) return;
+    this.levelProgress.bestScore = Math.max(this.levelProgress.bestScore, this.state.score);
+    if (this.didWinLevel()) {
+      this.levelProgress.cleared = Math.max(this.levelProgress.cleared, this.currentLevel);
+    }
+    saveProgress(config.gameKey, this.levelProgress);
+    this.levelPanel?.refresh(this.levelProgress);
+  }
+
+  /**
+   * Maps the selected level to the game's parameters (speed, difficulty…).
+   * Hook for level-based games to override; must not start the loop.
+   */
+  protected onLevelSelected(_levelId: number): void {
+    // Hook for subclasses with a `levels` config.
+  }
+
+  /**
+   * Whether the current level counts as cleared (so the next unlocks). Default
+   * `false`; games with a win condition override it (e.g. Pac-Man returns its
+   * "all pellets eaten" win).
+   */
+  protected didWinLevel(): boolean {
+    return false;
   }
 
   /**
@@ -238,57 +371,75 @@ export abstract class GameEngine {
   }
 
   /**
-   * Entry point of the game-over flow; shows the modal by default.
-   * Override to add side effects (e.g. disabling an input).
+   * Entry point of the game-over flow; shows the game-over overlay (with a save
+   * prompt for leaderboard games) by default. Override to add side effects (e.g.
+   * disabling an input).
    */
   protected onGameOver(): void {
-    this.showGameOverModal();
+    this.showGameOverOverlay();
   }
 
   /**
-   * Builds and shows the game-over modal (title, details, name field if the
-   * score makes the leaderboard, Save/Restart buttons).
+   * Shows the game-over overlay: title, score/details, and — when the game has a
+   * leaderboard and the score makes the top-N board — a save prompt (pseudo
+   * pre-filled and editable). The engine never auto-saves: the player always
+   * decides whether to record the score (and under which name). Always shows
+   * "Rejouer" (+ "Voir le classement" when the game has a leaderboard panel).
    */
-  protected showGameOverModal(): void {
+  protected showGameOverOverlay(): void {
+    // Offer the save prompt only when the game actually shows a leaderboard (e.g.
+    // not Pac-Man, which is level-based) and the score makes the top-N board.
+    const savable =
+      this.leaderboardPanel !== null && this.scoreManager.isHighScore(this.state.score);
+
     const content = this.getGameOverContent();
-    this.modalManager.show({
+    const buttons = [
+      {
+        text: 'Rejouer',
+        primary: true,
+        onClick: () => {
+          this.overlay.hide();
+          this.restartAfterGameOver();
+        },
+      },
+    ];
+    if (this.leaderboardPanel) {
+      buttons.push({
+        text: 'Voir le classement',
+        primary: false,
+        onClick: () => {
+          this.overlay.hide();
+          this.leaderboardPanel?.open();
+        },
+      });
+    }
+
+    this.overlay.show({
       title: this.getGameOverTitle(),
-      content,
-      showScore: content === undefined,
-      score: this.state.score,
-      showUsernameInput: this.scoreManager.isHighScore(this.state.score),
-      buttons: [
-        {
-          text: 'Sauvegarder',
-          primary: true,
-          onClick: () => this.handleSaveScore(),
-        },
-        {
-          text: 'Recommencer',
-          primary: false,
-          onClick: () => {
-            this.modalManager.hide();
-            this.restartAfterGameOver();
-          },
-        },
-      ],
+      bodyHtml: content,
+      score: content === undefined ? this.state.score : undefined,
+      prompt: savable
+        ? {
+            label: 'Enregistre ton score au classement',
+            placeholder: 'Pseudo',
+            value: getPlayerName() ?? '',
+            submitLabel: 'Enregistrer',
+            onSubmit: (value) => {
+              setPlayerName(value);
+              this.saveScore(value);
+            },
+          }
+        : undefined,
+      buttons,
     });
   }
 
-  /**
-   * Saves the score if a name is entered and the score makes the leaderboard,
-   * then closes the modal and restarts a game.
-   */
-  private handleSaveScore(): void {
-    const username = this.modalManager.getUsername();
-    if (username && this.scoreManager.isHighScore(this.state.score)) {
-      const entry = this.buildScoreEntry(username);
-      this.scoreManager.saveScore(entry);
-      this.submitOnlineScore(entry);
-      this.onScoreSaved();
-    }
-    this.modalManager.hide();
-    this.restartAfterGameOver();
+  /** Saves a score entry locally and (best-effort) online, then refreshes. */
+  private saveScore(username: string): void {
+    const entry = this.buildScoreEntry(username);
+    this.scoreManager.saveScore(entry);
+    this.submitOnlineScore(entry);
+    this.onScoreSaved();
   }
 
   /**
@@ -306,14 +457,14 @@ export abstract class GameEngine {
   }
 
   /**
-   * Title of the game-over modal. Override to customize it (e.g. "You won!").
+   * Title of the game-over overlay. Override to customize it (e.g. "You won!").
    */
   protected getGameOverTitle(): string {
     return 'Game Over !';
   }
 
   /**
-   * Rich HTML injected into `.score-details`. Return `undefined` (default) to
+   * Rich HTML injected into the overlay body. Return `undefined` (default) to
    * show a plain "Score: N".
    */
   protected getGameOverContent(): string | undefined {
@@ -343,6 +494,12 @@ export abstract class GameEngine {
    * for the initial display; re-rendered automatically after each save.
    */
   protected renderScoreTable(): void {
+    // Wire the "Classement" panel on first render (no-op for games without one).
+    if (!this.leaderboardPanelReady) {
+      this.leaderboardPanelReady = true;
+      this.leaderboardPanel = setupLeaderboardPanel();
+    }
+
     // Immediate paint from the local leaderboard (also the offline fallback).
     this.renderScoreRows(this.scoreManager.getScores());
 

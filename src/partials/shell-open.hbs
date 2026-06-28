@@ -15,32 +15,126 @@
       {{#if key}}<span class="game-icon" style="--game-icon: url(/icons/{{key}}.svg)" aria-hidden="true"></span>{{/if}}
     </h1>
     {{#if game}}
-    {{#if game.controls}}
-    <!-- Aide : panneau révélé au survol (ou au focus clavier / tap mobile), en CSS pur. -->
-    <div class="game-info">
-      <button
-        class="game-info-toggle"
-        type="button"
-        aria-label="Aide : comment jouer"
-        aria-controls="gameInfoPanel"
-      >
-        <i class="fas fa-circle-info" aria-hidden="true"></i>
-      </button>
-      <div class="game-info-panel" id="gameInfoPanel" role="dialog" aria-label="Comment jouer">
-        <h2 class="game-info-title">Comment jouer</h2>
-        <ul class="game-info-list">
-          {{#each game.controls}}
-          <li class="game-info-item">
-            <span class="game-info-keys">{{{this.keys}}}</span>
-            <span class="game-info-action">{{this.action}}</span>
-          </li>
-          {{/each}}
-        </ul>
+    <!-- Barre d'actions, coin haut-gauche : niveaux (optionnel), aide, puis classement. -->
+    <div class="game-actions">
+      {{#if game.controls}}
+      <!-- Aide : panneau révélé au survol (ou au focus clavier / tap mobile), en CSS pur. -->
+      <div class="game-info">
+        <button
+          class="game-info-toggle"
+          type="button"
+          aria-label="Aide : comment jouer"
+          aria-controls="gameInfoPanel"
+        >
+          <i class="fas fa-circle-info" aria-hidden="true"></i>
+        </button>
+        <div class="game-info-panel" id="gameInfoPanel" role="dialog" aria-label="Comment jouer">
+          <h2 class="game-info-title">Comment jouer</h2>
+          <ul class="game-info-list">
+            {{#each game.controls}}
+            <li class="game-info-item">
+              <span class="game-info-keys">{{{this.keys}}}</span>
+              <span class="game-info-action">{{this.action}}</span>
+            </li>
+            {{/each}}
+          </ul>
+        </div>
       </div>
+      {{/if}}
+      {{#if game.settings}}
+      <!-- Paramètres : popover de réglages (rempli par settingsPanel.ts, ex. difficulté du bot). -->
+      <div class="game-pop" id="settingsControl">
+        <button
+          class="game-pop-toggle"
+          type="button"
+          id="settingsToggle"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="settingsPanel"
+          aria-label="Paramètres"
+        >
+          <i class="fas fa-sliders" aria-hidden="true"></i>
+        </button>
+        <div class="game-pop-panel" id="settingsPanel" role="dialog" aria-label="Paramètres"></div>
+      </div>
+      {{/if}}
+      {{#if game.levels}}
+      <!-- Niveaux : bouton icône compact, déplie au clic le panneau (rempli par levelPanel.ts). -->
+      <div class="game-pop" id="levelControl">
+        <button
+          class="game-pop-toggle"
+          type="button"
+          id="levelToggle"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="levelPanel"
+          aria-label="Niveaux"
+        >
+          <i class="fas fa-layer-group" aria-hidden="true"></i>
+          <span class="game-pop-current" aria-hidden="true">1</span>
+        </button>
+        <div class="game-pop-panel" id="levelPanel" role="dialog" aria-label="Choisir un niveau"></div>
+      </div>
+      {{/if}}
+      {{#if game.leaderboard}}
+      <!-- Classement : même popover, contient la table des scores (remplie par le moteur). -->
+      <div class="game-pop" id="leaderboardControl">
+        <button
+          class="game-pop-toggle"
+          type="button"
+          id="leaderboardToggle"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="leaderboardPanel"
+          aria-label="Classement"
+        >
+          <i class="fas fa-trophy" aria-hidden="true"></i>
+        </button>
+        <div
+          class="game-pop-panel game-leaderboard-panel"
+          id="leaderboardPanel"
+          role="dialog"
+          aria-label="Classement"
+        >
+          <p class="game-pop-title">Classement</p>
+          <table id="scoreTable" class="score-table">
+            <thead>
+              <tr>
+                <th>Joueur</th>
+                <th>Score</th>
+                {{#if game.speed}}<th>Vitesse</th>{{/if}}
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      {{/if}}
+      {{#if game.multiplayer}}
+      <!-- Multijoueur : popover de session (créer / rejoindre par code), rempli par multiplayerPanel.ts. -->
+      <div class="game-pop" id="multiplayerControl">
+        <button
+          class="game-pop-toggle"
+          type="button"
+          id="multiplayerToggle"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="multiplayerPanel"
+          aria-label="Multijoueur"
+        >
+          <i class="fas fa-users" aria-hidden="true"></i>
+        </button>
+        <div
+          class="game-pop-panel game-multiplayer-panel"
+          id="multiplayerPanel"
+          role="dialog"
+          aria-label="Multijoueur"
+        ></div>
+      </div>
+      {{/if}}
     </div>
-    {{/if}}
-    <button class="game-fullscreen-toggle" type="button" aria-label="Plein écran" aria-pressed="false">
+    <button class="game-fullscreen-toggle" type="button" aria-label="Mode immersif" aria-pressed="false">
       <i class="fas fa-expand" aria-hidden="true"></i>
     </button>
-    <script type="module" src="/shared/fullscreen.ts"></script>
+    <script type="module" src="/shared/ui/zenMode.ts"></script>
     {{/if}}

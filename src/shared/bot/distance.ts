@@ -1,4 +1,4 @@
-import { Vec2 } from '../input.js';
+import { Vec2 } from '../engine/input.js';
 
 /**
  * Manhattan (grid) distance between two cells: the number of orthogonal steps.

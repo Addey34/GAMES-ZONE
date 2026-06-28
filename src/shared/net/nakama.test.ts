@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildScoreMetadata, recordToScoreEntry, googleTokenName } from './nakama.js';
-import { ScoreEntry } from './ScoreManager.js';
+import { ScoreEntry } from '../score/ScoreManager.js';
 
 /** A score entry enriched like Dactylographie's (extra typing metrics). */
 interface TypingEntry extends ScoreEntry {

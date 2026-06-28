@@ -12,11 +12,12 @@ interface BootstrapOptions {
  * Startup shared by all games.
  *
  * On `DOMContentLoaded`, instantiates the game via `factory`, initializes it
- * (`initialize()` may be asynchronous), starts the loop (unless
- * `autoStart: false`), then exposes the instance on `window[globalName]` for
- * debugging.
+ * (`initialize()` may be asynchronous), and — unless `autoStart: false` — shows
+ * the modular Play screen ({@link GameEngine.presentStartScreen}) so the loop
+ * only begins on the player's click. In development, exposes the instance on
+ * `window[globalName]` for debugging (stripped from production builds).
  *
- * @param globalName Name under which to expose the instance on `window`.
+ * @param globalName Name under which to expose the instance on `window` (dev only).
  * @param factory Factory creating the game instance.
  * @param options Startup options.
  */
@@ -29,8 +30,10 @@ export function bootstrapGame(
     const game = factory();
     await game.initialize();
     if (options.autoStart !== false) {
-      game.start();
+      game.presentStartScreen();
     }
-    (window as unknown as Record<string, unknown>)[globalName] = game;
+    if (import.meta.env.DEV) {
+      (window as unknown as Record<string, unknown>)[globalName] = game;
+    }
   });
 }

@@ -1,32 +1,8 @@
 <!--
-  Chrome commun à tous les jeux : modal de fin, tableau des scores, sidebar.
-  Le contenu du modal (titre, détails, boutons) est rempli par ModalManager ;
-  on ne garde donc que la coquille avec les hooks (ids/classes) attendus.
-  Param `speed=true` ajoute la colonne Vitesse (jeu de dactylographie).
+  Chrome commun à tous les jeux : uniquement la sidebar globale désormais.
+  Le classement vit dans le panneau « Classement » du shell (shell-open) pour
+  les jeux qui l'activent (`leaderboard: true`), et la fin de partie passe par
+  l'overlay géré en JS (src/shared/ui/gameOverlay.ts) — plus de modal ici.
   La navigation (retour accueil + autres jeux) vit dans la sidebar globale.
 -->
-<div id="scoreModal" class="modal" style="display: none">
-  <div class="modal-content">
-    <h2></h2>
-    <div class="score-details"></div>
-    <input
-      type="text"
-      id="usernameInput"
-      class="input-field"
-      placeholder="Entrez votre nom"
-      required
-    />
-    <div class="button-group"></div>
-  </div>
-</div>
-<table id="scoreTable" class="score-table">
-  <thead>
-    <tr>
-      <th>Joueur</th>
-      <th>Score</th>
-      {{#if speed}}<th>Vitesse</th>{{/if}}
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
 {{> sidebar}}

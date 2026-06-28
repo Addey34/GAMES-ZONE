@@ -1,4 +1,5 @@
 import { GOOGLE_CLIENT_ID, loginWithGoogleToken, getCurrentUser, logout } from './nakama.js';
+import { clearLocalProgress } from '../levels/levels.js';
 
 /**
  * Drives the "Sign in with Google" widget in the sidebar (`#authArea`), loaded
@@ -17,6 +18,7 @@ interface GoogleIdApi {
     callback: (response: GoogleCredentialResponse) => void;
   }): void;
   renderButton(parent: HTMLElement, options: Record<string, string>): void;
+  prompt(): void;
 }
 declare const google: { accounts: { id: GoogleIdApi } };
 
@@ -49,26 +51,50 @@ function loadGoogleScript(): Promise<void> {
 async function renderAuthArea(area: HTMLElement): Promise<void> {
   const user = await getCurrentUser();
   if (user?.loggedIn) {
+    // Rail-style row: a sign-out icon (always visible, even on the compact rail)
+    // + the player's name as the label (revealed on hover, like the game links).
     area.innerHTML = `
-      <span class="sidebar-user" title="Connecté">${escapeHtml(user.displayName)}</span>
-      <button class="sidebar-auth-btn" type="button" id="logoutBtn">Se déconnecter</button>`;
+      <button
+        class="sidebar-auth-item"
+        type="button"
+        id="logoutBtn"
+        title="Se déconnecter (${escapeHtml(user.displayName)})"
+        aria-label="Se déconnecter"
+      >
+        <span class="sidebar-icon"><i class="fas fa-right-from-bracket" aria-hidden="true"></i></span>
+        <span class="sidebar-label">${escapeHtml(user.displayName)}</span>
+      </button>`;
     area.querySelector('#logoutBtn')?.addEventListener('click', () => {
+      // Drop this browser's cached unlocks so the next player starts clean.
+      clearLocalProgress();
       logout();
       location.reload();
     });
   } else {
-    area.innerHTML = '<div id="gsiButton"></div>';
+    // Same rail-style row: the real Google button (its "G" logo) lives in the
+    // always-visible icon box, and the "Se connecter" label is revealed on hover.
+    area.innerHTML = `
+      <div class="sidebar-auth-item" id="loginItem">
+        <span class="sidebar-icon" id="gsiButton"></span>
+        <span class="sidebar-label">Se connecter</span>
+      </div>`;
     const target = area.querySelector<HTMLElement>('#gsiButton');
     if (target) {
       // Icon-only button: compact and width-independent, so it fits the narrow
-      // rail (Google ignores attempts to shrink the text variant below its label).
+      // icon box (Google ignores attempts to shrink the text variant below its label).
       google.accounts.id.renderButton(target, {
         type: 'icon',
         theme: 'filled_blue',
-        size: 'large',
+        size: 'medium',
         shape: 'circle',
       });
     }
+    // Clicking the row's label (not the real Google button) opens the Google
+    // prompt too, so the whole expanded row is actionable.
+    area.querySelector('#loginItem')?.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('#gsiButton')) return;
+      google.accounts.id.prompt();
+    });
   }
 }
 
@@ -81,7 +107,12 @@ async function init(): Promise<void> {
       client_id: GOOGLE_CLIENT_ID,
       callback: (response) => {
         loginWithGoogleToken(response.credential)
-          .then(() => location.reload())
+          .then((switched) => {
+            // Switched to a different existing account → forget the previous
+            // player's local unlocks so they don't bleed into this account.
+            if (switched) clearLocalProgress();
+            location.reload();
+          })
           .catch((err) => console.warn('[login] connexion Google échouée:', err));
       },
     });
