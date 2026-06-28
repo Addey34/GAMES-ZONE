@@ -1,5 +1,5 @@
-import { GameEngine, GameConfig } from '../shared/GameEngine.js';
-import { ScoreEntry } from '../shared/ScoreManager.js';
+import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
+import { ScoreEntry } from '../shared/score/ScoreManager.js';
 
 /**
  * Configuration specific to the typing game.
@@ -85,8 +85,8 @@ export class DactylographieGame extends GameEngine {
 
   /**
    * Wires up the listeners specific to this game: typing in the input field
-   * (Space validates the word, the first keystroke starts the timer). The modal
-   * buttons are wired by the `ModalManager` via {@link GameEngine.onGameOver}.
+   * (Space validates the word, the first keystroke starts the timer). The
+   * game-over overlay is wired by the engine via {@link GameEngine.onGameOver}.
    */
   protected setupEventListeners(): void {
     if (this.wordInput) {
@@ -290,6 +290,9 @@ export class DactylographieGame extends GameEngine {
    */
   reset(): void {
     this.stop();
+    // Re-shuffle the list so "Rejouer" yields a different word order (the list is
+    // only loaded/shuffled once, in initialize()).
+    this.shuffleArray(this.words);
     this.currentWordIndex = 0;
     this.timeLeft = this.timeLimit;
     this.letterCount = 0;

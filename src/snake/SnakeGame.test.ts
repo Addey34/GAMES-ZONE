@@ -57,20 +57,35 @@ describe('Snake', () => {
     expect(snake.getBody()[0]).toEqual({ x: 3, y: 1 }); // kept going right
   });
 
-  it('cannot reverse via two quick inputs within the same tick (regression)', () => {
+  it('queues two quick turns and applies them on successive moves', () => {
     const snake = snakeAt(0, 10); // facing right, head (1,1)
     snake.setDirection('right');
     snake.move({ x: -1, y: -1 }); // travelling right, head (2,1)
 
-    // Going right, press up then left before the next move. Naively chaining
-    // these (up then left, since left is not opposite of up) would flip the
-    // snake to 'left' and make it cross itself. It must stay on course.
+    // Going right, press up then left to round a corner before the next move.
+    // Both are valid turns (up vs right, then left vs up), so they must each
+    // register — one per move — instead of the first being lost (responsiveness).
     snake.setDirection('up');
     snake.setDirection('left');
-    snake.move({ x: -1, y: -1 });
 
-    expect(snake.getDirection()).toBe('right');
-    expect(snake.getBody()[0]).toEqual({ x: 3, y: 1 });
+    snake.move({ x: -1, y: -1 }); // applies 'up'
+    expect(snake.getDirection()).toBe('up');
+
+    snake.move({ x: -1, y: -1 }); // applies 'left'
+    expect(snake.getDirection()).toBe('left');
+  });
+
+  it('rejects a reversal queued behind a turn (no self-cross)', () => {
+    const snake = snakeAt(0, 10); // facing right, head (1,1)
+    snake.setDirection('right');
+    snake.move({ x: -1, y: -1 }); // travelling right, head (2,1)
+
+    snake.setDirection('up'); // valid turn → queued
+    snake.setDirection('down'); // opposite of the projected heading (up) → rejected
+
+    snake.move({ x: -1, y: -1 }); // applies 'up'
+    snake.move({ x: -1, y: -1 }); // 'down' was never queued → keeps going up
+    expect(snake.getDirection()).toBe('up');
   });
 
   it('crosses the right edge and reappears on the left (wrap)', () => {

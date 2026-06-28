@@ -1,4 +1,4 @@
-import { Direction, Vec2, DIRECTION_DELTAS } from '../shared/input.js';
+import { Direction, Vec2, DIRECTION_DELTAS } from '../shared/engine/input.js';
 import { Difficulty, rollChase } from '../shared/bot/difficulty.js';
 import { manhattan } from '../shared/bot/distance.js';
 

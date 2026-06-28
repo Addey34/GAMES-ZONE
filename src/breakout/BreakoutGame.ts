@@ -1,4 +1,5 @@
-import { GameEngine, GameConfig } from '../shared/GameEngine.js';
+import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
+import { setupPaddlePointer } from '../shared/engine/pointerControl.js';
 
 /**
  * Configuration specific to Breakout.
@@ -91,13 +92,12 @@ export class BreakoutGame extends GameEngine {
 
   private scoreElement: HTMLElement | null = null;
   private livesElement: HTMLElement | null = null;
-  private highScoreElement: HTMLElement | null = null;
 
   /**
    * @param config Game configuration (brick rows/columns, lives).
    */
   constructor(config: BreakoutConfig = {}) {
-    super({ ...config, storageKey: 'breakout-high-scores', leaderboardId: 'breakout' });
+    super({ ...config, storageKey: 'breakout-high-scores' });
     this.brickRows = config.brickRows || 5;
     this.brickCols = config.brickCols || 9;
     this.maxLives = config.lives || 3;
@@ -112,11 +112,9 @@ export class BreakoutGame extends GameEngine {
     this.boardElement = document.getElementById('board');
     this.scoreElement = document.querySelector('.score');
     this.livesElement = document.querySelector('.lives');
-    this.highScoreElement = document.querySelector('.high-score');
 
     this.buildBoard();
     this.setupEventListeners();
-    this.renderScoreTable();
     this.updateScoreDisplay();
     this.resetBall();
     this.render();
@@ -125,12 +123,23 @@ export class BreakoutGame extends GameEngine {
   /**
    * Wires up the controls specific to this game: holding the arrows/A-D
    * (continuous movement handled in {@link update}) and following the mouse/finger
-   * on the board, instead of the engine's one-shot keyboard listening.
+   * (via the shared {@link setupPaddlePointer}, which keeps tracking off-board and
+   * grabs the pointer in immersive mode), instead of the engine's one-shot
+   * keyboard listening.
    */
   protected setupEventListeners(): void {
     document.addEventListener('keydown', (e) => this.setKey(e, true));
     document.addEventListener('keyup', (e) => this.setKey(e, false));
-    this.boardElement?.addEventListener('pointermove', (e) => this.onPointerMove(e));
+    if (this.boardElement) {
+      setupPaddlePointer({
+        board: this.boardElement,
+        axis: 'x',
+        onMove: (ratio) => {
+          this.paddleX = this.clampPaddle(ratio * BOARD);
+        },
+        getRatio: () => this.paddleX / BOARD,
+      });
+    }
   }
 
   /**
@@ -147,17 +156,6 @@ export class BreakoutGame extends GameEngine {
       this.keys.right = pressed;
       event.preventDefault();
     }
-  }
-
-  /**
-   * Places the paddle's center under the pointer (coordinate converted into
-   * logical board units).
-   */
-  private onPointerMove(event: PointerEvent): void {
-    if (!this.boardElement) return;
-    const rect = this.boardElement.getBoundingClientRect();
-    const ratio = (event.clientX - rect.left) / rect.width;
-    this.paddleX = this.clampPaddle(ratio * BOARD);
   }
 
   /**
@@ -451,9 +449,6 @@ export class BreakoutGame extends GameEngine {
     }
     if (this.livesElement) {
       this.livesElement.textContent = `Vies: ${this.lives}`;
-    }
-    if (this.highScoreElement) {
-      this.highScoreElement.textContent = `Meilleur: ${this.scoreManager.getHighScore()}`;
     }
   }
 

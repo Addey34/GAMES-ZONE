@@ -1,4 +1,4 @@
-import { GameEngine, GameConfig } from '../shared/GameEngine.js';
+import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
 import {
   Direction,
   Vec2 as Position,
@@ -6,9 +6,26 @@ import {
   OPPOSITE_DIRECTION,
   keyboardDirection,
   setupSwipe,
-} from '../shared/input.js';
+} from '../shared/engine/input.js';
 import { Difficulty } from '../shared/bot/difficulty.js';
+import { LevelDef } from '../shared/levels/levels.js';
 import { GHOST_PERSONALITIES, chooseGhostDirection } from './ghostAi.js';
+
+/** Number of Pac-Man levels offered in the "Niveaux" panel. */
+const PACMAN_LEVEL_COUNT = 30;
+
+/**
+ * Pac-Man's levels: level 1 is open, the rest unlock by clearing the previous
+ * one (win = eat every pellet). Each level only differs by its parameters,
+ * derived from the number (see {@link PacmanGame.onLevelSelected}).
+ */
+function buildPacmanLevels(): LevelDef[] {
+  const levels: LevelDef[] = [];
+  for (let id = 1; id <= PACMAN_LEVEL_COUNT; id++) {
+    levels.push({ id, unlock: id === 1 ? { type: 'open' } : { type: 'sequential' } });
+  }
+  return levels;
+}
 
 /**
  * Configuration specific to the Pac-Man game.
@@ -31,9 +48,9 @@ interface Ghost extends Position {
  * Pac-Man game.
  *
  * Pac-Man travels across a closed map (off-grid cells count as walls) eating the
- * food; three ghosts move randomly. The game is won when all the food is eaten,
- * lost on contact with a ghost. Nothing moves until the player presses a first
- * key.
+ * food; three ghosts chase him via their AI (see `ghostAi.ts`), pursuing harder
+ * as the difficulty rises. The game is won when all the food is eaten, lost on
+ * contact with a ghost. Nothing moves until the player presses a first key.
  */
 export class PacmanGame extends GameEngine {
   /** Pac-Man's starting cell (never counted as food). */
@@ -62,7 +79,13 @@ export class PacmanGame extends GameEngine {
    * @param config Game configuration (movement speed).
    */
   constructor(config: PacmanConfig = {}) {
-    super({ ...config, storageKey: 'pacman-high-scores', leaderboardId: 'pacman' });
+    // Level-based game: no leaderboard panel (see its `games` entry), so no
+    // `leaderboardId` — progress is tracked through the level system instead.
+    super({
+      ...config,
+      storageKey: 'pacman-high-scores',
+      levels: { gameKey: 'pacman', levels: buildPacmanLevels() },
+    });
     this.gameSpeed = config.gameSpeed || 200;
     this.difficulty = config.difficulty ?? 'medium';
 
@@ -116,6 +139,7 @@ export class PacmanGame extends GameEngine {
     this.scoreElement = document.getElementById('score');
 
     this.setupEventListeners();
+    this.setupLevels();
 
     // Touch control (mobile): swiping on the map steers Pac-Man.
     if (this.mapElement) {
@@ -131,7 +155,6 @@ export class PacmanGame extends GameEngine {
     this.createMap();
     this.render();
     this.updateScoreDisplay();
-    this.renderScoreTable();
   }
 
   /**
@@ -318,6 +341,15 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
+   * No "Jouer" overlay: the loop can run from load because Pac-Man and the
+   * ghosts stay still until the first key press (see `hasStarted`), so an
+   * unintended start is already blocked. Start the loop directly.
+   */
+  presentStartScreen(): void {
+    this.start();
+  }
+
+  /**
    * Remembers the requested direction (deferred turn) and starts the game on the
    * first key press.
    */
@@ -366,6 +398,20 @@ export class PacmanGame extends GameEngine {
    */
   protected getGameOverTitle(): string {
     return this.pendingWin ? 'Vous avez gagné !' : 'Game Over !';
+  }
+
+  /**
+   * Maps the selected level to a steady ramp: ghosts move faster (smaller
+   * interval) and grow smarter (`easy` → `medium` → `hard`) as the level rises.
+   */
+  protected onLevelSelected(levelId: number): void {
+    this.gameSpeed = Math.max(80, 220 - (levelId - 1) * 5);
+    this.difficulty = levelId <= 6 ? 'easy' : levelId <= 18 ? 'medium' : 'hard';
+  }
+
+  /** A level is cleared when Pac-Man eats every pellet (the game's win). */
+  protected didWinLevel(): boolean {
+    return this.pendingWin;
   }
 
   /**

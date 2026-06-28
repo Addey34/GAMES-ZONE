@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Direction, Vec2 } from '../shared/input.js';
+import { Direction, Vec2 } from '../shared/engine/input.js';
 import { manhattan } from '../shared/bot/distance.js';
 import { chooseGhostDirection, GHOST_PERSONALITIES, ChaseContext } from './ghostAi.js';
 

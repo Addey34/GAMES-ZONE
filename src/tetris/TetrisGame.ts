@@ -1,5 +1,5 @@
-import { GameEngine, GameConfig } from '../shared/GameEngine.js';
-import { keyboardDirection, setupSwipe } from '../shared/input.js';
+import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
+import { keyboardDirection, setupSwipe } from '../shared/engine/input.js';
 
 /**
  * Configuration specific to the Tetris game.

@@ -1,5 +1,5 @@
-import { GameEngine, GameConfig } from '../shared/GameEngine.js';
-import { Direction, keyboardDirection, setupSwipe } from '../shared/input.js';
+import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
+import { Direction, keyboardDirection, setupSwipe } from '../shared/engine/input.js';
 
 /**
  * Configuration specific to the 2048 game.
@@ -84,6 +84,15 @@ export class Game2048 extends GameEngine {
     this.state.isRunning = true;
     this.state.isGameOver = false;
     this.state.isPaused = false;
+  }
+
+  /**
+   * No "Jouer" overlay: 2048 is purely keyboard-driven (`update()` is a no-op),
+   * so nothing happens until the first key — an unintended start is already
+   * blocked. Activate the game state directly.
+   */
+  presentStartScreen(): void {
+    this.start();
   }
 
   /**

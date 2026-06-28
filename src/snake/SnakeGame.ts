@@ -1,11 +1,11 @@
-import { GameEngine, GameConfig } from '../shared/GameEngine.js';
+import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
 import {
   Direction,
   DIRECTION_DELTAS,
   OPPOSITE_DIRECTION,
   keyboardDirection,
   setupSwipe,
-} from '../shared/input.js';
+} from '../shared/engine/input.js';
 
 /**
  * Configuration specific to the Snake game.
@@ -37,14 +37,22 @@ interface Position {
  */
 export class Snake {
   private body: Position[];
-  private velocity: Position;
   /** Direction actually travelled on the last move (the "committed" one). */
   private direction: Direction;
-  /** Latest requested direction, applied at most once per move. */
-  private nextDirection: Direction;
+  /**
+   * Pending turns, applied one per move. A short queue (max 2) is what makes the
+   * controls feel responsive: pressing two turns in quick succession (e.g. ↑ then
+   * ← to round a corner) registers BOTH — on successive moves — instead of the
+   * first being overwritten and lost. Each entry is validated against the
+   * projected heading on enqueue, so a 180° reversal can never sneak in.
+   */
+  private directionQueue: Direction[] = [];
   /** Becomes true on the first input: the snake stays still until then. */
   private started: boolean = false;
   private gridSize: number;
+
+  /** Max pending turns: enough to round a corner, small enough to feel direct. */
+  private static readonly MAX_QUEUED = 2;
 
   /**
    * Creates a one-segment snake at a random position, facing right.
@@ -58,9 +66,7 @@ export class Snake {
         y: Math.floor(Math.random() * gridSize) + 1,
       },
     ];
-    this.velocity = { x: 0, y: 0 };
     this.direction = 'right';
-    this.nextDirection = 'right';
   }
 
   /**
@@ -69,20 +75,20 @@ export class Snake {
    * @returns `true` if the food was eaten on this move.
    */
   move(food: Position): boolean {
-    // Commit at most one queued direction change per move, rejecting a 180°
-    // reversal relative to the direction actually travelled last move. Doing
-    // this here (not in setDirection) stops two quick key presses within the
-    // same move interval from chaining into a U-turn that makes the snake cross
-    // itself. The snake stays still until the first input (started === false).
-    if (this.started && OPPOSITE_DIRECTION[this.nextDirection] !== this.direction) {
-      this.direction = this.nextDirection;
-      this.velocity = { ...DIRECTION_DELTAS[this.direction] };
+    // Apply at most one queued turn per move. Entries were validated against the
+    // projected heading on enqueue (see setDirection), so dequeuing one can
+    // never be a 180° reversal — no need to re-check here.
+    if (this.started && this.directionQueue.length > 0) {
+      this.direction = this.directionQueue.shift() as Direction;
     }
 
+    // The snake stays still until the first input; then it advances one cell in
+    // its current heading every move (the queue only changes that heading).
+    const step = this.started ? DIRECTION_DELTAS[this.direction] : { x: 0, y: 0 };
     const head = this.body[0];
     const newHead: Position = {
-      x: this.wrapPosition(head.x + this.velocity.x),
-      y: this.wrapPosition(head.y + this.velocity.y),
+      x: this.wrapPosition(head.x + step.x),
+      y: this.wrapPosition(head.y + step.y),
     };
 
     this.body.unshift(newHead);
@@ -132,11 +138,18 @@ export class Snake {
    * back on itself.
    */
   setDirection(newDirection: Direction): void {
-    // Only record the request; it is validated and applied once per move (see
-    // move()), so multiple presses between two moves cannot chain into a 180°
-    // reversal that makes the snake cross itself.
     this.started = true;
-    this.nextDirection = newDirection;
+    // Validate against the heading the snake WILL have when this input applies:
+    // the last queued turn, or the current direction if the queue is empty.
+    const reference =
+      this.directionQueue.length > 0
+        ? this.directionQueue[this.directionQueue.length - 1]
+        : this.direction;
+    // Drop no-ops (same heading) and 180° reversals (would cross itself), and
+    // cap the queue so buffered inputs never lag behind the snake.
+    if (newDirection === reference || OPPOSITE_DIRECTION[newDirection] === reference) return;
+    if (this.directionQueue.length >= Snake.MAX_QUEUED) return;
+    this.directionQueue.push(newDirection);
   }
 
   /** Returns the body segments (head at the front of the list). */
@@ -223,6 +236,10 @@ export class SnakeGame extends GameEngine {
   private playBoard: HTMLElement | null = null;
   /** Effects layer overlaid on the board (not cleared every frame). */
   private fxLayer: HTMLElement | null = null;
+  /** Persistent snake segment nodes, reused across moves so they can glide. */
+  private segmentEls: HTMLElement[] = [];
+  /** Persistent mouse node (its sub-divs are built once, then repositioned). */
+  private foodEl: HTMLElement | null = null;
   private scoreElement: HTMLElement | null = null;
   private highScoreElement: HTMLElement | null = null;
 
@@ -239,6 +256,13 @@ export class SnakeGame extends GameEngine {
   private moveInterval: number;
   /** Time accumulated since the last move (ms). */
   private moveAccumulator: number = 0;
+  /**
+   * Set when the board state actually changed (a move happened) so `render()`
+   * skips the ~12 identical frames between two moves. The rAF loop calls render
+   * at 60 fps, but the snake only steps every `moveInterval` ms: redrawing the
+   * whole board every frame is pure DOM churn.
+   */
+  private dirty: boolean = true;
 
   /**
    * @param config Game configuration (grid size, speeds…).
@@ -246,13 +270,24 @@ export class SnakeGame extends GameEngine {
   constructor(config: SnakeConfig = {}) {
     super({ ...config, storageKey: 'snake-high-scores', leaderboardId: 'snake' });
     this.gridSize = config.gridSize || 25;
-    this.baseInterval = config.baseSpeed || 200;
-    this.minInterval = config.minSpeed || 75;
+    // Faster base cadence than the classic 200ms: a turn takes effect at the
+    // next step, so a shorter step = less perceived input latency.
+    this.baseInterval = config.baseSpeed || 140;
+    this.minInterval = config.minSpeed || 70;
     this.speedFactor = config.speedFactor || 0.93;
     this.moveInterval = this.baseInterval;
 
     this.snake = new Snake(this.gridSize);
     this.food = new Food(this.snake, this.gridSize);
+  }
+
+  /**
+   * No "Jouer" overlay: the loop can run from load because the snake stays still
+   * until the first direction input (see `Snake.started`), so an unintended
+   * start is already blocked. Start the loop directly.
+   */
+  presentStartScreen(): void {
+    this.start();
   }
 
   /**
@@ -265,7 +300,10 @@ export class SnakeGame extends GameEngine {
     this.highScoreElement = document.querySelector('.high-score');
 
     if (this.playBoard) {
-      this.playBoard.style.gridTemplate = `repeat(${this.gridSize}, 1fr) / repeat(${this.gridSize}, 1fr)`;
+      // Size of one cell as a % of the board, and initial glide duration —
+      // both consumed by the CSS (segments are absolutely positioned now).
+      this.playBoard.style.setProperty('--cell-size', `${100 / this.gridSize}%`);
+      this.playBoard.style.setProperty('--move-ms', `${this.baseInterval}ms`);
       this.fxLayer = document.createElement('div');
       this.fxLayer.className = 'snake-fx';
       this.playBoard.appendChild(this.fxLayer);
@@ -295,6 +333,8 @@ export class SnakeGame extends GameEngine {
     if (this.moveAccumulator < this.moveInterval) return;
     this.moveAccumulator = 0;
 
+    // The snake stepped: the board changed, so the next render must repaint.
+    this.dirty = true;
     const hasEaten = this.snake.move(this.food.getPosition());
 
     if (hasEaten) {
@@ -323,35 +363,90 @@ export class SnakeGame extends GameEngine {
    */
   render(): void {
     if (!this.playBoard) return;
+    // Skip the frames where nothing moved (see `dirty`): the rAF loop ticks at
+    // 60 fps but the board only changes once per `moveInterval`. The smooth
+    // glide between cells is done by CSS transitions, not per-frame redraws.
+    if (!this.dirty) return;
+    this.dirty = false;
 
-    // We only clear the snake and the mouse: the effects layer (.snake-fx)
-    // and its ongoing animations must survive from one frame to the next.
-    this.playBoard.querySelectorAll('.snake-head, .snake-body, .food').forEach((el) => el.remove());
+    // Keep the glide duration in sync with the current move rate, so each
+    // segment finishes sliding exactly as the next step happens.
+    this.playBoard.style.setProperty('--move-ms', `${this.moveInterval}ms`);
 
-    this.snake.getBody().forEach((segment, index) => {
-      const snakeElement = document.createElement('div');
-      snakeElement.style.gridRowStart = segment.y.toString();
-      snakeElement.style.gridColumnStart = segment.x.toString();
-      snakeElement.className =
-        index === 0 ? `snake-head ${this.snake.getDirection()}` : 'snake-body';
-      this.playBoard!.appendChild(snakeElement);
+    this.renderSnake();
+    this.renderFood();
+  }
+
+  /**
+   * Positions the snake by reusing persistent nodes and moving each with a CSS
+   * `transform`, so the body glides one cell forward per move. A node whose
+   * target is more than one cell away — a wall wrap, or a freshly created node —
+   * is snapped without animation so it doesn't slide across the whole board.
+   */
+  private renderSnake(): void {
+    const body = this.snake.getBody();
+    const direction = this.snake.getDirection();
+
+    body.forEach((segment, index) => {
+      let el = this.segmentEls[index];
+      const isNew = el === undefined;
+      if (isNew) {
+        el = document.createElement('div');
+        this.playBoard!.appendChild(el);
+        this.segmentEls[index] = el;
+      }
+      el.className = index === 0 ? `snake-head ${direction}` : 'snake-body';
+
+      const snap =
+        isNew ||
+        Math.abs(segment.x - Number(el.dataset.x)) > 1 ||
+        Math.abs(segment.y - Number(el.dataset.y)) > 1;
+      this.placeCell(el, segment.x, segment.y, snap);
     });
 
-    const foodPosition = this.food.getPosition();
-    const foodElement = document.createElement('div');
-    foodElement.style.gridRowStart = foodPosition.y.toString();
-    foodElement.style.gridColumnStart = foodPosition.x.toString();
-    foodElement.className = `food food--${this.food.getVariant()}`;
-    foodElement.innerHTML = `
-      <div class="food-ear left"></div>
-      <div class="food-ear right"></div>
-      <div class="food-body"></div>
-      <div class="food-eye left"></div>
-      <div class="food-eye right"></div>
-      <div class="food-nose"></div>
-      <div class="food-tail"></div>
-    `;
-    this.playBoard!.appendChild(foodElement);
+    // Drop surplus nodes (e.g. after a reset to a shorter snake).
+    while (this.segmentEls.length > body.length) {
+      this.segmentEls.pop()?.remove();
+    }
+  }
+
+  /** Creates the mouse once (its sub-divs), then repositions it (no glide). */
+  private renderFood(): void {
+    if (!this.foodEl) {
+      this.foodEl = document.createElement('div');
+      this.foodEl.innerHTML = `
+        <div class="food-ear left"></div>
+        <div class="food-ear right"></div>
+        <div class="food-body"></div>
+        <div class="food-eye left"></div>
+        <div class="food-eye right"></div>
+        <div class="food-nose"></div>
+        <div class="food-tail"></div>
+      `;
+      this.playBoard!.appendChild(this.foodEl);
+    }
+    const pos = this.food.getPosition();
+    this.foodEl.className = `food food--${this.food.getVariant()}`;
+    this.placeCell(this.foodEl, pos.x, pos.y, true);
+  }
+
+  /**
+   * Places an element on cell (x, y) via `transform` (one cell = 100% of its own
+   * size). When `snap`, the transition is briefly disabled so the element jumps
+   * instead of sliding (used for wraps and the first placement).
+   */
+  private placeCell(el: HTMLElement, x: number, y: number, snap: boolean): void {
+    const transform = `translate(${(x - 1) * 100}%, ${(y - 1) * 100}%)`;
+    if (snap) {
+      el.style.transition = 'none';
+      el.style.transform = transform;
+      void el.offsetWidth; // force a reflow so the jump applies before…
+      el.style.transition = ''; // …the CSS transition is restored for next move.
+    } else {
+      el.style.transform = transform;
+    }
+    el.dataset.x = String(x);
+    el.dataset.y = String(y);
   }
 
   /**
@@ -397,6 +492,13 @@ export class SnakeGame extends GameEngine {
     this.state.isPaused = false;
     this.moveInterval = this.baseInterval;
     this.moveAccumulator = 0;
+    this.dirty = true;
+    // Drop the persistent snake/mouse nodes so the new game rebuilds cleanly.
+    this.segmentEls.forEach((el) => el.remove());
+    this.segmentEls = [];
+    this.foodEl?.remove();
+    this.foodEl = null;
+    this.playBoard?.style.setProperty('--move-ms', `${this.baseInterval}ms`);
     if (this.fxLayer) this.fxLayer.innerHTML = '';
     this.updateScoreDisplay();
     this.render();

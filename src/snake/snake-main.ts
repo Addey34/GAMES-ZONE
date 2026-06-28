@@ -1,5 +1,5 @@
 import { SnakeGame } from './SnakeGame.js';
-import { bootstrapGame } from '../shared/bootstrap.js';
+import { bootstrapGame } from '../shared/engine/bootstrap.js';
 
 /** Entry point of the Snake page: instantiates and starts the game. */
 bootstrapGame(
