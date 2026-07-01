@@ -27,14 +27,11 @@ validated by continuous integration (CI) before being merged.
    npm install
    npm run dev      # http://localhost:3000
    ```
-5. **Make your changes**, then **make sure everything passes** (the CI will check this
-   anyway):
+5. **Make your changes**, then run the **same checks as the CI** in a single command:
    ```bash
-   npm run format   # format the code
-   npm run lint     # analyze the code
-   npm test         # unit tests
-   npm run build    # type-check + production build
+   npm run verify   # format, lint, build + tests — all must pass
    ```
+   If Prettier reports formatting issues, fix them with `npm run format`, then re-run.
 6. **Commit and push** to your branch:
    ```bash
    git add .
@@ -50,10 +47,11 @@ The architecture is designed to make this simple. To add a game `pong`:
 
 1. **One line** in the `games` array of `vite.config.ts`:
    ```ts
-   { key: 'pong', label: 'Pong', color: '--color-pong', controls: [ /* ... */ ] }
+   { key: 'pong', label: 'Pong', color: '--color-pong', mode: 'duo', controls: [ /* ... */ ] }
    ```
    - `key` = the folder name (also used as the icon name and the menu active state)
    - `color` = a color token defined in `public/css/base/variables.css`
+   - `mode` = the player-count badge in the nav rail: `'solo'`, `'duo'` (1-v-1) or `'multi'` (3+)
 2. Create the page and the code in `src/pong/`:
    - `src/pong/index.html` — the page (~15 lines, see an existing game)
    - `src/pong/pong-main.ts` — the entry point (~3 lines)
@@ -63,13 +61,24 @@ The architecture is designed to make this simple. To add a game `pong`:
 The game then appears **automatically** in the menu and on the home page (everything is
 driven by the `games` array). Take inspiration from an existing game such as `snake`.
 
+### Turn-based board games and online play
+
+- A **turn-based** game (like Ludo or Connect 4) supplies its **pure rules** through the
+  `TurnRules` model in `src/shared/turn/turnGame.ts` (state + legal moves + a reducer — no DOM,
+  no time, so they are fully unit-testable) instead of the real-time loop. Start from
+  `src/connect4/` (the simplest reference) or `src/ludo/`.
+- To make a game playable **online**, add `settings: true` and `multiplayer: true` to its
+  `games` entry and reuse the shared lobby (`versus/multiplayerPanel.ts`). The networking
+  (`net/match.ts`) is relayed and **host-authoritative**, so no server change is needed — the
+  game stays fully playable solo against bots if the backend is unreachable.
+
 ## Best practices
 
 - **One PR = one topic** (one game, one bug, one improvement). The more focused it is,
   the easier it is to review and merge.
 - Follow the existing style (TypeScript `strict`, CSS design tokens, mobile-first).
-  Formatting is handled by **Prettier** and code style by **ESLint** — run them before
-  pushing.
+  Formatting is handled by **Prettier** and code style by **ESLint** — run `npm run verify`
+  before pushing so the CI passes on the first try.
 - Scores persist in `localStorage` and, when a game opts in, in online leaderboards on the
   Nakama backend (best-effort — `localStorage` is always the fallback).
 - A question or an idea before coding? Open an **Issue** to discuss it.
