@@ -76,3 +76,28 @@
     transform: scale(1);
   }
 }
+
+/* Connect 4 disc dropping into place with a small bounce at the end. The fall
+   distance is set per-disc via `--drop-from` (further for lower cells); the fall
+   segment accelerates (gravity), then a couple of shrinking bounces settle it. */
+@keyframes connect4Drop {
+  0% {
+    transform: translateY(var(--drop-from, -680%));
+    animation-timing-function: cubic-bezier(0.4, 0, 0.8, 0.55);
+  }
+  60% {
+    transform: translateY(0);
+  }
+  74% {
+    transform: translateY(-13%);
+  }
+  86% {
+    transform: translateY(0);
+  }
+  94% {
+    transform: translateY(-4%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

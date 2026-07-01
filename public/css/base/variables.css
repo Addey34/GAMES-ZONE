@@ -65,6 +65,7 @@
   --color-breakout: #db2777; /* magenta */
   --color-pong: #14b8a6; /* teal */
   --color-ludo: #4f46e5; /* indigo */
+  --color-connect4: #2563eb; /* blue */
 
   /* --- Spacing --- */
   --spacing-xxs: 0.125rem;
@@ -183,4 +184,10 @@
   /* --- Shared animated die (dice component) --- */
   --dice-bg: #ffffff;
   --dice-pip: #1f2937;
+
+  /* --- Connect 4: board and the two disc colours --- */
+  --connect4-board: #1d4ed8;
+  --connect4-hole: #eff6ff;
+  --connect4-disc-0: #ef4444; /* red */
+  --connect4-disc-1: #facc15; /* yellow */
 }

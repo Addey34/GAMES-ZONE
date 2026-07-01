@@ -1,0 +1,123 @@
+@import url('../global.css');
+
+/* =============================================================================
+   Connect 4 — a 7×6 board of holes on a blue frame, red vs yellow discs. The
+   grid keeps a square play-area footprint (like the other games) by centring the
+   7:6 frame; discs and the aiming "ghost" are toggled by class from the JS.
+   ========================================================================== */
+
+.connect4-board {
+  aspect-ratio: 1;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+}
+
+/* The blue frame holding the columns. `overflow: hidden` clips a falling disc
+   while it is still above its column, so the drop animation enters from the top. */
+.connect4-grid {
+  width: 100%;
+  aspect-ratio: 7 / 6;
+  display: flex;
+  padding: 1.6%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--connect4-board);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* One droppable column (the whole column is the click/hover target). */
+.connect4-col {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  /* Clip a falling disc to the column — which starts BELOW the grid's blue rim —
+     so it never rides over the top frame; it enters from the first hole down. */
+  overflow: hidden;
+}
+
+/* Aim highlight: a faint sheen laid OVER the board face of the hovered column. */
+.connect4-col.is-aim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* One cell = three stacked layers: the empty-hole fill (behind), the disc, and
+   the blue board face with a punched circular hole (in front). The disc therefore
+   sits BEHIND the board and is only seen through the hole — so a falling disc
+   slides behind the panel, flashing through each hole as it drops. */
+.connect4-cell {
+  position: relative;
+  aspect-ratio: 1;
+}
+
+/* Empty-hole fill, behind the disc (what shows through the hole when empty). */
+.connect4-cell::before {
+  content: '';
+  position: absolute;
+  inset: 7%;
+  z-index: 0;
+  border-radius: 50%;
+  background: var(--connect4-hole);
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.18);
+}
+
+/* The played token: transparent until a disc lands, then coloured. Slightly wider
+   than the hole so it fully fills it. A fresh drop plays `connect4Drop` (falls
+   from above + small bounce), its start height set per-disc via `--drop-from`. */
+.connect4-disc {
+  position: absolute;
+  inset: 6%;
+  z-index: 1;
+  border-radius: 50%;
+  background: transparent;
+}
+
+/* The blue board face with a circular hole cut out of each cell, ABOVE the discs. */
+.connect4-cell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--connect4-board);
+  -webkit-mask: radial-gradient(circle closest-side, transparent 84%, #000 86%);
+  mask: radial-gradient(circle closest-side, transparent 84%, #000 86%);
+}
+
+.connect4-cell.is-p0 .connect4-disc,
+.connect4-cell.is-p1 .connect4-disc {
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.22);
+}
+
+.connect4-cell.is-p0 .connect4-disc {
+  background: var(--connect4-disc-0);
+}
+
+.connect4-cell.is-p1 .connect4-disc {
+  background: var(--connect4-disc-1);
+}
+
+.connect4-disc.is-drop {
+  animation: connect4Drop 0.42s both;
+}
+
+/* Aiming preview: a translucent disc of the local player's colour. */
+.connect4-cell.is-ghost .connect4-disc {
+  opacity: 0.45;
+}
+
+.connect4-cell.is-ghost-p0 .connect4-disc {
+  background: var(--connect4-disc-0);
+}
+
+.connect4-cell.is-ghost-p1 .connect4-disc {
+  background: var(--connect4-disc-1);
+}

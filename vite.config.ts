@@ -157,6 +157,22 @@ const games = [
       { keys: 'Goal', action: 'Bring your 4 horses home to the center' },
     ],
   },
+  {
+    key: 'connect4',
+    label: 'Connect 4',
+    color: '--color-connect4',
+    mode: 'duo',
+    // Turn-based 2-player: "Settings" popover (bot difficulty) + "Multiplayer"
+    // panel (1-v-1 over the relay); both driven by the game.
+    settings: true,
+    multiplayer: true,
+    controls: [
+      { keys: 'Click / tap', action: 'Drop a disc in a column' },
+      { keys: '<kbd>← →</kbd>', action: 'Aim a column' },
+      { keys: '<kbd>↓</kbd> / <kbd>Enter</kbd>', action: 'Drop the disc' },
+      { keys: 'Goal', action: 'Line up four of your discs in a row' },
+    ],
+  },
 ];
 
 // Dev/preview equivalent of render.yaml's clean-URL rewrites. Without it Vite's
