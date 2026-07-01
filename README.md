@@ -5,34 +5,36 @@ locally in the browser (`localStorage`) **and**, when available, in **online lea
 on a self-hosted backend — online is best-effort, with `localStorage` as the always-working
 fallback.
 
-> Note: the user-facing interface is in French.
-
 ## Available games
 
-- ⌨️ **Dactylographie** (Typing) — fast-typing practice
+- ⌨️ **Typing** — fast-typing practice
 - 🐍 **Snake**
 - 🟡 **Pacman** — with selectable difficulty levels
 - 🔢 **2048**
 - 🧱 **Tetris**
 - 🃏 **Memory** — solo, vs a bot, or 1-v-1 online
-- 🧱 **Breakout** (Casse-brique)
+- 🧱 **Breakout**
 - 🏓 **Pong** — vs a bot or 1-v-1 online
+- 🎲 **Ludo** — solo vs bots, or online for up to 4 players
+- 🔴 **Connect 4** — vs a bot or 1-v-1 online
 
 ## Controls
 
-Every game can be played with the **keyboard** (arrow keys **or** ZQSD/WASD) and **by
-touch** (swipe on mobile); the paddle games (Breakout, Pong) also support the **mouse**.
-A help button "ⓘ" recalls each game's controls, and a **zen mode** button hides all the
-chrome to focus on the board (with best-effort native fullscreen).
+Most games are played with the **keyboard** (arrow keys **or** ZQSD/WASD) or **by touch**
+(swipe on mobile); the paddle games (Breakout, Pong) also support the **mouse**, and the
+board games (Memory, Ludo, Connect 4) are played by **click / tap**. A help button "ⓘ"
+recalls each game's controls, and a **zen mode** button hides all the chrome to focus on the
+board (with best-effort native fullscreen).
 
 ## Online features
 
-- **Online leaderboards** — global scores for Snake, 2048, Tetris and Dactylographie.
+- **Online leaderboards** — global scores for Typing, Snake, 2048 and Tetris.
 - **Google sign-in** — optional; players are anonymous by default and can sign in to carry
   their scores across devices.
 - **Levels & progression** — Pac-Man's difficulty tiers, synced across devices.
-- **Online multiplayer** — Pong and Memory can be played 1-v-1 over the network via a short
-  session code (relayed, host-authoritative); they stay fully playable solo if offline.
+- **Online multiplayer** — Pong, Memory and Connect 4 play 1-v-1, and Ludo up to 4 players,
+  over the network via a short session code (relayed, host-authoritative, with a lobby where
+  the host starts the game). Every game stays fully playable solo against bots if offline.
 
 The backend is a self-hosted [Nakama](https://heroiclabs.com/nakama/) server; the frontend
 talks to it only through a thin best-effort wrapper, so the app never breaks if it is
@@ -61,15 +63,16 @@ npm run dev      # dev server on http://localhost:3000
 
 ## Scripts
 
-| Command              | Description                                         |
-| -------------------- | --------------------------------------------------- |
-| `npm run dev`        | Development server (hot reload)                     |
-| `npm run build`      | Type-check then production build → `dist/`          |
-| `npm run preview`    | Serve the production build locally                  |
-| `npm run type-check` | Check types without building (`tsc --noEmit`)       |
-| `npm test`           | Run unit tests (Vitest)                             |
-| `npm run lint`       | Analyze the code (ESLint); `lint:fix` auto-fixes    |
-| `npm run format`     | Format the code (Prettier); `format:check` verifies |
+| Command              | Description                                              |
+| -------------------- | -------------------------------------------------------- |
+| `npm run dev`        | Development server (hot reload)                          |
+| `npm run build`      | Type-check then production build → `dist/`               |
+| `npm run preview`    | Serve the production build locally                       |
+| `npm run type-check` | Check types without building (`tsc --noEmit`)            |
+| `npm test`           | Run unit tests (Vitest)                                  |
+| `npm run lint`       | Analyze the code (ESLint); `lint:fix` auto-fixes         |
+| `npm run format`     | Format the code (Prettier); `format:check` verifies      |
+| `npm run verify`     | Run the full CI gate locally (format, lint, build, test) |
 
 ## Project structure
 
