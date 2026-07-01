@@ -470,7 +470,7 @@ export class MemoryGame extends GameEngine {
     if (this.turn === 'self') {
       text = `Your turn · ${Math.max(0, this.timeLeft)}s`;
     } else {
-      text = this.role === 'solo' ? "Bot turn…" : "Opponent turn…";
+      text = this.role === 'solo' ? 'Bot turn…' : 'Opponent turn…';
     }
     this.hud?.set('status', text);
     this.hud?.toggle('status', 'is-low', this.turn === 'self' && this.timeLeft <= 5);

@@ -411,5 +411,4 @@ export class PacmanGame extends GameEngine {
   protected didWinLevel(): boolean {
     return this.pendingWin;
   }
-
 }

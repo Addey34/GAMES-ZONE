@@ -295,7 +295,9 @@ export class LudoGame extends GameEngine {
         el.style.width = `${pawnSize}%`;
         el.style.height = `${pawnSize}%`;
         const movable =
-          this.awaitingHuman && seat === this.mySeat && this.humanMoves.some((m) => m.pawn === pawn);
+          this.awaitingHuman &&
+          seat === this.mySeat &&
+          this.humanMoves.some((m) => m.pawn === pawn);
         el.classList.toggle('is-movable', movable);
       }
     }
@@ -403,7 +405,8 @@ export class LudoGame extends GameEngine {
       this.humanMoves = moves;
       this.renderBoard();
       this.startCountdown(() => {
-        if (this.awaitingHuman) this.commitMove(decideMove(this.game, this.humanMoves, this.difficulty));
+        if (this.awaitingHuman)
+          this.commitMove(decideMove(this.game, this.humanMoves, this.difficulty));
       });
     } else if (this.isRemoteHuman(seat)) {
       // Remote guest: wait for its OP_MOVE, auto-play a bot move if it stalls/leaves.
@@ -567,7 +570,8 @@ export class LudoGame extends GameEngine {
     // If we were waiting on that seat, settle its turn right away (now a bot):
     // an awaited roll just proceeds (auto-roll), an awaited move plays a bot move.
     if (this.pendingRoll?.seat === seat) this.pendingRoll.resolve();
-    if (this.pendingSeat === seat) this.resolvePending(decideMove(this.game, this.humanMoves, this.difficulty));
+    if (this.pendingSeat === seat)
+      this.resolvePending(decideMove(this.game, this.humanMoves, this.difficulty));
   }
 
   /** Dispatches a relayed message according to this client's role. */
@@ -819,9 +823,7 @@ export class LudoGame extends GameEngine {
         this.multiplayer?.leave();
       },
     });
-    const waiting = !isHost
-      ? '<p class="mp-status">Waiting for a rematch from the host…</p>'
-      : '';
+    const waiting = !isHost ? '<p class="mp-status">Waiting for a rematch from the host…</p>' : '';
     const body = won
       ? '<p>Your 4 horses are home in the center!</p>'
       : `<p>Player ${SEAT_NAMES[w]} won.</p>`;
