@@ -10,7 +10,7 @@ import { ScoreEntry } from '../score/ScoreManager.js';
  *
  * It is game-agnostic: a whole {@link ScoreEntry} is stored, with the score in
  * the record's score field and every other field (username + game-specific
- * extras like Dactylographie's wpm/lpm) carried in the record metadata. So a
+ * extras like Typing's wpm/lpm) carried in the record metadata. So a
  * game's custom leaderboard columns work online exactly like they do locally.
  */
 
@@ -49,7 +49,7 @@ interface RawLeaderboardRecord {
 /**
  * Builds the metadata stored alongside a score: every entry field except the
  * ones the record owns natively (score, date). Keeps the username and any
- * game-specific extras (e.g. Dactylographie's wpm/lpm). Pure → unit-tested.
+ * game-specific extras (e.g. Typing's wpm/lpm). Pure → unit-tested.
  */
 export function buildScoreMetadata(entry: ScoreEntry): Record<string, unknown> {
   const metadata: Record<string, unknown> = {};
@@ -66,11 +66,11 @@ export function buildScoreMetadata(entry: ScoreEntry): Record<string, unknown> {
 export function recordToScoreEntry(record: RawLeaderboardRecord): ScoreEntry {
   const meta = (record.metadata ?? {}) as Record<string, unknown>;
   const entry: ScoreEntry = {
-    username: typeof meta.username === 'string' ? meta.username : record.username || 'Joueur',
+    username: typeof meta.username === 'string' ? meta.username : record.username || 'Player',
     score: record.score ?? 0,
     date: record.update_time ? new Date(record.update_time) : undefined,
   };
-  // Restore game-specific extra fields (e.g. Dactylographie's wpm/lpm).
+  // Restore game-specific extra fields (e.g. Typing's wpm/lpm).
   for (const [key, value] of Object.entries(meta)) {
     if (key !== 'username') (entry as unknown as Record<string, unknown>)[key] = value;
   }
@@ -294,7 +294,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     const session = await getSession();
     const account = await getClient().getAccount(session);
     return {
-      displayName: account.user?.display_name || account.user?.username || 'Joueur',
+      displayName: account.user?.display_name || account.user?.username || 'Player',
       loggedIn: Boolean(account.user?.google_id),
     };
   } catch {

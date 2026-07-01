@@ -1,13 +1,13 @@
 /* =============================================================================
-   Mode immersif "Zen" : masque toute la chrome (rail de navigation, titre,
-   panneaux d'actions, classement) et agrandit le plateau pour remplir l'écran,
-   pour jouer sans distraction sur desktop ET mobile. Piloté par la classe
-   body.zen-mode (zenMode.ts), couplé au plein écran natif quand l'API existe.
-   Fonctionne aussi là où le plein écran natif est indisponible (iPhone Safari).
+   Immersive "Zen" mode: hides all chrome (nav rail, title, action panels,
+   leaderboard) and enlarges the board to fill the screen, for distraction-free
+   play on desktop AND mobile. Driven by the body.zen-mode class (zenMode.ts),
+   coupled with native fullscreen when the API exists.
+   Also works where native fullscreen is unavailable (iPhone Safari).
    ========================================================================== */
 
-/* --- Plus aucune chrome autour du jeu. --- */
-.zen-mode::before, /* barre dégradée fixe du haut (pseudo de .app-body) */
+/* --- No more chrome around the game. --- */
+.zen-mode::before, /* fixed top gradient bar (pseudo of .app-body) */
 .zen-mode .sidebar,
 .zen-mode .sidebar-toggle,
 .zen-mode .game-shell .app-title,
@@ -15,11 +15,11 @@
   display: none !important;
 }
 
-/* --- Le conteneur devient un calque plein écran qui centre lui-même le cadre,
-   indépendamment du centrage/des paddings de .app-body. Sans ça, sur mobile, le
-   cadre (en vw, qui inclut une éventuelle scrollbar) combiné au padding de
-   .app-body décalait légèrement le jeu vers la droite. overflow:hidden ⇒ pas de
-   scrollbar parasite, donc pas de décalage. --- */
+/* --- The container becomes a full-screen layer that centers the frame itself,
+   independently of .app-body's centering/paddings. Without this, on mobile, the
+   frame (in vw, which includes any scrollbar) combined with .app-body's padding
+   shifted the game slightly to the right. overflow:hidden ⇒ no stray scrollbar,
+   so no shift. --- */
 .zen-mode .game-container {
   position: fixed;
   inset: 0;
@@ -31,9 +31,9 @@
   background: var(--gradient);
 }
 
-/* --- Le cadre perd son habillage de carte et centre un plateau agrandi.
-   Largeur = plateau (width:100%) bornée par la hauteur dispo (moins la barre de
-   score), pour rester carré sans déborder. --- */
+/* --- The frame drops its card trim and centers an enlarged board.
+   Width = board (width:100%) bounded by the available height (minus the score
+   bar), to stay square without overflowing. --- */
 .zen-mode .game-shell {
   width: min(96vw, calc(100dvh - 4rem));
   max-width: none;
@@ -46,7 +46,7 @@
   box-shadow: none;
 }
 
-/* --- Le bouton bascule reste accessible (coin haut-droit fixe) pour ressortir. --- */
+/* --- The toggle button stays reachable (fixed top-right corner) to exit. --- */
 .zen-mode .game-fullscreen-toggle {
   position: fixed;
   top: var(--spacing-sm);

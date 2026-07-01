@@ -18,7 +18,7 @@ if (toggle && container) {
   const sync = (active: boolean): void => {
     document.body.classList.toggle('zen-mode', active);
     toggle.setAttribute('aria-pressed', String(active));
-    toggle.setAttribute('aria-label', active ? 'Quitter le mode immersif' : 'Mode immersif');
+    toggle.setAttribute('aria-label', active ? 'Exit immersive mode' : 'Immersive mode');
     icon?.classList.toggle('fa-expand', !active);
     icon?.classList.toggle('fa-compress', active);
   };

@@ -1,8 +1,8 @@
 /* =============================================================================
-   Toutes les animations du projet (source unique — ne pas redéfinir ailleurs).
+   All the project's animations (single source — don't redefine elsewhere).
    ========================================================================== */
 
-/* Apparition de la modale de fin de partie. */
+/* Entrance of the game-over modal. */
 @keyframes slideUp {
   from {
     transform: translateY(40px);
@@ -14,7 +14,7 @@
   }
 }
 
-/* Score flottant « +N » qui monte et s'estompe (Snake mange une souris). */
+/* Floating "+N" score that rises and fades (Snake eats a mouse). */
 @keyframes scoreFloat {
   0% {
     transform: translate(-50%, -50%) scale(0.8);
@@ -27,5 +27,52 @@
   100% {
     transform: translate(-50%, -240%) scale(1);
     opacity: 0;
+  }
+}
+
+/* Die tumbling during the roll (shared/ui/dice component). */
+@keyframes diceTumble {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(160deg) scale(1.18);
+  }
+  50% {
+    transform: rotate(300deg) scale(0.92);
+  }
+  75% {
+    transform: rotate(440deg) scale(1.12);
+  }
+  100% {
+    transform: rotate(540deg) scale(1);
+  }
+}
+
+/* Pulse of the "click to roll" prompt. */
+@keyframes dicePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: var(--shadow-lg);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow:
+      var(--shadow-lg),
+      0 0 0 6px rgba(255, 255, 255, 0.35);
+  }
+}
+
+/* Small bounce of the die when the result appears. */
+@keyframes dicePop {
+  0% {
+    transform: scale(0.7);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
   }
 }

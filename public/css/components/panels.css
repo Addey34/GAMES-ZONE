@@ -1,24 +1,23 @@
 /* =============================================================================
-   Popover d'action générique : un bouton rond (dans .game-actions, assorti aux
-   boutons aide/plein écran) qui déplie un panneau AU SURVOL (comme l'aide), le
-   clic/tap sur l'icône l'épinglant ouvert (.is-open) — ce qui fait aussi office
-   d'ouverture au tap sur mobile (pas de survol). Mutualisé par les panneaux
-   Niveaux, Paramètres, Classement et Multijoueur. Le contenu propre à chaque
-   panneau (grille de niveaux, table des scores…) vit dans son composant dédié.
+   Generic action popover: a round button (in .game-actions, matching the
+   help/fullscreen buttons) that expands a panel ON HOVER (like the help), the
+   click/tap on the icon pinning it open (.is-open) — which also serves as the
+   tap-to-open on mobile (no hover). Shared by the Levels, Settings, Leaderboard
+   and Multiplayer panels. Each panel's own content (level grid, score table…)
+   lives in its dedicated component.
    ========================================================================== */
 
 .game-pop {
   position: relative;
 }
 
-/* Le style de base du bouton rond est mutualisé dans info.css (aide / plein
-   écran / popover) ; ici on n'ajoute que le contexte de positionnement de la
-   pastille de coin. */
+/* The round button's base style is shared in info.css (help / fullscreen /
+   popover); here we only add the positioning context for the corner badge. */
 .game-pop-toggle {
   position: relative;
 }
 
-/* Pastille en coin du bouton (ex. niveau courant) : visible mais discrète. */
+/* Corner badge on the button (e.g. current level): visible but discreet. */
 .game-pop-current {
   position: absolute;
   right: -3px;
@@ -37,12 +36,13 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Panneau déplié, collé sous le bouton. Masqué par défaut. */
+/* Expanded panel, stuck flush under the button (top: 100%, NO margin) so the
+   cursor can travel from the button onto the panel without crossing a gap that
+   would drop the hover and snap it shut — identical to the help panel. */
 .game-pop-panel {
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: var(--spacing-xs);
   width: min(18rem, 80vw);
   max-height: min(60vh, 22rem);
   overflow-y: auto;
@@ -54,8 +54,12 @@
   display: none;
 }
 
-/* Révélé au survol (peek, comme l'aide) OU épinglé au clic/tap (.is-open). */
+/* Revealed purely on hover / keyboard-or-touch focus, exactly like the help
+   panel — so all action buttons behave the same. `.is-open` is only ever set
+   programmatically (the multiplayer flow keeps its lobby pinned during a
+   session); there is no click-to-pin to second-guess. */
 .game-pop:hover .game-pop-panel,
+.game-pop:focus-within .game-pop-panel,
 .game-pop.is-open .game-pop-panel {
   display: block;
 }
@@ -67,9 +71,9 @@
   color: var(--title-color, var(--primary-color));
 }
 
-/* Panneau Classement : même gabarit compact que les autres popovers. La table
-   des scores perd son habillage « autonome » (bordure/ombre/marges propres) et
-   son padding généreux pour s'intégrer comme un simple contenu de panneau. */
+/* Leaderboard panel: same compact template as the other popovers. The score
+   table drops its "standalone" trim (its own border/shadow/margins) and its
+   generous padding to fit in as plain panel content. */
 .game-leaderboard-panel {
   width: min(20rem, 82vw);
 }
@@ -87,7 +91,7 @@
   padding: var(--spacing-xs) var(--spacing-sm);
 }
 
-/* Pas de décalage des lignes au survol dans un panneau étroit. */
+/* No row shift on hover inside a narrow panel. */
 .game-pop-panel .score-table tbody tr:hover {
   transform: none;
 }

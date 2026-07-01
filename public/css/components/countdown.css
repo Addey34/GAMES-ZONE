@@ -1,6 +1,6 @@
 /* =============================================================================
-   Compte à rebours de coup d'envoi : grand chiffre centré en surimpression du
-   plateau (monté dans .game-shell par src/shared/ui/countdown.ts).
+   Kickoff countdown: large centered number overlaid on the board (mounted in
+   .game-shell by src/shared/ui/countdown.ts).
    ========================================================================== */
 
 .game-countdown {

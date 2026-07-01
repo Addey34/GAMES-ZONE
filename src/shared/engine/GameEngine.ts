@@ -13,6 +13,7 @@ import {
 } from '../levels/levels.js';
 import { setupLevelPanel, LevelPanelHandle } from '../levels/levelPanel.js';
 import { setupLeaderboardPanel, LeaderboardPanelHandle } from '../score/leaderboardPanel.js';
+import { HudHandle } from '../ui/hud.js';
 
 /**
  * Configuration shared by all games, passed to the engine constructor.
@@ -37,7 +38,7 @@ export interface GameConfig {
   /**
    * Level / unlocking configuration. When set (and the game calls
    * {@link GameEngine.setupLevels} from `initialize`), the engine drives the
-   * "Niveaux" panel, level selection and progress persistence; the game only
+   * "Levels" panel, level selection and progress persistence; the game only
    * maps the selected level to its parameters via {@link GameEngine.onLevelSelected}.
    */
   levels?: LevelsConfig;
@@ -64,7 +65,7 @@ export interface GameState {
  * (`start`/`stop`/`pause`/`gameOver`) and the shared state ({@link GameState}). It
  * also composes the collaborators {@link ScoreManager} (leaderboard) and
  * {@link GameOverlay} (game-over overlay), and carries the whole game-over flow
- * (the optional save prompt, the Rejouer/Classement overlay, score table).
+ * (the optional save prompt, the Play again/Leaderboard overlay, score table).
  *
  * A subclass must implement {@link initialize}, {@link update},
  * {@link render}, {@link handleInput} and {@link reset}, and only overrides the
@@ -96,7 +97,7 @@ export abstract class GameEngine {
   protected scoreManager: ScoreManager;
   /** Game-over overlay (replaces the old modal). */
   protected overlay: GameOverlay;
-  /** Handle to the "Classement" panel, when the game opts into one. */
+  /** Handle to the "Leaderboard" panel, when the game opts into one. */
   private leaderboardPanel: LeaderboardPanelHandle | null = null;
   /** Whether the leaderboard panel has been wired (lazy, once). */
   private leaderboardPanelReady = false;
@@ -192,7 +193,7 @@ export abstract class GameEngine {
    * Shows the modular Play screen and starts the loop only when the player clicks
    * it. Called by `bootstrapGame` instead of an immediate auto-start, so no game
    * begins before the player decides. Games with their own event-based start
-   * (`autoStart: false`, e.g. Dactylo) bypass this; override for a custom start.
+   * (`autoStart: false`, e.g. Typing) bypass this; override for a custom start.
    */
   presentStartScreen(): void {
     showStartOverlay(() => this.start());
@@ -363,11 +364,33 @@ export abstract class GameEngine {
   }
 
   /**
-   * Writes the score into the game's DOM. Hook to override: selectors and format
-   * vary from one game to another.
+   * The live-stats bar (`.game-details`). A game builds it once in `initialize()`
+   * with {@link setupHud} (`this.hud = setupHud([...])`), declaring its readouts
+   * (`score`, `high`, `time`, `lives`…); the engine and the game then update
+   * values by key. Null for games that don't show any stat.
+   */
+  protected hud: HudHandle | null = null;
+
+  /**
+   * Updates the score readouts on the {@link hud}. The default sets the `score`
+   * and (when declared) `high` stats — the common case. Games with extra stats
+   * call `super.updateScoreDisplay()` then set theirs (Tetris `lines`, Breakout
+   * `lives`); games with different stats (Pong/Memory's two scores) override it.
    */
   protected updateScoreDisplay(): void {
-    // Hook for subclasses.
+    this.hud?.set('score', this.state.score);
+    this.hud?.set('high', this.scoreManager.getHighScore());
+  }
+
+  /**
+   * Resets the shared run state (score, game-over and pause flags) to a fresh
+   * game. Call from a subclass `reset()` before re-seeding its own state, so
+   * the three flags aren't recopied in every game.
+   */
+  protected resetState(): void {
+    this.state.score = 0;
+    this.state.isGameOver = false;
+    this.state.isPaused = false;
   }
 
   /**
@@ -384,7 +407,7 @@ export abstract class GameEngine {
    * leaderboard and the score makes the top-N board — a save prompt (pseudo
    * pre-filled and editable). The engine never auto-saves: the player always
    * decides whether to record the score (and under which name). Always shows
-   * "Rejouer" (+ "Voir le classement" when the game has a leaderboard panel).
+   * "Play again" (+ "View leaderboard" when the game has a leaderboard panel).
    */
   protected showGameOverOverlay(): void {
     // Offer the save prompt only when the game actually shows a leaderboard (e.g.
@@ -395,7 +418,7 @@ export abstract class GameEngine {
     const content = this.getGameOverContent();
     const buttons = [
       {
-        text: 'Rejouer',
+        text: 'Play again',
         primary: true,
         onClick: () => {
           this.overlay.hide();
@@ -405,7 +428,7 @@ export abstract class GameEngine {
     ];
     if (this.leaderboardPanel) {
       buttons.push({
-        text: 'Voir le classement',
+        text: 'View leaderboard',
         primary: false,
         onClick: () => {
           this.overlay.hide();
@@ -420,10 +443,10 @@ export abstract class GameEngine {
       score: content === undefined ? this.state.score : undefined,
       prompt: savable
         ? {
-            label: 'Enregistre ton score au classement',
-            placeholder: 'Pseudo',
+            label: 'Save your score to the leaderboard',
+            placeholder: 'Nickname',
             value: getPlayerName() ?? '',
-            submitLabel: 'Enregistrer',
+            submitLabel: 'Save',
             onSubmit: (value) => {
               setPlayerName(value);
               this.saveScore(value);
@@ -453,14 +476,14 @@ export abstract class GameEngine {
     if (!leaderboardId) return;
     submitLeaderboardScore(leaderboardId, entry)
       .then(() => this.renderScoreTable())
-      .catch((err) => console.warn('[nakama] envoi du score en ligne échoué:', err));
+      .catch((err) => console.warn('[nakama] online score submission failed:', err));
   }
 
   /**
    * Title of the game-over overlay. Override to customize it (e.g. "You won!").
    */
   protected getGameOverTitle(): string {
-    return 'Game Over !';
+    return 'Game Over!';
   }
 
   /**
@@ -494,7 +517,7 @@ export abstract class GameEngine {
    * for the initial display; re-rendered automatically after each save.
    */
   protected renderScoreTable(): void {
-    // Wire the "Classement" panel on first render (no-op for games without one).
+    // Wire the "Leaderboard" panel on first render (no-op for games without one).
     if (!this.leaderboardPanelReady) {
       this.leaderboardPanelReady = true;
       this.leaderboardPanel = setupLeaderboardPanel();
@@ -508,7 +531,7 @@ export abstract class GameEngine {
     if (!leaderboardId) return;
     listLeaderboardScores(leaderboardId, this.config.maxScores ?? 10)
       .then((scores) => this.renderScoreRows(scores))
-      .catch((err) => console.warn('[nakama] classement en ligne indisponible:', err));
+      .catch((err) => console.warn('[nakama] online leaderboard unavailable:', err));
   }
 
   /** Fills `#scoreTable tbody` with the given entries (one `<tr>` each). */

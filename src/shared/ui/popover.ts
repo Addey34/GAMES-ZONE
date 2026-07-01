@@ -1,11 +1,16 @@
 /**
- * Generic collapsible popover used by the game-shell action buttons (Niveaux,
- * Paramètres, Classement, Multijoueur). The panel is revealed **on hover** in
- * pure CSS (like the help panel, see `panels.css`); this module only adds the
- * **pin** behaviour so a panel can stay open after the cursor leaves: a click /
- * tap on the toggle pins it (`.is-open` — this is also how it opens on mobile,
- * where there is no hover), an outside click unpins it, and `aria-expanded`
- * stays in sync. The panel content lives in its own component.
+ * Generic collapsible popover used by the game-shell action buttons (Levels,
+ * Settings, Leaderboard, Multiplayer). The panel is revealed **purely on hover /
+ * focus** in CSS (`panels.css`), exactly like the help panel — so every action
+ * button behaves identically and there is no click-to-pin to second-guess (the
+ * source of the old "did my click open or close it?" confusion). On touch, where
+ * there is no hover, tapping the toggle button focuses it and `:focus-within`
+ * reveals the panel; tapping elsewhere blurs it and it closes.
+ *
+ * This module therefore adds no open/close interaction of its own; it only
+ * exposes a **programmatic** `open()` / `close()` (toggling `.is-open`) for the
+ * one flow that needs to keep a panel up while the cursor is away — the
+ * multiplayer session lobby — plus an outside-click that dismisses such a pin.
  *
  * Markup convention (see `shell-open.hbs` and `panels.css`): a `.game-pop`
  * control wraps a `.game-pop-toggle` button and a `.game-pop-panel`; the pinned
@@ -43,20 +48,16 @@ export function setupPopover(ids: PopoverIds): Popover | null {
     toggle.setAttribute('aria-expanded', String(open));
   };
 
-  toggle.addEventListener('click', (event) => {
-    event.stopPropagation();
-    setOpen(!control.classList.contains('is-open'));
-  });
-
-  // A click inside the panel never closes it. Crucially this also survives a
-  // content re-render that detaches the clicked node before the document handler
-  // runs (e.g. the multiplayer "Créer" button replacing the panel): a detached
-  // target would fail the `contains` check below and wrongly close the panel.
+  // A click inside the panel never dismisses a programmatic pin. Crucially this
+  // also survives a content re-render that detaches the clicked node before the
+  // document handler runs (e.g. the multiplayer "Create" button replacing the
+  // panel): a detached target would fail the `contains` check below and wrongly
+  // close the panel.
   panel.addEventListener('click', (event) => {
     event.stopPropagation();
   });
 
-  // A click anywhere outside the control unpins the panel.
+  // A click anywhere outside the control dismisses a programmatic pin.
   document.addEventListener('click', (event) => {
     if (!control.contains(event.target as Node)) setOpen(false);
   });

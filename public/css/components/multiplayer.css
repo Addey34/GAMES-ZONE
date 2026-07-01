@@ -1,7 +1,7 @@
 /* =============================================================================
-   Panneau « Multijoueur » : créer / rejoindre une session par code, état de
-   présence et bouton quitter. Rendu par src/shared/versus/multiplayerPanel.ts
-   dans un popover du shell ; générique pour tout jeu `multiplayer: true`.
+   "Multiplayer" panel: create / join a session by code, presence state and a
+   quit button. Rendered by src/shared/versus/multiplayerPanel.ts in a shell
+   popover; generic for any `multiplayer: true` game.
    ========================================================================== */
 
 .game-multiplayer-panel {
@@ -20,7 +20,7 @@
   gap: var(--spacing-sm);
 }
 
-/* Ligne « rejoindre » : champ code + bouton. */
+/* "Join" row: code field + button. */
 .mp-join {
   display: flex;
   gap: var(--spacing-xs);
@@ -35,7 +35,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Code de session à partager : grand, lisible, copiable d'un coup d'œil. */
+/* Session code to share: large, legible, copyable at a glance. */
 .mp-code {
   display: flex;
   align-items: center;
@@ -63,7 +63,7 @@
   color: var(--title-color, var(--primary-color));
 }
 
-/* Ligne d'état (en attente, connecté, erreur…). */
+/* Status line (waiting, connected, error…). */
 .mp-status {
   display: flex;
   align-items: center;
@@ -80,11 +80,38 @@
   color: var(--secondary-color);
 }
 
-/* Petit séparateur « ou » entre créer et rejoindre. */
+/* Small "or" separator between create and join. */
 .mp-or {
   text-align: center;
   font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-color-disabled);
+}
+
+/* Lobby roster: player count + a note about bot-filled seats. */
+.mp-roster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: var(--background-color);
+  border-radius: var(--border-radius-md);
+}
+
+.mp-roster-count {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bolder);
+  font-variant-numeric: tabular-nums;
+  color: var(--title-color, var(--primary-color));
+}
+
+.mp-roster-note {
+  font-size: var(--font-size-xs);
+  color: var(--text-color-muted);
+  text-align: center;
 }

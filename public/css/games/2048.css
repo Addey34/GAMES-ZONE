@@ -1,27 +1,19 @@
 @import url('../global.css');
 
-/* Couleur d'accent du jeu (titre + item actif du rail). */
-.app-body {
-  --title-color: var(--color-2048);
-}
-
 /* =============================================================================
-   2048 — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
+   2048 — game-specific styles (frame/controls/score-bar = shared).
    ========================================================================== */
 
-/* --- Plateau carré : grille 4x4 (taille logique posée en JS) --- */
+/* --- Square board: 4x4 grid (logical size set in JS) --- */
 .grid-board {
-  width: 100%;
-  aspect-ratio: 1;
   display: grid;
   grid-template: repeat(4, 1fr) / repeat(4, 1fr);
   gap: var(--spacing-sm);
   padding: var(--spacing-sm);
   background: var(--tile-board-bg);
-  border-radius: var(--border-radius-md);
 }
 
-/* --- Tuile --- */
+/* --- Tile --- */
 .tile {
   display: flex;
   align-items: center;
@@ -35,7 +27,7 @@
   user-select: none;
 }
 
-/* Réduction de la police pour les grands nombres. */
+/* Smaller font for large numbers. */
 .tile--3digits {
   font-size: clamp(0.9rem, 5.5vmin, 1.7rem);
 }
@@ -43,7 +35,7 @@
   font-size: clamp(0.75rem, 4.5vmin, 1.4rem);
 }
 
-/* Palette des valeurs : texte sombre jusqu'à 4, clair au-delà. */
+/* Value palette: dark text up to 4, light beyond. */
 .tile--2 {
   background: var(--tile-2-bg);
 }

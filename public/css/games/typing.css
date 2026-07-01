@@ -1,27 +1,14 @@
 @import url('../global.css');
 
-/* Couleur d'accent du jeu (titre + item actif du rail). */
-.app-body {
-  --title-color: var(--color-dactylo);
-}
-
 /* =============================================================================
-   Dactylographie — styles spécifiques au jeu.
-   La saisie (.input-field--game) et la barre de détails (.game-details, score +
-   chrono) viennent des composants/layouts partagés.
+   Typing — game-specific styles.
+   The input (.input-field--game) and the details bar (.game-details, HUD stats)
+   come from the shared components/layouts.
    ========================================================================== */
 
-/* Chrono dans la barre de détails partagée : devient rouge sous 10 s. */
-#chrono {
-  font-weight: var(--font-weight-bolder);
-}
-
-#chrono.is-low {
-  color: var(--error-color);
-}
-
-/* Zone de jeu carrée (même empreinte que les autres jeux). Mode « focus » : le
-   mot courant en grand, l'aperçu des suivants dessous, la saisie ancrée en bas. */
+/* Square play area (same footprint as the other games). "Focus" mode: the
+   current word large, the preview of the next ones below, the input pinned at
+   the bottom. */
 .typing-area {
   width: 100%;
   aspect-ratio: 1;
@@ -35,8 +22,8 @@
   overflow: hidden;
 }
 
-/* Mot courant + aperçu. Mobile-first : calés vers le HAUT pour rester visibles
-   au-dessus du clavier tactile ; centrés sur grand écran (pas de clavier). */
+/* Current word + preview. Mobile-first: pushed UP to stay visible above the
+   touch keyboard; centered on large screens (no keyboard). */
 .word-container {
   flex: 1 1 auto;
   width: 100%;
@@ -56,8 +43,8 @@
   }
 }
 
-/* Mot à taper, en grand. Une lettre par span pour la coloration en direct ;
-   les mots longs passent à la ligne plutôt que de déborder. */
+/* Word to type, large. One letter per span for live coloring; long words wrap
+   rather than overflow. */
 .focus-word {
   display: flex;
   flex-wrap: wrap;
@@ -74,7 +61,7 @@
   transition: color 0.08s ease;
 }
 
-/* Lettre correctement tapée / erronée. */
+/* Correctly typed / mistyped letter. */
 .focus-letter.correct {
   color: var(--secondary-color);
 }
@@ -84,13 +71,13 @@
   text-decoration: underline;
 }
 
-/* Prochaine lettre attendue (curseur visuel). */
+/* Next expected letter (visual cursor). */
 .focus-letter.active {
   color: var(--text-color);
   border-bottom: 3px solid var(--primary-color);
 }
 
-/* Aperçu discret des mots suivants. */
+/* Discreet preview of the next words. */
 .upcoming {
   display: flex;
   flex-wrap: wrap;
@@ -109,7 +96,7 @@
   white-space: nowrap;
 }
 
-/* Saisie ancrée en bas de la zone de frappe, centrée. */
+/* Input pinned at the bottom of the typing area, centered. */
 .input-field--game {
   align-self: center;
   flex: 0 0 auto;

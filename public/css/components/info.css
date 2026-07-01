@@ -1,14 +1,14 @@
 /* =============================================================================
-   Barre d'actions du jeu, en coins de carte :
-     - à gauche : bouton « i » ; au SURVOL (ou focus clavier / tap mobile) il
-       révèle le panneau d'aide « Comment jouer » (data-driven, liste `games`) ;
-     - à droite : bouton plein écran.
-   Ce fichier porte aussi le STYLE COMMUN du bouton rond d'action (aide, plein
-   écran ET popovers .game-pop-toggle) ; le comportement déplié des popovers
-   vit dans panels.css.
+   Game action bar, in the card corners:
+     - left  : the "i" button; on HOVER (or keyboard focus / mobile tap) it
+       reveals the "How to play" help panel (data-driven, `games` list);
+     - right : fullscreen button.
+   This file also carries the SHARED STYLE of the round action button (help,
+   fullscreen AND the .game-pop-toggle popovers); the popovers' expand behavior
+   lives in panels.css.
    ========================================================================== */
 
-/* Cluster d'actions ancré en haut à gauche (niveaux + aide côte à côte). */
+/* Action cluster anchored top-left (levels + help side by side). */
 .game-actions {
   position: absolute;
   top: var(--spacing-sm);
@@ -19,13 +19,13 @@
   gap: var(--spacing-xs);
 }
 
-/* Conteneur de l'aide : le survol/focus de l'ensemble (bouton + panneau) gère
-   l'ouverture, sans JS. Positionné relativement pour ancrer son panneau. */
+/* Help container: hovering/focusing the whole thing (button + panel) drives
+   the open, no JS. Positioned relative to anchor its panel. */
 .game-info {
   position: relative;
 }
 
-/* Bouton rond d'action, commun à l'aide, au plein écran et aux popovers. */
+/* Round action button, shared by help, fullscreen and the popovers. */
 .game-info-toggle,
 .game-fullscreen-toggle,
 .game-pop-toggle {
@@ -62,13 +62,13 @@
   transform: scale(1.08);
 }
 
-/* Masqué quand l'API plein écran est indisponible (ex. iPhone). */
+/* Hidden when the fullscreen API is unavailable (e.g. iPhone). */
 .game-fullscreen-toggle[hidden] {
   display: none;
 }
 
-/* Panneau d'aide : masqué par défaut, révélé au survol ou au focus clavier.
-   Collé sous le bouton (top: 100%) pour qu'aucun « trou » ne coupe le survol. */
+/* Help panel: hidden by default, revealed on hover or keyboard focus.
+   Stuck under the button (top: 100%) so no "gap" breaks the hover. */
 .game-info-panel {
   position: absolute;
   top: 100%;
@@ -103,8 +103,8 @@
   gap: var(--spacing-xs);
 }
 
-/* Chaque entrée : la (les) touche(s) au-dessus, l'action en dessous (lisible
-   même quand les touches sont larges, ex. flèches + ZQSD). */
+/* Each entry: the key(s) on top, the action below (readable even when the
+   keys are wide, e.g. arrows + WASD). */
 .game-info-item {
   display: flex;
   flex-direction: column;
@@ -120,7 +120,7 @@
   font-weight: 500;
 }
 
-/* Vraies touches du clavier (flèches, ZQSD, Espace…). */
+/* Real keyboard keys (arrows, WASD, Space…). */
 .game-info-keys kbd {
   display: inline-block;
   padding: 0.05em 0.45em;

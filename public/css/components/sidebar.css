@@ -1,18 +1,18 @@
 /* =============================================================================
-   Sidebar globale — rail neon vertical, remplace l'ancien footer.
-   Mobile-first :
-     - base (mobile)  : hors-champ, ouverte via le bouton hamburger (.sidebar-toggle) ;
-     - desktop (md+)  : rail compact fixe (icones seules) qui se deploie au survol.
-   L'item actif est rempli avec le degrade du jeu (--nav-accent, mappe par data-nav).
+   Global sidebar — vertical neon rail, replaces the old footer.
+   Mobile-first:
+     - base (mobile) : off-screen, opened via the hamburger button (.sidebar-toggle);
+     - desktop (md+) : fixed compact rail (icons only) that expands on hover.
+   The active item is filled with the game's accent (--nav-accent, set per item).
    ========================================================================== */
 
-/* Couleur d'accent de l'item actif : fournie en inline (style="--nav-accent: …")
-   depuis la liste `games` de vite.config.ts. Fallback ici si jamais absente. */
+/* Accent color of the active item: provided inline (style="--nav-accent: …")
+   from the `games` list in vite.config.ts. Fallback here if ever missing. */
 .sidebar-link {
   --nav-accent: var(--primary-color);
 }
 
-/* --- Le rail ------------------------------------------------------------- */
+/* --- The rail ------------------------------------------------------------ */
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
@@ -26,7 +26,7 @@
   box-shadow: var(--shadow-lg);
   overflow-x: hidden;
   overflow-y: auto;
-  /* Mobile : hors-champ, glisse a l'ouverture. */
+  /* Mobile: off-screen, slides in when opened. */
   transform: translateX(-100%);
   transition: transform var(--transition-speed) ease;
 }
@@ -35,7 +35,7 @@ body.sidebar-open .sidebar {
   transform: translateX(0);
 }
 
-/* Liseré degrade sur le bord droit du rail (signature visuelle). */
+/* Gradient hairline on the rail's right edge (visual signature). */
 .sidebar::after {
   content: '';
   position: absolute;
@@ -45,7 +45,7 @@ body.sidebar-open .sidebar {
   opacity: 0.6;
 }
 
-/* --- Logo / marque ------------------------------------------------------- */
+/* --- Logo / brand -------------------------------------------------------- */
 .sidebar-brand {
   display: flex;
   align-items: center;
@@ -63,7 +63,7 @@ body.sidebar-open .sidebar {
   font-size: var(--font-size-xl);
 }
 
-/* --- Liste & liens ------------------------------------------------------- */
+/* --- List & links -------------------------------------------------------- */
 .sidebar-nav {
   list-style: none;
   display: flex;
@@ -92,8 +92,8 @@ body.sidebar-open .sidebar {
     transform var(--transition-speed) ease;
 }
 
-/* Boite d'icone a largeur fixe : l'icone reste centree sur le rail compact
-   et ne bouge pas quand le rail se deploie. */
+/* Fixed-width icon box: the icon stays centered on the compact rail and does
+   not move when the rail expands. */
 .sidebar-icon {
   flex: 0 0 calc(var(--sidebar-width) - 2 * var(--spacing-sm));
   display: grid;
@@ -102,15 +102,51 @@ body.sidebar-open .sidebar {
   font-size: var(--font-size-lg);
 }
 
-/* Le libelle flexe de 0 (compact, clippe) a sa pleine largeur (deploye) sans
-   jamais s'enrouler : nowrap empeche tout reflux vertical, min-width:0 + flex
-   l'autorisent a se reduire a 0 au lieu de deborder. L'icone, elle, est figee. */
+/* The label flexes from 0 (compact, clipped) to its full width (expanded)
+   without ever wrapping: nowrap prevents any vertical reflow, min-width:0 + flex
+   let it shrink to 0 instead of overflowing. The icon stays fixed. */
 .sidebar-label {
   flex: 1 1 0;
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/* --- Mode badge (solo / duo / multi) ------------------------------------- */
+/* Small bubble at the end of each link telling how many players the game is
+   for. Data-driven from the game's `mode` field (data-mode); the people glyph
+   is painted in CSS from a Font Awesome codepoint, so a new game gets it for
+   free. Revealed with the label (hidden on the compact rail). */
+.sidebar-mode {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 1.4em;
+  height: 1.4em;
+  margin-left: var(--spacing-xs);
+  border-radius: var(--border-radius-pill, 999px);
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: var(--font-size-sm);
+}
+
+.sidebar-mode::before {
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 0.7em;
+  line-height: 1;
+}
+
+/* solo = one person, duo = two people, multi = a group (3+). */
+.sidebar-mode[data-mode='solo']::before {
+  content: '\f007';
+}
+.sidebar-mode[data-mode='duo']::before {
+  content: '\f500';
+}
+.sidebar-mode[data-mode='multi']::before {
+  content: '\f0c0';
 }
 
 .sidebar-link:hover,
@@ -120,7 +156,7 @@ body.sidebar-open .sidebar {
   transform: translateX(2px);
 }
 
-/* Item actif : rempli de la couleur du jeu + glow neon. */
+/* Active item: filled with the game's color + neon glow. */
 .sidebar-link.is-active {
   background-color: var(--nav-accent);
   color: var(--white-color);
@@ -131,19 +167,25 @@ body.sidebar-open .sidebar {
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.55));
 }
 
-/* --- Connexion (bouton Google / joueur connecte) ------------------------- */
-/* Pousse le bloc tout en bas du rail ; l'item interne suit la meme dynamique
-   que les liens (icone fixe toujours visible + libelle revele au survol). */
+/* On the active item the badge bubble reads against the accent fill. */
+.sidebar-link.is-active .sidebar-mode {
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--white-color);
+}
+
+/* --- Sign-in (Google button / signed-in player) ------------------------- */
+/* Pushes the block to the very bottom of the rail; the inner item follows the
+   same dynamic as the links (fixed icon always visible + label revealed on hover). */
 .sidebar-auth {
   margin-top: auto;
   padding-top: var(--spacing-sm);
-  /* Colonne flex : l'item s'etire sur toute la largeur (align-items: stretch
-     par defaut), donc la ligne entiere est cliquable comme les liens de jeu. */
+  /* Flex column: the item stretches to the full width (align-items: stretch by
+     default), so the whole row is clickable like the game links. */
   display: flex;
   flex-direction: column;
 }
 
-/* Filet de separation entre les jeux et la connexion. */
+/* Separator line between the games and the sign-in. */
 .sidebar-auth::before {
   content: '';
   display: block;
@@ -152,9 +194,9 @@ body.sidebar-open .sidebar {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* Reset des styles bouton natif : l'apparence vient de .sidebar-auth-item
-   (mutualise avec .sidebar-link plus haut). padding:0 indispensable, sinon le
-   padding par defaut du <button> decale l'icone vs les liens de jeu (<a>). */
+/* Reset native button styles: the look comes from .sidebar-auth-item (shared
+   with .sidebar-link above). padding:0 is essential, otherwise the <button>'s
+   default padding offsets the icon vs the game links (<a>). */
 .sidebar-auth-item {
   width: auto;
   padding: 0;
@@ -165,17 +207,17 @@ body.sidebar-open .sidebar {
   cursor: pointer;
 }
 
-/* Le widget Google rendu dans la boite d'icone reste centre et clippe. */
+/* The Google widget rendered in the icon box stays centered and clipped. */
 .sidebar-auth-item .sidebar-icon {
   overflow: hidden;
 }
 
-/* Icone de deconnexion : un peu plus petite pour equilibrer avec le logo G. */
+/* Sign-out icon: a bit smaller to balance with the G logo. */
 .sidebar-auth-item .sidebar-icon i {
   font-size: 1.1em;
 }
 
-/* --- Bouton hamburger (mobile uniquement) -------------------------------- */
+/* --- Hamburger button (mobile only) -------------------------------------- */
 .sidebar-toggle {
   position: fixed;
   top: var(--spacing-sm);
@@ -194,7 +236,7 @@ body.sidebar-open .sidebar {
   cursor: pointer;
 }
 
-/* --- Scrim mobile -------------------------------------------------------- */
+/* --- Mobile scrim -------------------------------------------------------- */
 .sidebar-scrim {
   position: fixed;
   inset: 0;
@@ -207,7 +249,7 @@ body.sidebar-open .sidebar {
 }
 
 /* =============================================================================
-   Desktop : rail compact fixe + deploiement au survol.
+   Desktop: fixed compact rail + expand on hover.
    ========================================================================== */
 @media (min-width: 768px) {
   .sidebar {
@@ -220,23 +262,25 @@ body.sidebar-open .sidebar {
     width: var(--sidebar-width-expanded);
   }
 
-  /* Libelles caches en mode compact, reveles au survol du rail. */
-  .sidebar-label {
+  /* Labels and mode badges hidden when compact, revealed on rail hover. */
+  .sidebar-label,
+  .sidebar-mode {
     opacity: 0;
     transition: opacity var(--transition-speed) ease;
   }
-  .sidebar:hover .sidebar-label {
+  .sidebar:hover .sidebar-label,
+  .sidebar:hover .sidebar-mode {
     opacity: 1;
   }
 
-  /* Plus de toggle ni de scrim en desktop. */
+  /* No toggle or scrim on desktop. */
   .sidebar-toggle,
   .sidebar-scrim {
     display: none;
   }
 }
 
-/* Le rail est un calque fixe : il N'AJOUTE AUCUN offset au contenu. Les pages
-   restent centrees sur le viewport reel (centrage gere par .app-body, partage),
-   le rail compact flotte par-dessus la gouttiere gauche et son deploiement au
-   survol passe en overlay. Rien a faire pour les futures pages : .app-body suffit. */
+/* The rail is a fixed layer: it ADDS NO offset to the content. Pages stay
+   centered on the real viewport (centering handled by shared .app-body), the
+   compact rail floats over the left gutter and its hover expansion overlays the
+   content. Nothing to do for future pages: .app-body is enough. */

@@ -1,7 +1,7 @@
 import { setupPopover } from '../ui/popover.js';
 
 /**
- * The collapsible "Classement" panel in the game shell header.
+ * The collapsible "Leaderboard" panel in the game shell header.
  *
  * It only handles open/close (delegated to {@link setupPopover}); the score
  * table inside it (`#scoreTable`) is filled by the engine's

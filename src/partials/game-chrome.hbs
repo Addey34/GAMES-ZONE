@@ -1,8 +1,8 @@
 <!--
-  Chrome commun à tous les jeux : uniquement la sidebar globale désormais.
-  Le classement vit dans le panneau « Classement » du shell (shell-open) pour
-  les jeux qui l'activent (`leaderboard: true`), et la fin de partie passe par
-  l'overlay géré en JS (src/shared/ui/gameOverlay.ts) — plus de modal ici.
-  La navigation (retour accueil + autres jeux) vit dans la sidebar globale.
+  Chrome shared by every game: just the global sidebar now.
+  The leaderboard lives in the shell's "Leaderboard" panel (shell-open) for the
+  games that enable it (`leaderboard: true`), and game-over goes through the
+  JS-managed overlay (src/shared/ui/gameOverlay.ts) — no modal here.
+  Navigation (back home + other games) lives in the global sidebar.
 -->
 {{> sidebar}}

@@ -1,35 +1,22 @@
 @import url('../global.css');
 
-/* Couleur d'accent du jeu (titre + item actif du rail). */
-.app-body {
-  --title-color: var(--color-memory);
-}
-
 /* =============================================================================
-   Memory — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
+   Memory — game-specific styles (frame/controls/score-bar = shared).
    ========================================================================== */
 
-/* --- Plateau carré : grille N×N (nombre de colonnes posé en JS) --- */
-/* `container-type: size` permet de dimensionner l'icône en `cqmin` (% du plus
-   petit côté du plateau), réglé en JS via --memory-icon selon la taille de grille
-   (4×4 / 6×6 / 8×8) pour que tout tienne. */
+/* --- Square board: N×N grid (number of columns set in JS) --- */
+/* `container-type: size` lets us size the icon in `cqmin` (% of the board's
+   smallest side), set in JS via --memory-icon according to the grid size
+   (4×4 / 6×6 / 8×8) so everything fits. */
 .memory-board {
-  width: 100%;
-  aspect-ratio: 1;
   container-type: size;
   display: grid;
   gap: clamp(2px, 1cqmin, var(--spacing-sm));
   padding: var(--spacing-sm);
   background: var(--memory-board-bg);
-  border-radius: var(--border-radius-md);
 }
 
-/* État de tour / chrono dans la barre de détails. */
-.memory-status.is-low {
-  font-weight: var(--font-weight-bolder);
-}
-
-/* --- Carte : bouton carré qui se retourne en 3D --- */
+/* --- Card: square button that flips in 3D --- */
 .memory-card {
   aspect-ratio: 1;
   padding: 0;
@@ -48,12 +35,12 @@
   transition: transform var(--transition-speed);
 }
 
-/* La carte retournée (paire en cours ou trouvée) montre sa face avant. */
+/* A flipped card (pair in progress or found) shows its front face. */
 .memory-card.is-flipped .memory-card-inner {
   transform: rotateY(180deg);
 }
 
-/* --- Faces de la carte --- */
+/* --- Card faces --- */
 .memory-card-face {
   position: absolute;
   inset: 0;
@@ -62,24 +49,24 @@
   justify-content: center;
   border-radius: var(--border-radius-sm);
   backface-visibility: hidden;
-  /* Taille d'icône relative au plateau (posée en JS selon la grille). */
+  /* Icon size relative to the board (set in JS according to the grid). */
   font-size: var(--memory-icon, 8cqmin);
 }
 
-/* Dos (visible au repos) : motif uni avec un point d'interrogation discret. */
+/* Back (visible at rest): solid pattern with a discreet question mark. */
 .memory-card-back {
   background: var(--memory-card-back-bg);
   color: var(--memory-card-back-icon);
 }
 
-/* Face avant (le symbole) : pré-tournée pour apparaître au retournement. */
+/* Front face (the symbol): pre-rotated to appear on the flip. */
 .memory-card-front {
   background: var(--memory-card-front-bg);
   color: var(--memory-card-front-icon);
   transform: rotateY(180deg);
 }
 
-/* Paire trouvée : on verrouille le curseur et on signale la réussite. */
+/* Matched pair: lock the cursor and signal the success. */
 .memory-card.is-matched {
   cursor: default;
 }

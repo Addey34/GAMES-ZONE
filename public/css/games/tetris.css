@@ -1,28 +1,19 @@
 @import url('../global.css');
 
-/* Couleur d'accent du jeu (titre + item actif du rail). */
-.app-body {
-  --title-color: var(--color-tetris);
-}
-
 /* =============================================================================
-   Tetris — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
+   Tetris — game-specific styles (frame/controls/score-bar = shared).
    ========================================================================== */
 
-/* --- Zone de jeu carrée : le plateau (10x20) est centré, fond noir en
-   letterbox sur les côtés (même principe que la carte de Pac-Man). --- */
+/* --- Square play area: the board (10x20) is centered, black letterbox on the
+   sides (same principle as the Pac-Man map). --- */
 .play-area {
-  width: 100%;
-  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--background-color-dark);
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
 }
 
-/* --- Plateau : grille 10 colonnes x 20 lignes, occupe toute la hauteur. --- */
+/* --- Board: 10-column x 20-row grid, fills the full height. --- */
 .tetris-board {
   height: 100%;
   aspect-ratio: 10 / 20;
@@ -31,7 +22,7 @@
   gap: 1px;
 }
 
-/* --- Case vide / pièce --- */
+/* --- Empty cell / piece --- */
 .cell {
   background: var(--tetris-empty-bg);
   border-radius: var(--border-radius-xs);

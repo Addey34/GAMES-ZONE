@@ -1,10 +1,12 @@
 import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
 import { ScoreEntry } from '../shared/score/ScoreManager.js';
+import { CountdownTimer } from '../shared/ui/countdownTimer.js';
+import { setupHud } from '../shared/ui/hud.js';
 
 /**
  * Configuration specific to the typing game.
  */
-interface DactylographieConfig extends GameConfig {
+interface TypingConfig extends GameConfig {
   /** Game duration, in seconds. */
   timeLimit?: number;
 }
@@ -22,7 +24,7 @@ interface SpeedMetrics {
 /**
  * Leaderboard entry enriched with the typing metrics.
  */
-interface DactylographieScoreEntry extends ScoreEntry {
+interface TypingScoreEntry extends ScoreEntry {
   /** Total number of correctly typed letters. */
   letters: number;
   /** Words per minute. */
@@ -40,18 +42,16 @@ interface DactylographieScoreEntry extends ScoreEntry {
  * `setInterval` (the timer), and the display is driven by typing and resize
  * events.
  */
-export class DactylographieGame extends GameEngine {
+export class TypingGame extends GameEngine {
   private words: string[] = [];
   private currentWordIndex: number = 0;
   private readonly timeLimit: number;
-  private timeLeft: number;
   private letterCount: number = 0;
-  private timer: number | null = null;
+  /** Shared one-second countdown; ends the game when it reaches zero. */
+  private readonly chrono = new CountdownTimer();
 
   private wordContainer: HTMLElement | null = null;
   private wordInput: HTMLInputElement | null = null;
-  private scoreDisplay: HTMLElement | null = null;
-  private chronoDisplay: HTMLElement | null = null;
 
   /** Number of upcoming words shown as a preview below the current word. */
   private static readonly UPCOMING_COUNT = 3;
@@ -59,10 +59,9 @@ export class DactylographieGame extends GameEngine {
   /**
    * @param config Game configuration (game duration).
    */
-  constructor(config: DactylographieConfig = {}) {
-    super({ ...config, storageKey: 'dactylographie-scores', leaderboardId: 'dactylographie' });
+  constructor(config: TypingConfig = {}) {
+    super({ ...config, storageKey: 'typing-scores', leaderboardId: 'typing' });
     this.timeLimit = config.timeLimit || 60;
-    this.timeLeft = this.timeLimit;
   }
 
   /**
@@ -72,15 +71,17 @@ export class DactylographieGame extends GameEngine {
   async initialize(): Promise<void> {
     this.wordContainer = document.getElementById('wordContainer');
     this.wordInput = document.getElementById('wordInput') as HTMLInputElement;
-    this.scoreDisplay = document.getElementById('score');
-    this.chronoDisplay = document.getElementById('chrono');
+    this.hud = setupHud([
+      { key: 'score', icon: 'star', label: 'Score' },
+      { key: 'time', icon: 'clock', label: 'Time' },
+    ]);
 
     this.setupEventListeners();
     this.words = await this.loadWords();
     this.updateWords();
     this.renderScoreTable();
     this.updateScoreDisplay();
-    this.updateChronoDisplay();
+    this.updateChronoDisplay(this.timeLimit);
   }
 
   /**
@@ -227,7 +228,7 @@ export class DactylographieGame extends GameEngine {
     const upcoming = document.createElement('div');
     upcoming.className = 'upcoming';
     const start = this.currentWordIndex + 1;
-    const end = Math.min(this.words.length, start + DactylographieGame.UPCOMING_COUNT);
+    const end = Math.min(this.words.length, start + TypingGame.UPCOMING_COUNT);
     for (let j = start; j < end; j++) {
       const span = document.createElement('span');
       span.className = 'upcoming-word';
@@ -244,7 +245,7 @@ export class DactylographieGame extends GameEngine {
    * elapsed since the start of the game.
    */
   private calculateSpeed(): SpeedMetrics {
-    const minutes = (this.timeLimit - this.timeLeft) / 60;
+    const minutes = (this.timeLimit - this.chrono.remaining) / 60;
     return {
       wpm: minutes > 0 ? Math.round(this.state.score / minutes) : 0,
       lpm: minutes > 0 ? Math.round(this.letterCount / minutes) : 0,
@@ -263,14 +264,11 @@ export class DactylographieGame extends GameEngine {
     this.state.isGameOver = false;
     this.state.isPaused = false;
 
-    this.timer = window.setInterval(() => {
-      this.timeLeft--;
-      this.updateChronoDisplay();
-
-      if (this.timeLeft === 0) {
-        this.gameOver();
-      }
-    }, 1000);
+    this.chrono.start({
+      seconds: this.timeLimit,
+      onTick: (remaining) => this.updateChronoDisplay(remaining),
+      onExpire: () => this.gameOver(),
+    });
   }
 
   /**
@@ -278,10 +276,7 @@ export class DactylographieGame extends GameEngine {
    */
   stop(): void {
     this.state.isRunning = false;
-    if (this.timer !== null) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
+    this.chrono.stop();
   }
 
   /**
@@ -290,19 +285,16 @@ export class DactylographieGame extends GameEngine {
    */
   reset(): void {
     this.stop();
-    // Re-shuffle the list so "Rejouer" yields a different word order (the list is
+    // Re-shuffle the list so "Play again" yields a different word order (the list is
     // only loaded/shuffled once, in initialize()).
     this.shuffleArray(this.words);
     this.currentWordIndex = 0;
-    this.timeLeft = this.timeLimit;
     this.letterCount = 0;
-    this.state.score = 0;
-    this.state.isGameOver = false;
-    this.state.isPaused = false;
+    this.resetState();
 
     if (this.wordInput) {
       this.wordInput.disabled = false;
-      this.wordInput.placeholder = 'Tapez le mot ici...';
+      this.wordInput.placeholder = 'Type the word here...';
       this.wordInput.style.opacity = '1';
       this.wordInput.style.cursor = 'text';
       this.wordInput.value = '';
@@ -310,7 +302,7 @@ export class DactylographieGame extends GameEngine {
 
     this.updateWords();
     this.updateScoreDisplay();
-    this.updateChronoDisplay();
+    this.updateChronoDisplay(this.timeLimit);
   }
 
   /**
@@ -322,7 +314,7 @@ export class DactylographieGame extends GameEngine {
 
     if (this.wordInput) {
       this.wordInput.disabled = true;
-      this.wordInput.placeholder = 'Partie terminée !';
+      this.wordInput.placeholder = 'Game over!';
       this.wordInput.style.opacity = '0.7';
       this.wordInput.style.cursor = 'not-allowed';
     }
@@ -334,7 +326,7 @@ export class DactylographieGame extends GameEngine {
    * Title of the game-over modal.
    */
   protected getGameOverTitle(): string {
-    return 'Partie terminée !';
+    return 'Game over!';
   }
 
   /**
@@ -343,17 +335,17 @@ export class DactylographieGame extends GameEngine {
   protected getGameOverContent(): string {
     const speed = this.calculateSpeed();
     return `
-      <div>Mots corrects : ${this.state.score}</div>
-      <div>Lettres tapées : ${this.letterCount}</div>
-      <div>Vitesse : ${speed.wpm} mots/minute</div>
-      <div>Vitesse : ${speed.lpm} lettres/minute</div>
+      <div>Correct words: ${this.state.score}</div>
+      <div>Typed letters: ${this.letterCount}</div>
+      <div>Speed: ${speed.wpm} words/minute</div>
+      <div>Speed: ${speed.lpm} letters/minute</div>
     `;
   }
 
   /**
    * Builds the leaderboard entry enriched with the typing metrics.
    */
-  protected buildScoreEntry(username: string): DactylographieScoreEntry {
+  protected buildScoreEntry(username: string): TypingScoreEntry {
     const speed = this.calculateSpeed();
     return {
       username,
@@ -374,29 +366,18 @@ export class DactylographieGame extends GameEngine {
   }
 
   /**
-   * Leaderboard row enriched with a "Vitesse" column (words/min and letters/min).
+   * Leaderboard row enriched with a "Speed" column (words/min and letters/min).
    */
   protected scoreTableRow(entry: ScoreEntry): string {
-    const e = entry as DactylographieScoreEntry;
-    return `<td>${this.escapeHtml(e.username)}</td><td>${e.score}</td><td>${e.wpm} mpm / ${e.lpm} lpm</td>`;
-  }
-
-  /**
-   * Shows the current score in the game header.
-   */
-  protected updateScoreDisplay(): void {
-    if (this.scoreDisplay) {
-      this.scoreDisplay.textContent = `Score : ${this.state.score}`;
-    }
+    const e = entry as TypingScoreEntry;
+    return `<td>${this.escapeHtml(e.username)}</td><td>${e.score}</td><td>${e.wpm} wpm / ${e.lpm} lpm</td>`;
   }
 
   /**
    * Shows the remaining time and turns the timer red below 10 seconds.
    */
-  private updateChronoDisplay(): void {
-    if (this.chronoDisplay) {
-      this.chronoDisplay.textContent = this.timeLeft.toString();
-      this.chronoDisplay.classList.toggle('is-low', this.timeLeft <= 10);
-    }
+  private updateChronoDisplay(remaining: number): void {
+    this.hud?.set('time', remaining);
+    this.hud?.toggle('time', 'is-low', remaining <= 10);
   }
 }

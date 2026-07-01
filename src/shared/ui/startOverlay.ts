@@ -6,10 +6,10 @@
  * and countdown overlays) so the loop only begins once the player decides. The
  * engine shows it from {@link GameEngine.presentStartScreen} (driven by
  * `bootstrapGame`), so a single implementation covers all auto-starting games —
- * no per-game wiring. Games that already wait for an event (e.g. Dactylo starts
+ * no per-game wiring. Games that already wait for an event (e.g. Typing starts
  * on the first keystroke, `autoStart: false`) keep their own behaviour.
  */
-export function showStartOverlay(onPlay: () => void, label = 'Jouer'): void {
+export function showStartOverlay(onPlay: () => void, label = 'Play'): void {
   const host = document.querySelector<HTMLElement>('.game-shell');
   if (!host) {
     // No shell to mount onto: fall back to starting immediately.

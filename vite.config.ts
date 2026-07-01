@@ -18,117 +18,143 @@ const srcRoot = resolve(projectRoot, 'src');
 // SVG logo: public/icons/<key>.svg).
 // `color` = a solid-color token (base/variables.css) to color the rail's active
 // item (and, via --title-color, the game page title).
+// `mode` = the player-count badge shown next to the rail label: 'solo' (1
+// player), 'duo' (1-v-1) or 'multi' (3+); rendered by sidebar.hbs.
 // `controls` = { keys, action } lines shown in the "How to play" help
 // (the "i" button), rendered by shell-open via the per-page context (see below).
 // `keys` may contain <kbd>…</kbd> HTML (rendered unescaped, trusted content
-// defined here) to display real keys; e.g. arrows + ZQSD.
-// `levels: true` (optional) renders the shell's collapsible "Niveaux" panel for
+// defined here) to display real keys; e.g. arrows + WASD.
+// `levels: true` (optional) renders the shell's collapsible "Levels" panel for
 // that game; the level set + unlock rules are declared in the game's own code.
-// `leaderboard: true` (optional) renders the collapsible "Classement" panel
+// `leaderboard: true` (optional) renders the collapsible "Leaderboard" panel
 // (hosting the score table); omit it for games where a high-score board makes no
 // sense (e.g. Pac-Man, which is level-based).
-// `speed: true` (optional) adds the typing game's extra "Vitesse" column to that
+// `speed: true` (optional) adds the typing game's extra "Speed" column to that
 // leaderboard table.
-// `settings: true` (optional) renders the shell's "Paramètres" popover (filled by
+// `settings: true` (optional) renders the shell's "Settings" popover (filled by
 // ui/settingsPanel.ts; e.g. Pong's bot difficulty + win score).
-// `multiplayer: true` (optional) renders the shell's "Multijoueur" popover for
+// `multiplayer: true` (optional) renders the shell's "Multiplayer" popover for
 // relayed 1-v-1 sessions (versus/multiplayerPanel.ts; e.g. Pong).
 // =============================================================================
 const games = [
   {
-    key: 'dactylographie',
-    label: 'Dactylographie',
-    color: '--color-dactylo',
+    key: 'typing',
+    label: 'Typing',
+    color: '--color-typing',
+    mode: 'solo',
     leaderboard: true,
     speed: true,
     controls: [
-      { keys: 'Frappe', action: 'Recopiez les mots affichés' },
-      { keys: 'Chrono', action: 'Démarre à la première lettre' },
+      { keys: 'Type', action: 'Retype the displayed words' },
+      { keys: 'Timer', action: 'Starts on the first letter' },
     ],
   },
   {
     key: 'snake',
     label: 'Snake',
     color: '--color-snake',
+    mode: 'solo',
     leaderboard: true,
     controls: [
-      { keys: '<kbd>↑ ↓ ← →</kbd> ou <kbd>Z Q S D</kbd>', action: 'Diriger le serpent' },
-      { keys: 'Glisser (mobile)', action: 'Diriger le serpent au doigt' },
-      { keys: 'But', action: 'Manger les souris, éviter sa queue' },
+      { keys: '<kbd>↑ ↓ ← →</kbd> or <kbd>W A S D</kbd>', action: 'Steer the snake' },
+      { keys: 'Swipe (mobile)', action: 'Steer the snake with your finger' },
+      { keys: 'Goal', action: 'Eat the mice, avoid your tail' },
     ],
   },
   {
     key: 'pacman',
     label: 'Pacman',
     color: '--color-pacman',
-    // Drives the shell's "Niveaux" panel (the level config itself lives in
+    mode: 'solo',
+    // Drives the shell's "Levels" panel (the level config itself lives in
     // PacmanGame); set `levels: true` on any game that opts into level selection.
     levels: true,
     controls: [
-      { keys: '<kbd>↑ ↓ ← →</kbd> ou <kbd>Z Q S D</kbd>', action: 'Déplacer Pac-Man' },
-      { keys: 'Glisser (mobile)', action: 'Déplacer Pac-Man au doigt' },
-      { keys: 'But', action: 'Manger toutes les pastilles' },
+      { keys: '<kbd>↑ ↓ ← →</kbd> or <kbd>W A S D</kbd>', action: 'Move Pac-Man' },
+      { keys: 'Swipe (mobile)', action: 'Move Pac-Man with your finger' },
+      { keys: 'Goal', action: 'Eat all the pellets' },
     ],
   },
   {
     key: '2048',
     label: '2048',
     color: '--color-2048',
+    mode: 'solo',
     leaderboard: true,
     controls: [
-      { keys: '<kbd>↑ ↓ ← →</kbd> ou <kbd>Z Q S D</kbd>', action: 'Glisser les tuiles' },
-      { keys: 'Glisser (mobile)', action: 'Glisser les tuiles au doigt' },
-      { keys: 'But', action: 'Fusionner pour atteindre 2048' },
+      { keys: '<kbd>↑ ↓ ← →</kbd> or <kbd>W A S D</kbd>', action: 'Slide the tiles' },
+      { keys: 'Swipe (mobile)', action: 'Slide the tiles with your finger' },
+      { keys: 'Goal', action: 'Merge tiles to reach 2048' },
     ],
   },
   {
     key: 'tetris',
     label: 'Tetris',
     color: '--color-tetris',
+    mode: 'solo',
     leaderboard: true,
     controls: [
-      { keys: '<kbd>← →</kbd> ou <kbd>Q D</kbd>', action: 'Déplacer la pièce' },
-      { keys: '<kbd>↑</kbd> ou <kbd>Z</kbd> (ou tap)', action: 'Pivoter' },
-      { keys: '<kbd>↓</kbd> ou <kbd>S</kbd>', action: 'Descente rapide' },
-      { keys: '<kbd>Espace</kbd>', action: 'Chute instantanée' },
-      { keys: 'Glisser (mobile)', action: '← → déplacer, ↓ descendre' },
+      { keys: '<kbd>← →</kbd> or <kbd>A D</kbd>', action: 'Move the piece' },
+      { keys: '<kbd>↑</kbd> or <kbd>W</kbd> (or tap)', action: 'Rotate' },
+      { keys: '<kbd>↓</kbd> or <kbd>S</kbd>', action: 'Soft drop' },
+      { keys: '<kbd>Space</kbd>', action: 'Hard drop' },
+      { keys: 'Swipe (mobile)', action: '← → to move, ↓ to drop' },
     ],
   },
   {
     key: 'memory',
     label: 'Memory',
     color: '--color-memory',
+    mode: 'duo',
     settings: true,
     multiplayer: true,
     controls: [
-      { keys: 'Clic / tap', action: 'Retourner deux cartes' },
-      { keys: 'Paire', action: 'Trouvée → tu rejoues (+1)' },
-      { keys: 'Chrono', action: '15 s par tour, sinon coup auto' },
-      { keys: 'But', action: 'Plus de paires que l’adversaire' },
+      { keys: 'Click / tap', action: 'Flip two cards' },
+      { keys: 'Pair', action: 'Found → you play again (+1)' },
+      { keys: 'Timer', action: '15 s per turn, otherwise an auto move' },
+      { keys: 'Goal', action: 'More pairs than your opponent' },
     ],
   },
   {
     key: 'breakout',
-    label: 'Casse-brique',
+    label: 'Breakout',
     color: '--color-breakout',
+    mode: 'solo',
     controls: [
-      { keys: '<kbd>← →</kbd> ou <kbd>Q D</kbd>', action: 'Déplacer la raquette' },
-      { keys: 'Glisser / souris', action: 'Déplacer la raquette' },
-      { keys: 'But', action: 'Détruire toutes les briques' },
+      { keys: '<kbd>← →</kbd> or <kbd>A D</kbd>', action: 'Move the paddle' },
+      { keys: 'Drag / mouse', action: 'Move the paddle' },
+      { keys: 'Goal', action: 'Destroy all the bricks' },
     ],
   },
   {
     key: 'pong',
     label: 'Pong',
     color: '--color-pong',
-    // Active la pastille « Paramètres » (config du bot) et le panneau
-    // « Multijoueur » (session à code) dans le shell ; pilotés par le jeu.
+    mode: 'duo',
+    // Enables the shell's "Settings" popover (bot config) and the "Multiplayer"
+    // panel (code-based session); both driven by the game.
     settings: true,
     multiplayer: true,
     controls: [
-      { keys: '<kbd>↑ ↓</kbd> ou <kbd>Z S</kbd>', action: 'Déplacer ta raquette' },
-      { keys: 'Glisser / souris', action: 'Déplacer ta raquette' },
-      { keys: 'But', action: 'Marquer en passant la raquette adverse' },
+      { keys: '<kbd>↑ ↓</kbd> or <kbd>W S</kbd>', action: 'Move your paddle' },
+      { keys: 'Drag / mouse', action: 'Move your paddle' },
+      { keys: 'Goal', action: 'Score past the opponent paddle' },
+    ],
+  },
+  {
+    key: 'ludo',
+    label: 'Ludo',
+    color: '--color-ludo',
+    mode: 'multi',
+    // "Settings" popover (bot difficulty) + "Multiplayer" panel (up to 4 players
+    // over the relay); both driven by the game.
+    settings: true,
+    multiplayer: true,
+    controls: [
+      { keys: 'Die', action: 'Rolled automatically on your turn' },
+      { keys: 'Click / tap', action: 'Choose which horse to move' },
+      { keys: '<kbd>6</kbd>', action: 'Brings a horse out of the stable and rolls again' },
+      { keys: 'Goal', action: 'Bring your 4 horses home to the center' },
     ],
   },
 ];

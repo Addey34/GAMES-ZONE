@@ -1,13 +1,13 @@
 <!--
-  Ouverture du shell de page unifie, commun a tous les jeux : un seul conteneur
-  (.game-shell) qui englobe le titre puis le contenu propre au jeu.
-  Parametres :
-    - title : texte du titre.
-    - key   : cle du jeu (ex. snake) ; affiche son logo SVG (/icons/<key>.svg) de
-              part et d'autre du titre (optionnel).
-  A refermer avec le partial shell-close.
+  Opening of the unified page shell, shared by every game: a single container
+  (.game-shell) wrapping the title and then the game's own content.
+  Parameters:
+    - title : the title text.
+    - key   : the game key (e.g. snake); shows its SVG logo (/icons/<key>.svg) on
+              both sides of the title (optional).
+  Close it with the shell-close partial.
 -->
-<main class="game-container">
+<main class="game-container"{{#if game}} style="--title-color: var({{game.color}})"{{/if}}>
   <section class="game-shell">
     <h1 class="app-title">
       {{#if key}}<span class="game-icon" style="--game-icon: url(/icons/{{key}}.svg)" aria-hidden="true"></span>{{/if}}
@@ -15,21 +15,21 @@
       {{#if key}}<span class="game-icon" style="--game-icon: url(/icons/{{key}}.svg)" aria-hidden="true"></span>{{/if}}
     </h1>
     {{#if game}}
-    <!-- Barre d'actions, coin haut-gauche : niveaux (optionnel), aide, puis classement. -->
+    <!-- Action bar, top-left corner: levels (optional), help, then leaderboard. -->
     <div class="game-actions">
       {{#if game.controls}}
-      <!-- Aide : panneau révélé au survol (ou au focus clavier / tap mobile), en CSS pur. -->
+      <!-- Help: panel revealed on hover (or keyboard focus / mobile tap), pure CSS. -->
       <div class="game-info">
         <button
           class="game-info-toggle"
           type="button"
-          aria-label="Aide : comment jouer"
+          aria-label="Help: how to play"
           aria-controls="gameInfoPanel"
         >
           <i class="fas fa-circle-info" aria-hidden="true"></i>
         </button>
-        <div class="game-info-panel" id="gameInfoPanel" role="dialog" aria-label="Comment jouer">
-          <h2 class="game-info-title">Comment jouer</h2>
+        <div class="game-info-panel" id="gameInfoPanel" role="dialog" aria-label="How to play">
+          <h2 class="game-info-title">How to play</h2>
           <ul class="game-info-list">
             {{#each game.controls}}
             <li class="game-info-item">
@@ -42,7 +42,7 @@
       </div>
       {{/if}}
       {{#if game.settings}}
-      <!-- Paramètres : popover de réglages (rempli par settingsPanel.ts, ex. difficulté du bot). -->
+      <!-- Settings: options popover (filled by settingsPanel.ts, e.g. bot difficulty). -->
       <div class="game-pop" id="settingsControl">
         <button
           class="game-pop-toggle"
@@ -51,15 +51,15 @@
           aria-haspopup="true"
           aria-expanded="false"
           aria-controls="settingsPanel"
-          aria-label="Paramètres"
+          aria-label="Settings"
         >
           <i class="fas fa-sliders" aria-hidden="true"></i>
         </button>
-        <div class="game-pop-panel" id="settingsPanel" role="dialog" aria-label="Paramètres"></div>
+        <div class="game-pop-panel" id="settingsPanel" role="dialog" aria-label="Settings"></div>
       </div>
       {{/if}}
       {{#if game.levels}}
-      <!-- Niveaux : bouton icône compact, déplie au clic le panneau (rempli par levelPanel.ts). -->
+      <!-- Levels: compact icon button, expands the panel on click (filled by levelPanel.ts). -->
       <div class="game-pop" id="levelControl">
         <button
           class="game-pop-toggle"
@@ -68,16 +68,16 @@
           aria-haspopup="true"
           aria-expanded="false"
           aria-controls="levelPanel"
-          aria-label="Niveaux"
+          aria-label="Levels"
         >
           <i class="fas fa-layer-group" aria-hidden="true"></i>
           <span class="game-pop-current" aria-hidden="true">1</span>
         </button>
-        <div class="game-pop-panel" id="levelPanel" role="dialog" aria-label="Choisir un niveau"></div>
+        <div class="game-pop-panel" id="levelPanel" role="dialog" aria-label="Choose a level"></div>
       </div>
       {{/if}}
       {{#if game.leaderboard}}
-      <!-- Classement : même popover, contient la table des scores (remplie par le moteur). -->
+      <!-- Leaderboard: same popover, holds the score table (filled by the engine). -->
       <div class="game-pop" id="leaderboardControl">
         <button
           class="game-pop-toggle"
@@ -86,7 +86,7 @@
           aria-haspopup="true"
           aria-expanded="false"
           aria-controls="leaderboardPanel"
-          aria-label="Classement"
+          aria-label="Leaderboard"
         >
           <i class="fas fa-trophy" aria-hidden="true"></i>
         </button>
@@ -94,15 +94,15 @@
           class="game-pop-panel game-leaderboard-panel"
           id="leaderboardPanel"
           role="dialog"
-          aria-label="Classement"
+          aria-label="Leaderboard"
         >
-          <p class="game-pop-title">Classement</p>
+          <p class="game-pop-title">Leaderboard</p>
           <table id="scoreTable" class="score-table">
             <thead>
               <tr>
-                <th>Joueur</th>
+                <th>Player</th>
                 <th>Score</th>
-                {{#if game.speed}}<th>Vitesse</th>{{/if}}
+                {{#if game.speed}}<th>Speed</th>{{/if}}
               </tr>
             </thead>
             <tbody></tbody>
@@ -111,7 +111,7 @@
       </div>
       {{/if}}
       {{#if game.multiplayer}}
-      <!-- Multijoueur : popover de session (créer / rejoindre par code), rempli par multiplayerPanel.ts. -->
+      <!-- Multiplayer: session popover (create / join by code), filled by multiplayerPanel.ts. -->
       <div class="game-pop" id="multiplayerControl">
         <button
           class="game-pop-toggle"
@@ -120,7 +120,7 @@
           aria-haspopup="true"
           aria-expanded="false"
           aria-controls="multiplayerPanel"
-          aria-label="Multijoueur"
+          aria-label="Multiplayer"
         >
           <i class="fas fa-users" aria-hidden="true"></i>
         </button>
@@ -128,12 +128,12 @@
           class="game-pop-panel game-multiplayer-panel"
           id="multiplayerPanel"
           role="dialog"
-          aria-label="Multijoueur"
+          aria-label="Multiplayer"
         ></div>
       </div>
       {{/if}}
     </div>
-    <button class="game-fullscreen-toggle" type="button" aria-label="Mode immersif" aria-pressed="false">
+    <button class="game-fullscreen-toggle" type="button" aria-label="Immersive mode" aria-pressed="false">
       <i class="fas fa-expand" aria-hidden="true"></i>
     </button>
     <script type="module" src="/shared/ui/zenMode.ts"></script>

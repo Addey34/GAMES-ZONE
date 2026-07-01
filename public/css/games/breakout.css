@@ -1,33 +1,23 @@
 @import url('../global.css');
 
-/* Couleur d'accent du jeu (titre + item actif du rail). */
-.app-body {
-  --title-color: var(--color-breakout);
-}
-
 /* =============================================================================
-   Casse-brique — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
+   Breakout — game-specific styles (frame/controls/score-bar = shared).
    ========================================================================== */
 
-/* --- Plateau carré : balle/raquette/briques positionnées en % par le JS. --- */
+/* --- Square board: ball/paddle/bricks positioned in % by the JS. --- */
 .breakout-board {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
   background: var(--background-color-dark);
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
   touch-action: none;
 }
 
-/* --- Briques --- */
+/* --- Bricks --- */
 .brick {
   position: absolute;
   border-radius: var(--border-radius-xs);
   box-shadow: var(--shadow-xs);
 }
 
-/* Une brique détruite disparaît (le modèle JS la marque `alive = false`). */
+/* A destroyed brick disappears (the JS model marks it `alive = false`). */
 .brick.is-broken {
   display: none;
 }
@@ -48,7 +38,7 @@
   background: var(--breakout-brick-5);
 }
 
-/* --- Raquette --- */
+/* --- Paddle --- */
 .paddle {
   position: absolute;
   background: var(--breakout-paddle);
@@ -56,7 +46,7 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* --- Balle --- */
+/* --- Ball --- */
 .ball {
   position: absolute;
   background: var(--breakout-ball);

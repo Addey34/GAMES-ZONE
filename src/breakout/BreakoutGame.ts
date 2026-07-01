@@ -1,4 +1,5 @@
 import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
+import { setupHud } from '../shared/ui/hud.js';
 import { setupPaddlePointer } from '../shared/engine/pointerControl.js';
 
 /**
@@ -90,9 +91,6 @@ export class BreakoutGame extends GameEngine {
   private paddleElement: HTMLElement | null = null;
   private brickElements: HTMLElement[] = [];
 
-  private scoreElement: HTMLElement | null = null;
-  private livesElement: HTMLElement | null = null;
-
   /**
    * @param config Game configuration (brick rows/columns, lives).
    */
@@ -110,8 +108,10 @@ export class BreakoutGame extends GameEngine {
    */
   initialize(): void {
     this.boardElement = document.getElementById('board');
-    this.scoreElement = document.querySelector('.score');
-    this.livesElement = document.querySelector('.lives');
+    this.hud = setupHud([
+      { key: 'score', icon: 'star', label: 'Score' },
+      { key: 'lives', icon: 'heart', label: 'Lives' },
+    ]);
 
     this.buildBoard();
     this.setupEventListeners();
@@ -427,9 +427,7 @@ export class BreakoutGame extends GameEngine {
    * the render.
    */
   reset(): void {
-    this.state.score = 0;
-    this.state.isGameOver = false;
-    this.state.isPaused = false;
+    this.resetState();
     this.lives = this.maxLives;
     this.level = 1;
     this.speed = BASE_SPEED;
@@ -444,18 +442,14 @@ export class BreakoutGame extends GameEngine {
    * Shows score, remaining lives and high score in the game header.
    */
   protected updateScoreDisplay(): void {
-    if (this.scoreElement) {
-      this.scoreElement.textContent = `Score: ${this.state.score}`;
-    }
-    if (this.livesElement) {
-      this.livesElement.textContent = `Vies: ${this.lives}`;
-    }
+    super.updateScoreDisplay();
+    this.hud?.set('lives', this.lives);
   }
 
   /**
    * Details shown in the game-over modal: score and level reached.
    */
   protected getGameOverContent(): string {
-    return `<div>Score : ${this.state.score}</div><div>Niveau : ${this.level}</div>`;
+    return `<div>Score: ${this.state.score}</div><div>Level: ${this.level}</div>`;
   }
 }

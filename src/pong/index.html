@@ -1,13 +1,10 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   {{> head title="Pong" css="/css/games/pong.css" script="./pong-main.ts"}}
   <body class="app-body">
     {{> shell-open title="Pong" key="pong"}}
-    <div class="game-details">
-      <span class="score"></span>
-      <span class="opp-score"></span>
-    </div>
-    <div class="pong-board" id="board"></div>
+    <div class="game-details"></div>
+    <div class="pong-board game-board" id="board"></div>
     {{> shell-close}} {{> game-chrome}}
   </body>
 </html>

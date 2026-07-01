@@ -4,6 +4,7 @@ import { Difficulty } from '../shared/bot/difficulty.js';
 import { pongBotTargetY } from '../shared/bot/pongBot.js';
 import { VersusRole } from '../shared/versus/opponent.js';
 import { setupSettingsPanel, SettingsPanelHandle } from '../shared/ui/settingsPanel.js';
+import { setupHud } from '../shared/ui/hud.js';
 import { setupMultiplayerPanel, MultiplayerHandle } from '../shared/versus/multiplayerPanel.js';
 import { NetMatch, MatchMessage } from '../shared/net/match.js';
 import { runCountdown } from '../shared/ui/countdown.js';
@@ -48,7 +49,7 @@ const SERVE_DELAY = 800;
  *  score is visible on the scoreboard before the victory panel appears. */
 const END_DELAY = 800;
 
-/** Available win-score choices for the Paramètres panel. */
+/** Available win-score choices for the Settings panel. */
 const WIN_SCORES = [3, 5, 11];
 const DEFAULT_WIN_SCORE = 5;
 
@@ -82,7 +83,7 @@ const NET_CORRECT = 0.5;
  * Two vertical paddles, a ball bouncing between them; first to {@link winScore}
  * points wins. The player drives the left paddle (↑/↓ or Z/S, or drag/mouse on
  * the board); the right paddle is the opponent. In `solo` it is a bot whose skill
- * is tuned in the Paramètres panel; in multiplayer it is the remote player, with
+ * is tuned in the Settings panel; in multiplayer it is the remote player, with
  * the host simulating the ball authoritatively.
  *
  * Reuses the engine's `requestAnimationFrame` loop: the ball advances in small
@@ -92,7 +93,7 @@ const NET_CORRECT = 0.5;
 export class PongGame extends GameEngine {
   /** Who drives the opponent / who is authoritative (see {@link VersusRole}). */
   protected role: VersusRole = 'solo';
-  /** Bot difficulty (solo / host-side fill-in), set from the Paramètres panel. */
+  /** Bot difficulty (solo / host-side fill-in), set from the Settings panel. */
   private difficulty: Difficulty = 'medium';
   /** Points needed to win the match. */
   private winScore = DEFAULT_WIN_SCORE;
@@ -129,21 +130,21 @@ export class PongGame extends GameEngine {
   private ballElement: HTMLElement | null = null;
   private playerPaddleEl: HTMLElement | null = null;
   private opponentPaddleEl: HTMLElement | null = null;
-  private scoreElement: HTMLElement | null = null;
-  private opponentScoreElement: HTMLElement | null = null;
 
   constructor(config: GameConfig = {}) {
     super({ ...config, storageKey: 'pong' });
   }
 
   /**
-   * Binds the DOM, builds the board, wires controls + the Paramètres panel, then
+   * Binds the DOM, builds the board, wires controls + the Settings panel, then
    * performs the first render and arms the kickoff serve.
    */
   initialize(): void {
     this.boardElement = document.getElementById('board');
-    this.scoreElement = document.querySelector('.score');
-    this.opponentScoreElement = document.querySelector('.opp-score');
+    this.hud = setupHud([
+      { key: 'score', icon: 'user', label: 'You' },
+      { key: 'opp', icon: 'robot', label: 'Opponent' },
+    ]);
 
     this.buildBoard();
     this.setupEventListeners();
@@ -177,7 +178,7 @@ export class PongGame extends GameEngine {
     }
   }
 
-  /** Builds the Paramètres panel (bot difficulty + win score). No-op without markup. */
+  /** Builds the Settings panel (bot difficulty + win score). No-op without markup. */
   private setupSettings(): void {
     this.settings = setupSettingsPanel([
       {
@@ -185,9 +186,9 @@ export class PongGame extends GameEngine {
         label: 'Bot',
         value: this.difficulty,
         choices: [
-          { label: 'Facile', value: 'easy' },
-          { label: 'Moyen', value: 'medium' },
-          { label: 'Difficile', value: 'hard' },
+          { label: 'Easy', value: 'easy' },
+          { label: 'Medium', value: 'medium' },
+          { label: 'Hard', value: 'hard' },
         ],
         onChange: (value) => {
           this.difficulty = value as Difficulty;
@@ -467,9 +468,7 @@ export class PongGame extends GameEngine {
 
   /** Resets scores, paddles, ball and state for a fresh match. */
   reset(): void {
-    this.state.score = 0;
-    this.state.isGameOver = false;
-    this.state.isPaused = false;
+    this.resetState();
     this.opponentScore = 0;
     this.playerY = BOARD / 2;
     this.opponentY = BOARD / 2;
@@ -482,20 +481,18 @@ export class PongGame extends GameEngine {
 
   /** Writes both scores into the game header. */
   protected updateScoreDisplay(): void {
-    if (this.scoreElement) this.scoreElement.textContent = `Toi : ${this.state.score}`;
-    if (this.opponentScoreElement) {
-      this.opponentScoreElement.textContent = `Adversaire : ${this.opponentScore}`;
-    }
+    this.hud?.set('score', this.state.score);
+    this.hud?.set('opp', this.opponentScore);
   }
 
   /** Title of the game-over overlay: win or loss. */
   protected getGameOverTitle(): string {
-    return this.state.score > this.opponentScore ? 'Gagné ! 🏆' : 'Perdu…';
+    return this.state.score > this.opponentScore ? 'You win! 🏆' : 'You lose…';
   }
 
   /** Final score in the overlay body. */
   protected getGameOverContent(): string {
-    return `<div>Toi : ${this.state.score} — Adversaire : ${this.opponentScore}</div>`;
+    return `<div>You: ${this.state.score} — Opponent: ${this.opponentScore}</div>`;
   }
 
   /* ===========================================================================
@@ -505,9 +502,9 @@ export class PongGame extends GameEngine {
      ========================================================================= */
 
   /**
-   * Game-over flow. In solo it uses the engine's default (overlay + Rejouer); in
+   * Game-over flow. In solo it uses the engine's default (overlay + Play again); in
    * multiplayer the host first tells the guest the match is over, then both show
-   * the versus result overlay (Revanche for the host, Quitter for everyone).
+   * the versus result overlay (Rematch for the host, Quit for everyone).
    */
   protected onGameOver(): void {
     if (this.role === 'solo') {
@@ -608,13 +605,13 @@ export class PongGame extends GameEngine {
     this.startRound();
   }
 
-  /** Shows the versus result overlay (Revanche for the host, Quitter for all). */
+  /** Shows the versus result overlay (Rematch for the host, Quit for all). */
   private showVersusGameOver(): void {
     const won = this.state.score > this.opponentScore;
     const buttons: GameOverlayButton[] = [];
     if (this.role === 'host') {
       buttons.push({
-        text: 'Revanche',
+        text: 'Rematch',
         primary: true,
         onClick: () => {
           this.overlay.hide();
@@ -623,7 +620,7 @@ export class PongGame extends GameEngine {
       });
     }
     buttons.push({
-      text: 'Quitter',
+      text: 'Quit',
       primary: this.role !== 'host',
       onClick: () => {
         this.overlay.hide();
@@ -631,10 +628,10 @@ export class PongGame extends GameEngine {
       },
     });
     const waiting =
-      this.role === 'guest' ? '<p class="mp-status">En attente d’une revanche de l’hôte…</p>' : '';
+      this.role === 'guest' ? '<p class="mp-status">Waiting for a rematch from the host…</p>' : '';
     this.overlay.show({
-      title: won ? 'Gagné ! 🏆' : 'Perdu…',
-      bodyHtml: `<div>Toi : ${this.state.score} — Adversaire : ${this.opponentScore}</div>${waiting}`,
+      title: won ? 'You win! 🏆' : 'You lose…',
+      bodyHtml: `<div>You: ${this.state.score} — Opponent: ${this.opponentScore}</div>${waiting}`,
       buttons,
     });
   }

@@ -1,13 +1,13 @@
 import { setupPopover } from './popover.js';
 
 /**
- * Generic "Paramètres" popover for the game-shell header.
+ * Generic "Settings" popover for the game-shell header.
  *
  * Data-driven and game-agnostic: a game passes a list of {@link SettingsField}
  * (each a labelled segmented control), and the panel renders them into the shell
  * markup (`#settingsControl` / `#settingsToggle` / `#settingsPanel`) and reports
  * picks back via `onChange`. Open/close is delegated to {@link setupPopover}, like
- * the Niveaux / Classement panels. Reusable by any future game that opts into
+ * the Niveaux / Leaderboard panels. Reusable by any future game that opts into
  * `settings: true` (see the games array in vite.config.ts).
  */
 
@@ -50,7 +50,7 @@ export function setupSettingsPanel(fields: SettingsField[]): SettingsPanelHandle
 
   const title = document.createElement('p');
   title.className = 'game-pop-title';
-  title.textContent = 'Paramètres';
+  title.textContent = 'Settings';
 
   const fieldEls: HTMLElement[] = [title];
   for (const field of fields) {

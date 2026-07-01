@@ -1,4 +1,5 @@
 import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
+import { setupHud } from '../shared/ui/hud.js';
 import {
   Direction,
   DIRECTION_DELTAS,
@@ -240,8 +241,6 @@ export class SnakeGame extends GameEngine {
   private segmentEls: HTMLElement[] = [];
   /** Persistent mouse node (its sub-divs are built once, then repositioned). */
   private foodEl: HTMLElement | null = null;
-  private scoreElement: HTMLElement | null = null;
-  private highScoreElement: HTMLElement | null = null;
 
   /** Points earned per mouse eaten. */
   private static readonly FOOD_POINTS = 10;
@@ -296,8 +295,10 @@ export class SnakeGame extends GameEngine {
    */
   initialize(): void {
     this.playBoard = document.querySelector('.play-board');
-    this.scoreElement = document.querySelector('.score');
-    this.highScoreElement = document.querySelector('.high-score');
+    this.hud = setupHud([
+      { key: 'score', icon: 'star', label: 'Score' },
+      { key: 'high', icon: 'trophy', label: 'Best' },
+    ]);
 
     if (this.playBoard) {
       // Size of one cell as a % of the board, and initial glide duration —
@@ -487,9 +488,7 @@ export class SnakeGame extends GameEngine {
   reset(): void {
     this.snake = new Snake(this.gridSize);
     this.food = new Food(this.snake, this.gridSize);
-    this.state.score = 0;
-    this.state.isGameOver = false;
-    this.state.isPaused = false;
+    this.resetState();
     this.moveInterval = this.baseInterval;
     this.moveAccumulator = 0;
     this.dirty = true;
@@ -502,17 +501,5 @@ export class SnakeGame extends GameEngine {
     if (this.fxLayer) this.fxLayer.innerHTML = '';
     this.updateScoreDisplay();
     this.render();
-  }
-
-  /**
-   * Shows the current score and the high score in the game header.
-   */
-  protected updateScoreDisplay(): void {
-    if (this.scoreElement) {
-      this.scoreElement.textContent = `Score: ${this.state.score}`;
-    }
-    if (this.highScoreElement) {
-      this.highScoreElement.textContent = `High Score: ${this.scoreManager.getHighScore()}`;
-    }
   }
 }

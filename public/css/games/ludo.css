@@ -1,0 +1,190 @@
+@import url('../global.css');
+
+/* =============================================================================
+   Ludo (petits chevaux) — 15×15 cross-shaped board. The cells, bases and pawns
+   are positioned in % by the JS (board.ts); here we only do the styling.
+   ========================================================================== */
+
+/* The 4 player badges, placed in the shared blue bar (.game-details). */
+.ludo-players {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs) var(--spacing-sm);
+}
+
+.ludo-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: var(--border-radius-lg);
+  border: 2px solid transparent;
+  background: color-mix(in srgb, var(--seat-color) 14%, white);
+  color: color-mix(in srgb, var(--seat-color) 75%, black);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  opacity: 0.5;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.ludo-player-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--seat-color);
+}
+
+.ludo-player.is-active {
+  opacity: 1;
+  border-color: var(--seat-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--seat-color) 30%, transparent);
+  transform: scale(1.06);
+}
+
+/* --- Square board --- */
+.ludo-board {
+  background: var(--ludo-board-bg);
+  touch-action: manipulation;
+}
+
+/* --- Bases (stables) in the 4 corners, numbered 1–4 --- */
+.ludo-base {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border-radius: var(--border-radius-md);
+  box-sizing: border-box;
+}
+
+/* The seat's short label (P1…P4 / bot1…botN), a faint tag in the base. Compact
+   so it fits multi-character labels and clears the die that parks at the centre. */
+.ludo-base-num {
+  font-size: 1.05rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  opacity: 0.6;
+  white-space: nowrap;
+  user-select: none;
+}
+.ludo-base--s0 {
+  background: color-mix(in srgb, var(--ludo-seat-0) 20%, white);
+  border: 3px solid var(--ludo-seat-0);
+}
+.ludo-base--s1 {
+  background: color-mix(in srgb, var(--ludo-seat-1) 20%, white);
+  border: 3px solid var(--ludo-seat-1);
+}
+.ludo-base--s2 {
+  background: color-mix(in srgb, var(--ludo-seat-2) 20%, white);
+  border: 3px solid var(--ludo-seat-2);
+}
+.ludo-base--s3 {
+  background: color-mix(in srgb, var(--ludo-seat-3) 20%, white);
+  border: 3px solid var(--ludo-seat-3);
+}
+
+/* --- Center: shared target split into 4 "arrow" triangles --- */
+.ludo-center {
+  position: absolute;
+  overflow: visible;
+}
+
+.ludo-center-tri {
+  stroke: var(--white-color);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.ludo-center-tri--s0 {
+  fill: var(--ludo-seat-0);
+}
+.ludo-center-tri--s1 {
+  fill: var(--ludo-seat-1);
+}
+.ludo-center-tri--s2 {
+  fill: var(--ludo-seat-2);
+}
+.ludo-center-tri--s3 {
+  fill: var(--ludo-seat-3);
+}
+
+/* --- Track cells --- */
+.ludo-cell {
+  position: absolute;
+  box-sizing: border-box;
+  background: var(--ludo-cell);
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--border-radius-sm);
+}
+/* Start cells + home lane take the player's color. */
+.ludo-cell--s0 {
+  background: color-mix(in srgb, var(--ludo-seat-0) 45%, white);
+}
+.ludo-cell--s1 {
+  background: color-mix(in srgb, var(--ludo-seat-1) 45%, white);
+}
+.ludo-cell--s2 {
+  background: color-mix(in srgb, var(--ludo-seat-2) 45%, white);
+}
+.ludo-cell--s3 {
+  background: color-mix(in srgb, var(--ludo-seat-3) 45%, white);
+}
+
+/* --- Stable slots (dashed targets) --- */
+.ludo-slot {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px dashed;
+  transform: scale(0.66);
+}
+.ludo-slot--s0 {
+  border-color: var(--ludo-seat-0);
+}
+.ludo-slot--s1 {
+  border-color: var(--ludo-seat-1);
+}
+.ludo-slot--s2 {
+  border-color: var(--ludo-seat-2);
+}
+.ludo-slot--s3 {
+  border-color: var(--ludo-seat-3);
+}
+
+/* --- Pawns (horses) --- */
+.ludo-pawn {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px solid var(--white-color);
+  box-shadow: var(--shadow-sm);
+  transition:
+    top 0.25s ease,
+    left 0.25s ease,
+    transform 0.15s ease;
+}
+.ludo-pawn--s0 {
+  background: var(--ludo-seat-0);
+}
+.ludo-pawn--s1 {
+  background: var(--ludo-seat-1);
+}
+.ludo-pawn--s2 {
+  background: var(--ludo-seat-2);
+}
+.ludo-pawn--s3 {
+  background: var(--ludo-seat-3);
+}
+
+/* Pawns the human can play this turn: highlight + click. */
+.ludo-pawn.is-movable {
+  z-index: 3;
+  cursor: pointer;
+  transform: scale(1.18);
+  box-shadow:
+    0 0 0 3px var(--white-color),
+    0 0 10px 2px rgba(0, 0, 0, 0.4);
+}

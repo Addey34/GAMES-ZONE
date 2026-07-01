@@ -1,13 +1,10 @@
 <!doctype html>
-<html lang="fr">
-  {{> head title="Casse-brique" css="/css/games/breakout.css" script="./breakout-main.ts"}}
+<html lang="en">
+  {{> head title="Breakout" css="/css/games/breakout.css" script="./breakout-main.ts"}}
   <body class="app-body">
-    {{> shell-open title="Casse-brique" key="breakout"}}
-    <div class="game-details">
-      <span class="score"></span>
-      <span class="lives"></span>
-    </div>
-    <div class="breakout-board" id="board"></div>
+    {{> shell-open title="Breakout" key="breakout"}}
+    <div class="game-details"></div>
+    <div class="breakout-board game-board" id="board"></div>
     {{> shell-close}} {{> game-chrome}}
   </body>
 </html>

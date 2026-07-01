@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildScoreMetadata, recordToScoreEntry, googleTokenName } from './nakama.js';
 import { ScoreEntry } from '../score/ScoreManager.js';
 
-/** A score entry enriched like Dactylographie's (extra typing metrics). */
+/** A score entry enriched like Typing's (extra typing metrics). */
 interface TypingEntry extends ScoreEntry {
   wpm: number;
   lpm: number;
@@ -59,9 +59,9 @@ describe('recordToScoreEntry', () => {
     expect(recordToScoreEntry({ score: 10, username: 'Bob', metadata: {} }).username).toBe('Bob');
   });
 
-  it('defaults username to "Joueur" and score to 0 when absent', () => {
+  it('defaults username to "Player" and score to 0 when absent', () => {
     const entry = recordToScoreEntry({});
-    expect(entry.username).toBe('Joueur');
+    expect(entry.username).toBe('Player');
     expect(entry.score).toBe(0);
     expect(entry.date).toBeUndefined();
   });

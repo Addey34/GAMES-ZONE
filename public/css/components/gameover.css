@@ -1,8 +1,8 @@
 /* =============================================================================
-   Overlay de fin de partie : remplace l'ancien modal. Il se superpose au
-   plateau (dans .game-shell, positionné) plutôt qu'en plein écran. Le score est
-   déjà sauvegardé automatiquement par le moteur ; l'overlay ne propose plus que
-   « Rejouer » / « Voir le classement » (et, une seule fois, le choix du pseudo).
+   Game-over overlay: replaces the old modal. It overlays the board (inside the
+   positioned .game-shell) rather than the full screen. The score is no longer
+   auto-saved by the engine; the overlay offers "Play again" / "View leaderboard"
+   (and, only once, the choice of the player name).
    ========================================================================== */
 
 .game-over {
@@ -42,7 +42,7 @@
   color: var(--text-color);
 }
 
-/* Multi-line rich content (e.g. Dactylo's word/letter/speed breakdown). */
+/* Multi-line rich content (e.g. Typing's word/letter/speed breakdown). */
 .game-over-body div {
   margin: var(--spacing-xs) 0;
 }
@@ -54,7 +54,7 @@
   justify-content: center;
 }
 
-/* Demande du pseudo (une seule fois). */
+/* Player-name prompt (only once). */
 .game-over-name {
   display: flex;
   flex-direction: column;

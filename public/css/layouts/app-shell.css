@@ -1,5 +1,5 @@
 /* =============================================================================
-   Coquille de page : conteneur centré + titre + barre supérieure.
+   Page shell: centered container + title + top bar.
    Mobile-first.
    ========================================================================== */
 .app-body {
@@ -7,8 +7,8 @@
   max-width: var(--content-width-max);
   margin: 0 auto;
   padding: 0 clamp(1rem, 2vw, 2rem);
-  /* Aligne le plancher du body sur le conteneur (qui vise 100dvh) : sans ça,
-     le 100vh de reset.css dépasse 100dvh sur mobile et recrée un vide en bas. */
+  /* Aligns the body's floor with the container (which targets 100dvh): without
+     this, reset.css's 100vh exceeds 100dvh on mobile and recreates a gap below. */
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -18,7 +18,7 @@
   overflow-x: hidden;
 }
 
-/* Barre dégradée fixe en haut de toutes les pages. */
+/* Fixed gradient bar at the top of every page. */
 .app-body::before {
   content: '';
   position: fixed;

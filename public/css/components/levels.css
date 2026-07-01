@@ -1,7 +1,7 @@
 /* =============================================================================
-   Panneau « Niveaux » : la grille de niveaux affichée dans un .game-pop-panel
-   générique (voir panels.css). Les niveaux verrouillés sont désactivés.
-   Réutilisable par tout jeu déclarant `levels: true`.
+   "Levels" panel: the level grid shown inside a generic .game-pop-panel (see
+   panels.css). Locked levels are disabled.
+   Reusable by any game declaring `levels: true`.
    ========================================================================== */
 
 .game-levels-grid {
@@ -44,7 +44,7 @@
   opacity: 0.65;
 }
 
-/* Petit cadenas en coin sur les niveaux verrouillés. */
+/* Small lock in the corner of locked levels. */
 .game-level.is-locked::after {
   content: '🔒';
   position: absolute;

@@ -1,7 +1,7 @@
 /* =============================================================================
-   Panneau « Paramètres » : champs en contrôle segmenté (un choix parmi quelques
-   options), rendus par src/shared/ui/settingsPanel.ts dans un popover du shell.
-   Générique : réutilisable par tout jeu déclarant `settings: true`.
+   "Settings" panel: segmented-control fields (one choice among a few options),
+   rendered by src/shared/ui/settingsPanel.ts in a shell popover.
+   Generic: reusable by any game declaring `settings: true`.
    ========================================================================== */
 
 .game-setting {
@@ -21,7 +21,7 @@
   color: var(--text-color-muted);
 }
 
-/* Le groupe segmenté : pistes côte à côte dans une gouttière arrondie. */
+/* The segmented group: tracks side by side in a rounded gutter. */
 .game-seg {
   display: flex;
   gap: 2px;

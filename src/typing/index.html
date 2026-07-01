@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  {{> head title="Typing" css="/css/games/typing.css" script="./typing-main.ts"}}
+  <body class="app-body">
+    {{> shell-open title="Typing" key="typing"}}
+    <div class="game-details"></div>
+    <div class="typing-area">
+      <div id="wordContainer" class="word-container"></div>
+      <input
+        type="text"
+        id="wordInput"
+        class="input-field input-field--game"
+        placeholder="Type the word here..."
+      />
+    </div>
+    {{> shell-close}} {{> game-chrome}}
+  </body>
+</html>

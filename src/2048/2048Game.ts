@@ -1,4 +1,5 @@
 import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
+import { setupHud } from '../shared/ui/hud.js';
 import { Direction, keyboardDirection, setupSwipe } from '../shared/engine/input.js';
 
 /**
@@ -40,8 +41,6 @@ export class Game2048 extends GameEngine {
   private board: number[][] = [];
 
   private boardElement: HTMLElement | null = null;
-  private scoreElement: HTMLElement | null = null;
-  private highScoreElement: HTMLElement | null = null;
 
   /**
    * @param config Game configuration (grid size).
@@ -57,8 +56,10 @@ export class Game2048 extends GameEngine {
    */
   initialize(): void {
     this.boardElement = document.getElementById('board');
-    this.scoreElement = document.querySelector('.score');
-    this.highScoreElement = document.querySelector('.high-score');
+    this.hud = setupHud([
+      { key: 'score', icon: 'star', label: 'Score' },
+      { key: 'high', icon: 'trophy', label: 'Best' },
+    ]);
 
     this.setupEventListeners();
 
@@ -315,23 +316,9 @@ export class Game2048 extends GameEngine {
    * Resets the grid, the score and the state, then performs the render.
    */
   reset(): void {
-    this.state.score = 0;
-    this.state.isGameOver = false;
-    this.state.isPaused = false;
+    this.resetState();
     this.resetBoard();
     this.updateScoreDisplay();
     this.render();
-  }
-
-  /**
-   * Shows the current score and the high score in the game header.
-   */
-  protected updateScoreDisplay(): void {
-    if (this.scoreElement) {
-      this.scoreElement.textContent = `Score: ${this.state.score}`;
-    }
-    if (this.highScoreElement) {
-      this.highScoreElement.textContent = `Meilleur: ${this.scoreManager.getHighScore()}`;
-    }
   }
 }

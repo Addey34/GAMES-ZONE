@@ -1,4 +1,5 @@
 import { GameEngine, GameConfig } from '../shared/engine/GameEngine.js';
+import { setupHud } from '../shared/ui/hud.js';
 import { keyboardDirection, setupSwipe } from '../shared/engine/input.js';
 
 /**
@@ -138,9 +139,6 @@ export class TetrisGame extends GameEngine {
   private level: number = 1;
 
   private boardElement: HTMLElement | null = null;
-  private scoreElement: HTMLElement | null = null;
-  private linesElement: HTMLElement | null = null;
-  private highScoreElement: HTMLElement | null = null;
 
   /**
    * @param config Game configuration (dimensions, drop rate).
@@ -160,9 +158,11 @@ export class TetrisGame extends GameEngine {
    */
   initialize(): void {
     this.boardElement = document.getElementById('board');
-    this.scoreElement = document.querySelector('.score');
-    this.linesElement = document.querySelector('.lines');
-    this.highScoreElement = document.querySelector('.high-score');
+    this.hud = setupHud([
+      { key: 'score', icon: 'star', label: 'Score' },
+      { key: 'lines', icon: 'grip-lines', label: 'Lines' },
+      { key: 'high', icon: 'trophy', label: 'Best' },
+    ]);
 
     this.setupEventListeners();
 
@@ -470,9 +470,7 @@ export class TetrisGame extends GameEngine {
    * Resets grid, score, lines, level, rate and state, then performs the render.
    */
   reset(): void {
-    this.state.score = 0;
-    this.state.isGameOver = false;
-    this.state.isPaused = false;
+    this.resetState();
     this.lines = 0;
     this.level = 1;
     this.dropInterval = this.baseDropInterval;
@@ -486,21 +484,14 @@ export class TetrisGame extends GameEngine {
    * Details shown in the game-over modal: score and lines cleared.
    */
   protected getGameOverContent(): string {
-    return `<div>Score : ${this.state.score}</div><div>Lignes : ${this.lines}</div>`;
+    return `<div>Score: ${this.state.score}</div><div>Lines: ${this.lines}</div>`;
   }
 
   /**
    * Shows score, lines and high score in the game header.
    */
   protected updateScoreDisplay(): void {
-    if (this.scoreElement) {
-      this.scoreElement.textContent = `Score: ${this.state.score}`;
-    }
-    if (this.linesElement) {
-      this.linesElement.textContent = `Lignes: ${this.lines}`;
-    }
-    if (this.highScoreElement) {
-      this.highScoreElement.textContent = `Meilleur: ${this.scoreManager.getHighScore()}`;
-    }
+    super.updateScoreDisplay();
+    this.hud?.set('lines', this.lines);
   }
 }

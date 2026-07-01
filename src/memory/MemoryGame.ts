@@ -12,6 +12,8 @@ import { setupSettingsPanel, SettingsPanelHandle } from '../shared/ui/settingsPa
 import { setupMultiplayerPanel, MultiplayerHandle } from '../shared/versus/multiplayerPanel.js';
 import { NetMatch, MatchMessage } from '../shared/net/match.js';
 import { runCountdown } from '../shared/ui/countdown.js';
+import { CountdownTimer } from '../shared/ui/countdownTimer.js';
+import { setupHud } from '../shared/ui/hud.js';
 import { dismissStartOverlay } from '../shared/ui/startOverlay.js';
 import { GameOverlayButton } from '../shared/ui/gameOverlay.js';
 
@@ -119,8 +121,8 @@ export class MemoryGame extends GameEngine {
   /** The bot's remembered cards (solo only): index → symbol. */
   private botMemory = new Map<number, string>();
 
-  /** Per-turn countdown. */
-  private turnTimer: number | null = null;
+  /** Per-turn countdown (shared timer) and its last remaining value (for status). */
+  private readonly turnCountdown = new CountdownTimer();
   private timeLeft = TURN_TIME;
 
   private net: NetMatch | null = null;
@@ -128,9 +130,6 @@ export class MemoryGame extends GameEngine {
   private settings: SettingsPanelHandle | null = null;
 
   private boardElement: HTMLElement | null = null;
-  private scoreElement: HTMLElement | null = null;
-  private opponentScoreElement: HTMLElement | null = null;
-  private statusElement: HTMLElement | null = null;
 
   constructor(config: GameConfig = {}) {
     super({ ...config, storageKey: 'memory' });
@@ -140,20 +139,22 @@ export class MemoryGame extends GameEngine {
   /** Binds the DOM, wires controls + panels, builds the initial (solo) board. */
   initialize(): void {
     this.boardElement = document.getElementById('board');
-    this.scoreElement = document.querySelector('.score');
-    this.opponentScoreElement = document.querySelector('.opp-score');
-    this.statusElement = document.querySelector('.memory-status');
+    this.hud = setupHud([
+      { key: 'score', icon: 'user', label: 'You' },
+      { key: 'status', icon: 'hourglass-half', label: 'Turn' },
+      { key: 'opp', icon: 'robot', label: 'Opponent' },
+    ]);
 
     this.setupEventListeners();
     this.settings = setupSettingsPanel([
       {
         id: 'difficulty',
-        label: 'Difficulté',
+        label: 'Difficulty',
         value: this.difficulty,
         choices: [
-          { label: 'Facile 4×4', value: 'easy' },
-          { label: 'Moyen 6×6', value: 'medium' },
-          { label: 'Difficile 8×8', value: 'hard' },
+          { label: 'Easy 4×4', value: 'easy' },
+          { label: 'Medium 6×6', value: 'medium' },
+          { label: 'Hard 8×8', value: 'hard' },
         ],
         onChange: (value) => {
           this.difficulty = value as Difficulty;
@@ -310,25 +311,18 @@ export class MemoryGame extends GameEngine {
   /* --- Per-turn timer ------------------------------------------------------ */
 
   private startTurnTimer(): void {
-    this.stopTurnTimer();
-    this.timeLeft = TURN_TIME;
-    this.updateStatus();
-    this.turnTimer = window.setInterval(() => {
-      this.timeLeft -= 1;
-      if (this.timeLeft <= 0) {
-        this.stopTurnTimer();
-        this.onTurnTimeout();
-      } else {
+    this.turnCountdown.start({
+      seconds: TURN_TIME,
+      onTick: (remaining) => {
+        this.timeLeft = remaining;
         this.updateStatus();
-      }
-    }, 1000);
+      },
+      onExpire: () => this.onTurnTimeout(),
+    });
   }
 
   private stopTurnTimer(): void {
-    if (this.turnTimer !== null) {
-      clearInterval(this.turnTimer);
-      this.turnTimer = null;
-    }
+    this.turnCountdown.stop();
   }
 
   /**
@@ -466,24 +460,20 @@ export class MemoryGame extends GameEngine {
   /* --- Displays ------------------------------------------------------------ */
 
   protected updateScoreDisplay(): void {
-    if (this.scoreElement) this.scoreElement.textContent = `Toi : ${this.state.score}`;
-    if (this.opponentScoreElement) {
-      const label = this.role === 'solo' ? 'Bot' : 'Adversaire';
-      this.opponentScoreElement.textContent = `${label} : ${this.opponentScore}`;
-    }
+    this.hud?.set('score', this.state.score);
+    this.hud?.set('opp', this.opponentScore);
   }
 
   /** Shows whose turn it is and, on the local turn, the countdown. */
   private updateStatus(): void {
-    if (!this.statusElement) return;
     let text: string;
     if (this.turn === 'self') {
-      text = `À toi · ${Math.max(0, this.timeLeft)}s`;
+      text = `Your turn · ${Math.max(0, this.timeLeft)}s`;
     } else {
-      text = this.role === 'solo' ? 'Tour du bot…' : 'Tour de l’adversaire…';
+      text = this.role === 'solo' ? "Bot turn…" : "Opponent turn…";
     }
-    this.statusElement.textContent = text;
-    this.statusElement.classList.toggle('is-low', this.turn === 'self' && this.timeLeft <= 5);
+    this.hud?.set('status', text);
+    this.hud?.toggle('status', 'is-low', this.turn === 'self' && this.timeLeft <= 5);
   }
 
   /* --- End of match -------------------------------------------------------- */
@@ -495,21 +485,21 @@ export class MemoryGame extends GameEngine {
     window.setTimeout(() => this.gameOver(), END_DELAY);
   }
 
-  /** Shows the result overlay (solo: Rejouer; multi: Revanche (host) / Quitter). */
+  /** Shows the result overlay (solo: Play again; multi: Rematch (host) / Quit). */
   protected onGameOver(): void {
     this.stopTurnTimer();
     const selfPairs = this.state.score;
     const otherPairs = this.opponentScore;
     const title =
-      selfPairs === otherPairs ? 'Égalité !' : selfPairs > otherPairs ? 'Gagné ! 🏆' : 'Perdu…';
-    const oppLabel = this.role === 'solo' ? 'Bot' : 'Adversaire';
+      selfPairs === otherPairs ? 'Draw!' : selfPairs > otherPairs ? 'You win! 🏆' : 'You lose…';
+    const oppLabel = this.role === 'solo' ? 'Bot' : 'Opponent';
 
     const buttons: GameOverlayButton[] = [];
     if (this.role === 'solo') {
-      buttons.push({ text: 'Rejouer', primary: true, onClick: () => this.restartSolo() });
+      buttons.push({ text: 'Play again', primary: true, onClick: () => this.restartSolo() });
     } else if (this.role === 'host') {
       buttons.push({
-        text: 'Revanche',
+        text: 'Rematch',
         primary: true,
         onClick: () => {
           this.overlay.hide();
@@ -518,7 +508,7 @@ export class MemoryGame extends GameEngine {
       });
     }
     buttons.push({
-      text: 'Quitter',
+      text: 'Quit',
       primary: this.role === 'guest',
       onClick: () => {
         this.overlay.hide();
@@ -527,15 +517,15 @@ export class MemoryGame extends GameEngine {
     });
 
     const waiting =
-      this.role === 'guest' ? '<p class="mp-status">En attente d’une revanche de l’hôte…</p>' : '';
+      this.role === 'guest' ? '<p class="mp-status">Waiting for a rematch from the host…</p>' : '';
     this.overlay.show({
       title,
-      bodyHtml: `<div>Toi : ${selfPairs} — ${oppLabel} : ${otherPairs}</div>${waiting}`,
+      bodyHtml: `<div>You: ${selfPairs} — ${oppLabel}: ${otherPairs}</div>${waiting}`,
       buttons,
     });
   }
 
-  /** Restarts a solo match from a clean board (Rejouer / difficulty change). */
+  /** Restarts a solo match from a clean board (Play again / difficulty change). */
   private restartSolo(): void {
     this.overlay.hide();
     this.role = 'solo';

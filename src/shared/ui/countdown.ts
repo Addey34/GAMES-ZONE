@@ -6,7 +6,7 @@
  * itself and resolves. Used before a multiplayer round starts so both players get
  * a clear, shared "get ready" beat.
  */
-export function runCountdown(seconds = 3, label = 'Prêt ?'): Promise<void> {
+export function runCountdown(seconds = 3, label = 'Ready?'): Promise<void> {
   return new Promise((resolve) => {
     const host = document.querySelector<HTMLElement>('.game-shell');
     if (!host) {

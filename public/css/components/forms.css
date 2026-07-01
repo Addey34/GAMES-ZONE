@@ -1,5 +1,5 @@
 /* =============================================================================
-   Champs de formulaire réutilisables.
+   Reusable form fields.
    ========================================================================== */
 .input-field {
   width: 100%;
@@ -31,7 +31,7 @@
   cursor: not-allowed;
 }
 
-/* Variante « saisie de jeu » : plus grande, largeur bornée. */
+/* "Game input" variant: larger, bounded width. */
 .input-field--game {
   width: min(100%, 320px);
   font-size: var(--font-size-lg);

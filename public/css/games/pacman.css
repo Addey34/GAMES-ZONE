@@ -1,28 +1,19 @@
 @import url('../global.css');
 
-/* Couleur d'accent du jeu (titre + item actif du rail). */
-.app-body {
-  --title-color: var(--color-pacman);
-}
-
 /* =============================================================================
-   Pac-Man — styles spécifiques au jeu.
-   La carte fait 21 colonnes × 18 lignes ; chaque case est une div à laquelle le
-   JS ajoute .wall / .food / .nofood, puis .pacman / .ghost par-dessus.
-   Les personnages sont dessinés en radial-gradient (aucune image externe).
+   Pac-Man — game-specific styles.
+   The map is 21 columns × 18 rows; each cell is a div to which the JS adds
+   .wall / .food / .nofood, then .pacman / .ghost on top.
+   The characters are drawn with radial-gradients (no external image).
    ========================================================================== */
 
-/* Zone de jeu carrée (même empreinte que le plateau de Snake) : le labyrinthe
-   21×18 y est centré, les bandes haut/bas restent noires (fond du plateau). */
+/* Square play area (same footprint as the Snake board): the 21×18 maze is
+   centered in it, the top/bottom bands stay black (board background). */
 .body {
-  width: 100%;
-  aspect-ratio: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: var(--black-color);
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
 }
 
 #map {
@@ -35,28 +26,28 @@
   background-color: var(--black-color);
 }
 
-/* Mur : tuile bleue légèrement arrondie avec liseré clair (look labyrinthe). */
+/* Wall: slightly rounded blue tile with a light edge (maze look). */
 .wall {
   background-color: var(--pacman-wall);
   border-radius: 22%;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
 }
 
-/* Couloir avec pastille (dégradé radial, ton crème de la palette). */
+/* Corridor with a dot (radial gradient, cream tone from the palette). */
 .food {
   background: radial-gradient(circle, var(--pacman-dot) 0 18%, transparent 19%);
 }
 
-/* Couloir déjà mangé. */
+/* Already-eaten corridor. */
 .nofood {
   background-color: var(--black-color);
 }
 
-/* --- Pac-Man : disque jaune avec une bouche (secteur transparent) orientée
-   selon le déplacement. Déclaré après .food/.nofood pour primer sur la case. */
+/* --- Pac-Man: yellow disc with a mouth (transparent sector) oriented by the
+   movement. Declared after .food/.nofood to win over the cell. */
 .pacman {
   border-radius: 50%;
-  /* Œil (point sombre) posé au-dessus du corps ; orienté pour la bouche à droite. */
+  /* Eye (dark dot) laid over the body; oriented for the mouth on the right. */
   background:
     radial-gradient(circle at 56% 30%, var(--background-color-dark) 0 7%, transparent 8%),
     conic-gradient(
@@ -66,7 +57,7 @@
     );
   transform: scale(0.92);
 }
-/* Gauche = miroir horizontal (l'œil reste en haut) ; haut/bas = rotations. */
+/* Left = horizontal mirror (the eye stays on top); up/down = rotations. */
 .pacman--right {
   transform: scale(0.92);
 }
@@ -80,8 +71,8 @@
   transform: rotate(-90deg) scale(0.92);
 }
 
-/* --- Fantômes : corps en dôme + deux yeux dessinés en dégradés radial
-   superposés. La couleur dépend de l'index (.ghost--0/1/2). --- */
+/* --- Ghosts: dome body + two eyes drawn with stacked radial gradients.
+   The color depends on the index (.ghost--0/1/2). --- */
 .ghost {
   --ghost-color: var(--ghost-red);
   border-radius: 50% 50% 20% 20%;

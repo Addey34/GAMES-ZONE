@@ -8,7 +8,7 @@ export interface ScoreEntry {
   score: number;
   /** Date the score was achieved (default: now). */
   date?: Date;
-  /** Game-specific data (e.g. typing speed for Dactylographie). */
+  /** Game-specific data (e.g. typing speed for Typing). */
   additionalData?: Record<string, number>;
 }
 

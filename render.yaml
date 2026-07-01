@@ -1,19 +1,19 @@
-# Configuration Render (Blueprint) — site statique.
-# Build Vite (sortie dans dist/), puis routes pour ne servir chaque jeu QUE sur
-# son URL propre : /dactylographie (et non /dactylographie/dactylographie.html).
+# Render configuration (Blueprint) — static site.
+# Vite build (output in dist/), then routes so each game is served ONLY on its
+# own clean URL: /typing (not /typing/typing.html).
 #
-# Deux types de règles (évaluées de haut en bas, 1re correspondance gagne) :
-#   - rewrite : l'URL reste /<jeu> dans le navigateur, mais Render sert le
-#     fichier /<jeu>/index.html.
-#   - redirect (301) : un attrape-tout /* renvoie tout le reste (anciennes URLs
-#     en .html, chemins inconnus) vers l'accueil /.
-# IMPORTANT : Render n'applique JAMAIS une règle si un fichier réel existe à ce
-# chemin (il le sert directement). Donc /* ne casse pas les assets (/assets, /css,
-# /icons, /words.txt) — ils sont servis tels quels.
+# Two rule types (evaluated top to bottom, first match wins):
+#   - rewrite: the URL stays /<game> in the browser, but Render serves the
+#     /<game>/index.html file.
+#   - redirect (301): a catch-all /* sends everything else (old .html URLs,
+#     unknown paths) back to the home page /.
+# IMPORTANT: Render NEVER applies a rule when a real file exists at that path
+# (it serves it directly). So /* does not break assets (/assets, /css, /icons,
+# /words.txt) — they are served as-is.
 #
-# NB : ce fichier ne s'applique PAS automatiquement (service créé à la main).
-# Reporter ces mêmes routes dans le dashboard (Settings > Redirects/Rewrites),
-# dans le même ordre.
+# NB: this file is NOT applied automatically (the service was created by hand).
+# Mirror these same routes in the dashboard (Settings > Redirects/Rewrites),
+# in the same order.
 services:
   - type: web
     name: games-zone
@@ -21,14 +21,16 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     routes:
-      # URLs propres -> fichier réel (l'URL ne change pas dans la barre).
-      - { type: rewrite, source: /dactylographie, destination: /dactylographie/index.html }
+      # Clean URLs -> real file (the URL does not change in the address bar).
+      - { type: rewrite, source: /typing, destination: /typing/index.html }
       - { type: rewrite, source: /snake, destination: /snake/index.html }
       - { type: rewrite, source: /pacman, destination: /pacman/index.html }
       - { type: rewrite, source: /2048, destination: /2048/index.html }
       - { type: rewrite, source: /tetris, destination: /tetris/index.html }
       - { type: rewrite, source: /memory, destination: /memory/index.html }
       - { type: rewrite, source: /breakout, destination: /breakout/index.html }
-      # Tout le reste (anciennes URLs .html, chemins inconnus) -> accueil.
-      # En DERNIER : les règles ci-dessus ont priorité, les assets aussi.
+      - { type: rewrite, source: /pong, destination: /pong/index.html }
+      - { type: rewrite, source: /ludo, destination: /ludo/index.html }
+      # Everything else (old .html URLs, unknown paths) -> home.
+      # LAST: the rules above take priority, and so do assets.
       - { type: redirect, source: /*, destination: / }

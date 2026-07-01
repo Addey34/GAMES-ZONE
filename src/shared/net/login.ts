@@ -58,8 +58,8 @@ async function renderAuthArea(area: HTMLElement): Promise<void> {
         class="sidebar-auth-item"
         type="button"
         id="logoutBtn"
-        title="Se déconnecter (${escapeHtml(user.displayName)})"
-        aria-label="Se déconnecter"
+        title="Sign out (${escapeHtml(user.displayName)})"
+        aria-label="Sign out"
       >
         <span class="sidebar-icon"><i class="fas fa-right-from-bracket" aria-hidden="true"></i></span>
         <span class="sidebar-label">${escapeHtml(user.displayName)}</span>
@@ -72,11 +72,11 @@ async function renderAuthArea(area: HTMLElement): Promise<void> {
     });
   } else {
     // Same rail-style row: the real Google button (its "G" logo) lives in the
-    // always-visible icon box, and the "Se connecter" label is revealed on hover.
+    // always-visible icon box, and the "Sign in" label is revealed on hover.
     area.innerHTML = `
       <div class="sidebar-auth-item" id="loginItem">
         <span class="sidebar-icon" id="gsiButton"></span>
-        <span class="sidebar-label">Se connecter</span>
+        <span class="sidebar-label">Sign in</span>
       </div>`;
     const target = area.querySelector<HTMLElement>('#gsiButton');
     if (target) {
@@ -113,7 +113,7 @@ async function init(): Promise<void> {
             if (switched) clearLocalProgress();
             location.reload();
           })
-          .catch((err) => console.warn('[login] connexion Google échouée:', err));
+          .catch((err) => console.warn('[login] Google sign-in failed:', err));
       },
     });
     await renderAuthArea(area);

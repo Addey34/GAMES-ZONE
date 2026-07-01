@@ -7,11 +7,12 @@ import {
   keyboardDirection,
   setupSwipe,
 } from '../shared/engine/input.js';
+import { setupHud } from '../shared/ui/hud.js';
 import { Difficulty } from '../shared/bot/difficulty.js';
 import { LevelDef } from '../shared/levels/levels.js';
 import { GHOST_PERSONALITIES, chooseGhostDirection } from './ghostAi.js';
 
-/** Number of Pac-Man levels offered in the "Niveaux" panel. */
+/** Number of Pac-Man levels offered in the "Levels" panel. */
 const PACMAN_LEVEL_COUNT = 30;
 
 /**
@@ -69,7 +70,6 @@ export class PacmanGame extends GameEngine {
   /** Remembers whether the last game over is a win (modal title). */
   private pendingWin: boolean = false;
   private mapElement: HTMLElement | null = null;
-  private scoreElement: HTMLElement | null = null;
   private gameSpeed: number;
   private difficulty: Difficulty;
   /** Time accumulated since the last move (ms). */
@@ -136,7 +136,7 @@ export class PacmanGame extends GameEngine {
    */
   initialize(): void {
     this.mapElement = document.getElementById('map');
-    this.scoreElement = document.getElementById('score');
+    this.hud = setupHud([{ key: 'score', icon: 'star', label: 'Score' }]);
 
     this.setupEventListeners();
     this.setupLevels();
@@ -375,9 +375,7 @@ export class PacmanGame extends GameEngine {
     this.nextDirection = null;
     this.hasStarted = false;
     this.pendingWin = false;
-    this.state.score = 0;
-    this.state.isGameOver = false;
-    this.state.isPaused = false;
+    this.resetState();
     this.lastMoveTime = 0;
 
     this.createMap();
@@ -394,10 +392,10 @@ export class PacmanGame extends GameEngine {
   }
 
   /**
-   * Modal title: "Vous avez gagné !" on a win, otherwise "Game Over !".
+   * Modal title: "You won!" on a win, otherwise "Game Over!".
    */
   protected getGameOverTitle(): string {
-    return this.pendingWin ? 'Vous avez gagné !' : 'Game Over !';
+    return this.pendingWin ? 'You won!' : 'Game Over!';
   }
 
   /**
@@ -414,12 +412,4 @@ export class PacmanGame extends GameEngine {
     return this.pendingWin;
   }
 
-  /**
-   * Shows the current score in the game header.
-   */
-  protected updateScoreDisplay(): void {
-    if (this.scoreElement) {
-      this.scoreElement.textContent = this.state.score.toString();
-    }
-  }
 }

@@ -1,26 +1,16 @@
 @import url('../global.css');
 
-/* Couleur d'accent du jeu (titre + item actif du rail). */
-.app-body {
-  --title-color: var(--color-snake);
-}
-
 /* =============================================================================
-   Snake — styles spécifiques au jeu (cadre/contrôles/score-bar = partagés).
+   Snake — game-specific styles (frame/controls/score-bar = shared).
    ========================================================================== */
 
-/* --- Plateau --- */
+/* --- Board --- */
 .play-board {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
   background: var(--background-color-dark);
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
 }
 
-/* Serpent & souris : positionnés en absolu et déplacés par transform (une case
-   = 100% de leur propre taille). --cell-size (= 100/gridSize %) est posé en JS. */
+/* Snake & mouse: absolutely positioned and moved via transform (one cell =
+   100% of their own size). --cell-size (= 100/gridSize %) is set in JS. */
 .snake-head,
 .snake-body,
 .food {
@@ -31,8 +21,8 @@
   height: var(--cell-size, 4%);
 }
 
-/* Calque d'effets : couvre le plateau, persiste entre les rendus (le serpent et
-   la souris sont redessinés à chaque frame, pas lui). Hors flux de la grille. */
+/* Effects layer: covers the board, persists between renders (the snake and the
+   mouse are redrawn every frame, not it). Out of the grid's flow. */
 .snake-fx {
   position: absolute;
   inset: 0;
@@ -40,8 +30,8 @@
   pointer-events: none;
 }
 
-/* Score flottant « +N » à l'endroit de la souris mangée. Positionné en % par le
-   JS ; se nettoie tout seul à la fin de l'animation. */
+/* Floating "+N" score at the eaten mouse's spot. Positioned in % by the JS;
+   cleans itself up at the end of the animation. */
 .score-float {
   position: absolute;
   font-size: clamp(0.75rem, 2.4vw, var(--font-size-md));
@@ -52,10 +42,10 @@
   animation: scoreFloat 0.8s ease-out forwards;
 }
 
-/* --- Serpent ---
-   Le glissement d'une case est animé par transition sur le transform, dont la
-   durée (--move-ms) est synchronisée sur la cadence de déplacement (posée en
-   JS). La bordure transparente recrée le « gap » d'1px d'antan entre segments
+/* --- Snake ---
+   The one-cell glide is animated by a transition on the transform, whose
+   duration (--move-ms) is synced to the movement cadence (set in JS). The
+   transparent border recreates the old 1px "gap" between segments
    (box-sizing: border-box). */
 .snake-body {
   background-color: var(--primary-color);
@@ -75,7 +65,7 @@
   transition: transform var(--move-ms, 120ms) linear;
 }
 
-/* Yeux du serpent (orientés selon la direction). */
+/* Snake eyes (oriented by direction). */
 .snake-head::before,
 .snake-head::after {
   content: '';
@@ -120,10 +110,10 @@
   bottom: 22%;
 }
 
-/* --- Nourriture (petite souris) ---
-   La couleur du pelage passe par --mouse-color : un modèle (gris/brun/blanc) est
-   tiré au hasard à chaque apparition et posé en classe (.food--<variante>) par le
-   rendu JS. Yeux et intérieur d'oreille restent fixes. */
+/* --- Food (little mouse) ---
+   The fur color goes through --mouse-color: a variant (gray/brown/white) is
+   picked at random on each spawn and set as a class (.food--<variant>) by the
+   JS render. Eyes and inner ear stay fixed. */
 .food {
   --mouse-color: var(--mouse-gray);
 }
@@ -161,7 +151,7 @@
 .food-ear.right {
   right: 20%;
 }
-/* Intérieur d'oreille rose. */
+/* Pink inner ear. */
 .food-ear::after {
   content: '';
   position: absolute;
@@ -188,7 +178,7 @@
   right: 28%;
 }
 
-/* Museau rose, entre les yeux. */
+/* Pink snout, between the eyes. */
 .food-nose {
   position: absolute;
   width: 12%;

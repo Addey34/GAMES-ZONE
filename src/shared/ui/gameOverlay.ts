@@ -1,7 +1,7 @@
 /**
  * Lightweight game-over overlay shown over the game shell (replaces the old
  * modal). It carries the title, the score (or rich content), an optional save
- * prompt, and action buttons (Rejouer / Voir le classement).
+ * prompt, and action buttons (Play again / View leaderboard).
  *
  * For games with a leaderboard, the engine never auto-saves: the overlay shows a
  * save prompt with the player's name pre-filled and editable, so the player
@@ -61,7 +61,7 @@ export class GameOverlay {
     root.className = 'game-over';
     root.setAttribute('role', 'dialog');
     root.setAttribute('aria-modal', 'true');
-    root.setAttribute('aria-label', 'Fin de partie');
+    root.setAttribute('aria-label', 'Game over');
 
     const card = document.createElement('div');
     card.className = 'game-over-card';
@@ -76,7 +76,7 @@ export class GameOverlay {
     if (options.bodyHtml !== undefined) {
       body.innerHTML = options.bodyHtml;
     } else if (options.score !== undefined) {
-      body.textContent = `Score : ${options.score}`;
+      body.textContent = `Score: ${options.score}`;
     }
     card.appendChild(body);
 
@@ -162,7 +162,7 @@ export class GameOverlay {
       // Replace the form with a small confirmation so it isn't asked again.
       const done = document.createElement('p');
       done.className = 'game-over-name-done';
-      done.textContent = `Score enregistré au nom de ${value}.`;
+      done.textContent = `Score saved as ${value}.`;
       form.replaceWith(done);
     });
 

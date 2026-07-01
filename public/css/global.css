@@ -1,14 +1,14 @@
 /* =============================================================================
-   Point d'entrée CSS partagé : agrège tokens, base, composants et layouts.
-   Chaque page (home + jeux) importe UN SEUL fichier qui lui-même importe ceci.
-   Ordre = cascade : tokens → reset → composants → layouts.
+   Shared CSS entry point: aggregates tokens, base, components and layouts.
+   Each page (home + games) imports a SINGLE file that itself imports this one.
+   Order = cascade: tokens → reset → components → layouts.
    ========================================================================== */
 
 /* Tokens & base */
 @import url('./base/variables.css');
 @import url('./base/reset.css');
 
-/* Composants réutilisables */
+/* Reusable components */
 @import url('./components/animations.css');
 @import url('./components/buttons.css');
 @import url('./components/icon.css');
@@ -21,6 +21,7 @@
 @import url('./components/start.css');
 @import url('./components/gameover.css');
 @import url('./components/zen.css');
+@import url('./components/dice.css');
 @import url('./components/forms.css');
 @import url('./components/table.css');
 @import url('./components/sidebar.css');
